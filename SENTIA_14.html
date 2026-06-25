@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0d3b2e">
+<title>SENTIA — Vitrac · Pont de Pech</title>
+<style>
+  :root{--forest:#0d3b2e;--moss:#1c5c45;--river:#2a7a8c;--sun:#e8a838;--bark:#5c4a3a;--sand:#f2ede1;--sand-dim:#d9d0bd;--ink:#16221d;--leaf:#7fb069;--danger:#c45c4a}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:'Avenir Next','Segoe UI',system-ui,sans-serif;background:var(--forest);color:var(--sand);overflow:hidden;position:fixed;width:100%}
+  .screen{height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+  h1,h2,h3{font-family:'Georgia',serif;font-weight:600;letter-spacing:-0.01em}
+  .eyebrow{font-size:.7rem;text-transform:uppercase;letter-spacing:.22em;color:var(--sun);font-weight:700}
+
+  /* sélecteur de langue */
+  .lang-bar{display:flex;justify-content:center;gap:10px;padding:14px 0 0}
+  .flag{width:42px;height:42px;border-radius:50%;border:2px solid transparent;background:rgba(255,255,255,.06);font-size:1.4rem;cursor:pointer;display:grid;place-items:center;transition:transform .12s,border-color .15s}
+  .flag:active{transform:scale(.9)}
+  .flag.on{border-color:var(--sun);background:rgba(232,168,56,.18)}
+  .lang-mini{display:flex;gap:7px}
+  .lang-mini .flag{width:30px;height:30px;font-size:1rem;border-width:2px}
+
+  /* ACCUEIL */
+  #home{justify-content:flex-start;background:radial-gradient(120% 80% at 50% -10%,#1c5c45 0%,#0d3b2e 55%,#08271e 100%)}
+  .home-head{padding:14px 26px 18px;text-align:center}
+  .logo-mark{width:60px;height:60px;margin:8px auto 12px;display:block}
+  .home-head h1{font-size:2.5rem;line-height:1}
+  .home-head p{margin:10px auto 0;color:var(--sand-dim);font-size:.95rem;max-width:300px}
+  .rando-list{flex:1;overflow-y:auto;padding:8px 18px 28px}
+  .rando-card{background:linear-gradient(135deg,rgba(255,255,255,.07),rgba(255,255,255,.02));border:1px solid rgba(242,237,225,.12);border-radius:20px;padding:18px;margin-bottom:14px;display:flex;gap:16px;align-items:center;cursor:pointer;transition:transform .15s,border-color .15s}
+  .rando-card:active{transform:scale(.98);border-color:var(--sun)}
+  .rando-ico{width:52px;height:52px;flex-shrink:0;border-radius:14px;display:grid;place-items:center;font-size:1.6rem;background:rgba(232,168,56,.15)}
+  .rando-meta h3{font-size:1.15rem}
+  .rando-meta .sub{font-size:.82rem;color:var(--sand-dim);margin-top:3px}
+  .rando-meta .tags{margin-top:7px;display:flex;gap:6px;flex-wrap:wrap}
+  .tag{font-size:.68rem;padding:3px 9px;border-radius:99px;background:rgba(127,176,105,.18);color:var(--leaf)}
+
+  /* PARCOURS */
+  #trail{display:none}
+  .trail-top{padding:14px 18px;display:flex;align-items:center;gap:12px;background:rgba(8,39,30,.85);backdrop-filter:blur(8px);border-bottom:1px solid rgba(242,237,225,.1)}
+  .back-btn{background:rgba(255,255,255,.08);border:none;color:var(--sand);width:38px;height:38px;border-radius:11px;font-size:1.2rem;cursor:pointer;flex-shrink:0}
+  .trail-title{flex:1;min-width:0}
+  .trail-title h2{font-size:1.05rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .trail-title .st{font-size:.74rem;color:var(--sand-dim)}
+  .demo-pill{font-size:.66rem;background:var(--sun);color:#3a2c10;padding:4px 10px;border-radius:99px;font-weight:700;flex-shrink:0}
+
+  .map-wrap{position:relative;flex:1;overflow:hidden;background:#0a3024}
+  #miniMap{width:100%;height:100%;display:block}
+  .play-badge{position:absolute;top:12px;right:12px;z-index:5;background:rgba(8,39,30,.82);border:1px solid rgba(242,237,225,.14);padding:7px 12px;border-radius:99px;font-size:.74rem;display:flex;align-items:center;gap:7px}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--sand-dim)}
+  .dot.live{background:var(--leaf);box-shadow:0 0 0 0 rgba(127,176,105,.7);animation:pulse 1.8s infinite}
+  @keyframes pulse{70%{box-shadow:0 0 0 9px rgba(127,176,105,0)}100%{box-shadow:0 0 0 0 rgba(127,176,105,0)}}
+  .gps-badge{position:absolute;top:12px;left:12px;z-index:5;background:rgba(8,39,30,.82);border:1px solid rgba(242,237,225,.14);color:var(--sand);padding:7px 12px;border-radius:99px;font-size:.74rem;cursor:pointer;font-family:inherit;transition:background .15s}
+  .gps-badge.active{background:rgba(127,176,105,.35);border-color:var(--leaf)}
+
+  .btn-photo{background:var(--river);color:var(--sand)}
+
+  .modal-overlay{display:none;position:fixed;inset:0;z-index:50;background:#000;flex-direction:column}
+  .modal-overlay.show{display:flex}
+  .modal-card{flex:1;display:flex;flex-direction:column;min-height:0}
+  .modal-top{position:absolute;top:0;left:0;right:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:max(14px,env(safe-area-inset-top)) 16px 28px;background:linear-gradient(to bottom,rgba(0,0,0,.65),transparent)}
+  .modal-top h3{font-size:1rem;color:var(--sand);text-shadow:0 1px 4px rgba(0,0,0,.6)}
+  .modal-close{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:var(--sand);width:38px;height:38px;border-radius:50%;font-size:1.05rem;cursor:pointer;flex-shrink:0;backdrop-filter:blur(4px)}
+  .modal-photo-zone{flex:1;min-height:0;background:#000;overflow:hidden;position:relative}
+  .modal-photo-zone img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+  .modal-photo-zone .ph{text-align:center;color:var(--sand-dim);padding:24px;font-size:.92rem}
+  .modal-photo-zone .ph span{font-size:2.2rem;display:block;margin-bottom:8px}
+
+  .progress-bar{padding:12px 18px;background:rgba(8,39,30,.85)}
+  .progress-track{height:7px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
+  .progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--leaf),var(--sun));border-radius:99px;transition:width .5s}
+  .progress-labels{display:flex;justify-content:space-between;margin-top:7px;font-size:.74rem;color:var(--sand-dim)}
+
+  .sheet{background:var(--sand);color:var(--ink);border-radius:24px 24px 0 0;padding:18px 20px 22px;box-shadow:0 -8px 30px rgba(0,0,0,.3);max-height:52dvh;overflow-y:auto}
+  .sheet .eyebrow{color:var(--moss)}
+  .poi-name{font-size:1.35rem;margin:6px 0 4px;color:var(--forest)}
+  .poi-dist{font-size:.78rem;color:var(--bark);margin-bottom:12px}
+  .poi-text{font-size:.96rem;line-height:1.55;color:#3a3228}
+
+  .demo-controls{display:flex;align-items:center;gap:14px;margin:16px 0 4px}
+  .demo-controls button{background:var(--moss);border:none;color:var(--sand);width:46px;height:46px;border-radius:50%;font-size:1.1rem;cursor:pointer;flex-shrink:0;transition:transform .12s}
+  .demo-controls button:active{transform:scale(.9)}
+  .play-main{width:56px!important;height:56px!important;background:var(--sun)!important;color:#3a2c10!important;font-size:1.3rem!important}
+  .step-slider{flex:1;-webkit-appearance:none;height:6px;border-radius:99px;background:var(--sand-dim);outline:none}
+  .step-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--moss);cursor:pointer;border:3px solid var(--sand)}
+  .step-slider::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--moss);cursor:pointer;border:3px solid var(--sand)}
+
+  .sheet-actions{display:flex;gap:10px;margin-top:14px}
+  .btn{flex:1;border:none;border-radius:14px;padding:13px;font-size:.9rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .12s;font-family:inherit}
+  .btn:active{transform:scale(.97)}
+  .btn-voice{background:var(--moss);color:var(--sand)}
+  .btn-voice.playing{background:var(--danger)}
+  .btn-cam{background:var(--sun);color:#3a2c10}
+
+  #identify{display:none;background:var(--ink)}
+  .id-top{padding:14px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .id-body{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:18px}
+  .photo-zone{border:2px dashed rgba(242,237,225,.3);border-radius:20px;aspect-ratio:4/3;display:grid;place-items:center;overflow:hidden;position:relative;background:rgba(255,255,255,.03)}
+  .photo-zone img{width:100%;height:100%;object-fit:cover}
+  .photo-zone .ph{text-align:center;color:var(--sand-dim);padding:20px}
+  .photo-zone .ph span{font-size:2.4rem;display:block;margin-bottom:8px}
+  .id-result{background:rgba(255,255,255,.05);border-radius:18px;padding:18px;border:1px solid rgba(242,237,225,.1)}
+  .id-result h3{color:var(--leaf);font-size:1.25rem;margin-bottom:4px}
+  .id-result .latin{font-style:italic;color:var(--sand-dim);font-size:.85rem;margin-bottom:12px}
+  .id-result p{line-height:1.55;font-size:.95rem}
+  .spinner{width:34px;height:34px;border:3px solid rgba(242,237,225,.2);border-top-color:var(--sun);border-radius:50%;animation:spin 1s linear infinite;margin:20px auto}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .net-warn{font-size:.8rem;color:var(--sun);text-align:center}
+
+  #poi{background:var(--ink)}
+  .poi-group{font-size:.7rem;text-transform:uppercase;letter-spacing:.18em;color:var(--sun);font-weight:700;margin:6px 2px 0}
+  .poi-card{background:rgba(255,255,255,.05);border-radius:18px;padding:16px;border:1px solid rgba(242,237,225,.1)}
+  .poi-card h3{color:var(--leaf);font-size:1.1rem;margin-bottom:2px}
+  .poi-card .poi-type{font-size:.72rem;color:var(--sun);margin-bottom:6px}
+  .poi-card .poi-dist2{font-size:.74rem;color:var(--sand-dim);margin-bottom:8px}
+  .poi-card p{font-size:.92rem;line-height:1.5}
+
+  .hidden{display:none!important}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--sand);padding:12px 20px;border-radius:99px;font-size:.85rem;z-index:99;opacity:0;transition:opacity .3s;border:1px solid rgba(242,237,225,.2);max-width:88vw;text-align:center}
+  .toast.show{opacity:1}
+  ::-webkit-scrollbar{width:0}
+</style>
+</head>
+<body>
+
+<!-- ACCUEIL -->
+<div class="screen" id="home">
+  <div class="lang-bar">
+    <div class="flag on" data-lang="fr" onclick="setLang('fr')">🇫🇷</div>
+    <div class="flag" data-lang="en" onclick="setLang('en')">🇬🇧</div>
+    <div class="flag" data-lang="es" onclick="setLang('es')">🇪🇸</div>
+  </div>
+  <div class="home-head">
+    <svg class="logo-mark" viewBox="0 0 64 64" fill="none">
+      <path d="M32 4 L40 24 L60 24 L44 38 L50 60 L32 46 L14 60 L20 38 L4 24 L24 24 Z" fill="#e8a838" opacity=".18"/>
+      <path d="M32 14 C24 26 24 38 32 50 C40 38 40 26 32 14 Z" fill="#7fb069"/>
+      <path d="M32 14 C32 26 32 38 32 50" stroke="#0d3b2e" stroke-width="2"/>
+      <circle cx="32" cy="50" r="4" fill="#e8a838"/>
+    </svg>
+    <h1>Sentia</h1>
+    <p id="homeTagline">—</p>
+  </div>
+  <div class="rando-list" id="randoList"></div>
+</div>
+
+<!-- PARCOURS -->
+<div class="screen" id="trail">
+  <div class="trail-top">
+    <button class="back-btn" onclick="goHome()">‹</button>
+    <div class="trail-title"><h2 id="trailName">—</h2><div class="st" id="trailSub">—</div></div>
+    <div class="lang-mini">
+      <div class="flag on" data-lang="fr" onclick="setLang('fr')">🇫🇷</div>
+      <div class="flag" data-lang="en" onclick="setLang('en')">🇬🇧</div>
+      <div class="flag" data-lang="es" onclick="setLang('es')">🇪🇸</div>
+    </div>
+  </div>
+  <div class="map-wrap">
+    <canvas id="miniMap"></canvas>
+    <div class="play-badge"><span class="dot" id="liveDot"></span><span id="liveTxt">—</span></div>
+    <button class="gps-badge" id="gpsBtn" onclick="toggleGPS()">—</button>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
+    <div class="progress-labels"><span id="progDone">—</span><span id="progLeft">—</span></div>
+  </div>
+  <div class="sheet">
+    <div class="eyebrow" id="poiKind">—</div>
+    <h3 class="poi-name" id="poiName">—</h3>
+    <div class="poi-dist" id="poiDist">—</div>
+    <p class="poi-text" id="poiText">—</p>
+    <div class="demo-controls">
+      <button onclick="prevStep()">‹‹</button>
+      <button class="play-main" id="playBtn" onclick="togglePlay()">▶</button>
+      <button onclick="nextStep()">››</button>
+      <input type="range" class="step-slider" id="slider" min="0" max="0" value="0" oninput="goStep(+this.value)">
+    </div>
+    <div class="sheet-actions">
+      <button class="btn btn-voice" id="voiceBtn" onclick="toggleVoice()">🔊</button>
+      <button class="btn btn-photo" id="photoStepBtn" onclick="openPhotoModal()">🖼️</button>
+      <button class="btn btn-cam" id="camBtn" onclick="openIdentify()">📷</button>
+    </div>
+  </div>
+</div>
+
+<!-- FENÊTRE PHOTO D'UN POINT -->
+<div class="modal-overlay" id="photoModal">
+  <div class="modal-card">
+    <div class="modal-top">
+      <h3 id="photoModalTitle">—</h3>
+      <button class="modal-close" onclick="closePhotoModal()" id="photoModalClose">✕</button>
+    </div>
+    <div class="modal-photo-zone" id="photoModalZone"></div>
+  </div>
+</div>
+
+<!-- IDENTIFICATION -->
+<div class="screen" id="identify">
+  <div class="id-top">
+    <button class="back-btn" onclick="closeIdentify()">‹</button>
+    <div class="trail-title"><h2 id="idTitle">—</h2><div class="st" id="idSub">—</div></div>
+  </div>
+  <div class="id-body">
+    <div class="photo-zone" id="photoZone" onclick="document.getElementById('camInput').click()">
+      <div class="ph" id="photoPh"><span>📷</span><span id="photoPhTxt">—</span></div>
+    </div>
+    <input type="file" accept="image/*" capture="environment" id="camInput" class="hidden" onchange="handlePhoto(event)">
+    <button class="btn btn-cam" id="idTakeBtn" onclick="document.getElementById('camInput').click()">—</button>
+    <div id="idOutput"></div>
+  </div>
+</div>
+
+<!-- CENTRES D'INTÉRÊT -->
+<div class="screen" id="poi">
+  <div class="id-top">
+    <button class="back-btn" onclick="closePoi()">‹</button>
+    <div class="trail-title"><h2 id="poiTitle">—</h2><div class="st" id="poiSub">—</div></div>
+  </div>
+  <div class="id-body" id="poiList"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   SENTIA — Descente Vitrac → Pont de Pech (16 km)
+   Données trilingues FR / EN / ES.
+   Le mode démo avance automatiquement le long des étapes.
+   ============================================================ */
+
+/* ---- Textes d'interface ---- */
+const UI={
+  fr:{tagline:"Votre guide qui parle. Choisissez une descente, laissez la rivière se raconter.",
+    demo:"DÉMO",stopped:"À l'arrêt",running:"Descente en cours…",
+    listen:"🔊 Écouter",stop:"⏹ Arrêter",identify:"📷 Identifier",
+    kmDone:"km parcourus",kmLeft:"km restants",kmOf:"Kilomètre",
+    idTitle:"Identifier",idSub:"Faune & flore de la Dordogne",
+    photoPh:"Touchez pour prendre ou choisir une photo",takePhoto:"Prendre une photo",
+    noNet:"📡 Pas de réseau. L'identification nécessite une connexion. Réessayez avec de la 3G/4G ou du Wi-Fi.",
+    analyzing:"Analyse de l'image…",idFail:"⚠️ Échec de l'identification. Vérifiez la connexion et réessayez.",
+    needPoi:"Approchez d'un point pour écouter sa description.",
+    photoBtn:"🖼️ Photo",photoTitle:"Photo du point",photoNone:"Photo à venir pour ce point.",photoClose:"✕ Fermer",
+    gpsOn:"📍 GPS activé",gpsOff:"📍 Activer le GPS",gpsUnavailable:"📡 La localisation n'est pas disponible sur cet appareil/navigateur.",
+    gpsDenied:"📡 Localisation refusée. Autorisez l'accès à la position pour activer le guide GPS.",gpsNear:"Vous approchez d'un point :"},
+  en:{tagline:"Your guide that speaks. Pick a descent, let the river tell its story.",
+    demo:"DEMO",stopped:"Paused",running:"Descent in progress…",
+    listen:"🔊 Listen",stop:"⏹ Stop",identify:"📷 Identify",
+    kmDone:"km done",kmLeft:"km to go",kmOf:"Kilometre",
+    idTitle:"Identify",idSub:"Dordogne wildlife & plants",
+    photoPh:"Tap to take or choose a photo",takePhoto:"Take a photo",
+    noNet:"📡 No network. Identification needs a connection. Try again with 3G/4G or Wi-Fi.",
+    analyzing:"Analysing the image…",idFail:"⚠️ Identification failed. Check your connection and try again.",
+    needPoi:"Get close to a point to hear its description.",
+    photoBtn:"🖼️ Photo",photoTitle:"Point photo",photoNone:"Photo coming soon for this point.",photoClose:"✕ Close",
+    gpsOn:"📍 GPS on",gpsOff:"📍 Turn on GPS",gpsUnavailable:"📡 Location isn't available on this device/browser.",
+    gpsDenied:"📡 Location denied. Allow location access to enable the GPS guide.",gpsNear:"You're approaching a point:"},
+  es:{tagline:"Tu guía que habla. Elige un descenso y deja que el río se cuente.",
+    demo:"DEMO",stopped:"En pausa",running:"Descenso en curso…",
+    listen:"🔊 Escuchar",stop:"⏹ Parar",identify:"📷 Identificar",
+    kmDone:"km recorridos",kmLeft:"km restantes",kmOf:"Kilómetro",
+    idTitle:"Identificar",idSub:"Fauna y flora de la Dordoña",
+    photoPh:"Toca para hacer o elegir una foto",takePhoto:"Hacer una foto",
+    noNet:"📡 Sin red. La identificación necesita conexión. Inténtalo con 3G/4G o Wi-Fi.",
+    analyzing:"Analizando la imagen…",idFail:"⚠️ Identificación fallida. Revisa la conexión e inténtalo de nuevo.",
+    needPoi:"Acércate a un punto para escuchar su descripción.",
+    photoBtn:"🖼️ Foto",photoTitle:"Foto del punto",photoNone:"Foto disponible próximamente para este punto.",photoClose:"✕ Cerrar",
+    gpsOn:"📍 GPS activado",gpsOff:"📍 Activar GPS",gpsUnavailable:"📡 La localización no está disponible en este dispositivo/navegador.",
+    gpsDenied:"📡 Localización denegada. Permite el acceso a la ubicación para activar la guía GPS.",gpsNear:"Te acercas a un punto:"}
+};
+
+const VOICE={fr:'fr-FR',en:'en-US',es:'es-ES'};
+
+/* ---- Parcours trilingue ---- */
+const RANDO_FULL={
+  id:"vitrac-pech",icon:"🛶",total:16,
+  start:{lat:44.8167,lng:1.2167},end:{lat:44.8455,lng:1.1320},
+  nom:{fr:"Vitrac → Beynac",en:"Vitrac → Beynac",es:"Vitrac → Beynac"},
+  sousTitre:{fr:"Descente de la Dordogne · 16 km · ~3h",en:"Dordogne river descent · 16 km · ~3h",es:"Descenso del Dordoña · 16 km · ~3h"},
+  tags:{fr:["Canoë","Famille","Châteaux"],en:["Canoe","Family","Castles"],es:["Canoa","Familia","Castillos"]},
+  steps:[
+    {km:0,lat:44.825768,lng:1.224381,photo:"Vitrac%20port.JPG",
+     nom:{fr:"Port de Vitrac — la Maison du passeur",en:"Port of Vitrac — the Ferryman's House",es:"Puerto de Vitrac — la Casa del barquero"},
+     kind:{fr:"Départ & histoire",en:"Start & history",es:"Salida e historia"},
+     txt:{
+      fr:"Bienvenue sur la Dordogne, au port de Vitrac. En face de l'embarcadère se tient la Maison du passeur, perchée sur le rocher de l'autre rive : regardez bien, elle se devine à peine, à demi cachée dans la végétation de la falaise. Pendant la Seconde Guerre mondiale, la ligne de démarcation qui coupait la France en deux traversait ici la rivière : la Maison du passeur servait à faire passer clandestinement les gens de la zone occupée à la zone libre, en franchissant l'eau. Le port abritait aussi un vivier, un bassin où l'on gardait vivants les saumons pêchés dans la rivière avant de les vendre au marché de Sarlat-la-Canéda. La Dordogne était alors si poissonneuse que le saumon y remontait en nombre. Installez-vous, trouvez votre rythme de pagaie : la descente commence.",
+      en:"Welcome to the Dordogne, at the port of Vitrac. Across from the launch stands the Ferryman's House, perched on the rock of the opposite bank: look closely, it's barely visible, half hidden in the cliffside vegetation. During the Second World War, the demarcation line that split France in two crossed the river here: the Ferryman's House was used to smuggle people from the occupied zone to the free zone, across the water. The port also held a live-tank, a basin where salmon caught in the river were kept alive before being sold at the market of Sarlat-la-Canéda. The Dordogne was then so full of fish that salmon swam up it in great numbers. Settle in, find your paddling rhythm: the descent begins.",
+      es:"Bienvenido al Dordoña, en el puerto de Vitrac. Enfrente del embarcadero se alza la Casa del barquero, encaramada en la roca de la orilla opuesta: mira bien, apenas se distingue, medio escondida entre la vegetación del acantilado. Durante la Segunda Guerra Mundial, la línea de demarcación que partía Francia en dos cruzaba aquí el río: la Casa del barquero servía para pasar clandestinamente a la gente de la zona ocupada a la zona libre, atravesando el agua. El puerto albergaba también un vivero, una balsa donde se mantenían vivos los salmones pescados en el río antes de venderlos en el mercado de Sarlat-la-Canéda. El Dordoña era entonces tan rico en peces que el salmón lo remontaba en gran número. Acomódate y encuentra tu ritmo de remo: empieza el descenso."}},
+    {km:0.3,lat:44.8175,lng:1.2140,bridge:true,
+     nom:{fr:"Pont de Vitrac",en:"Vitrac Bridge",es:"Puente de Vitrac"},
+     kind:{fr:"Repère · Pont 1",en:"Landmark · Bridge 1",es:"Referencia · Puente 1"},
+     txt:{
+      fr:"Premier repère : environ 300 mètres après la base de canoës de Vitrac, vous passez sous le pont de Vitrac, le premier des cinq ponts de la descente. Passez sous l'arche principale en restant dans le courant. C'est ici que commence vraiment votre voyage vers l'aval : derrière vous, l'embarcadère ; devant vous, seize kilomètres de châteaux, de falaises et de villages.",
+      en:"First landmark: about 300 metres after the Vitrac canoe base, you pass under the Vitrac bridge, the first of the five bridges on the descent. Go under the main arch, staying in the current. This is where your journey downstream truly begins: behind you, the launch; ahead, sixteen kilometres of castles, cliffs and villages.",
+      es:"Primera referencia: a unos 300 metros tras la base de canoas de Vitrac, pasas bajo el puente de Vitrac, el primero de los cinco puentes del descenso. Pasa bajo el arco principal manteniéndote en la corriente. Aquí empieza de verdad tu viaje río abajo: detrás de ti, el embarcadero; delante, dieciséis kilómetros de castillos, acantilados y pueblos."}},
+    {km:1,lat:44.8210,lng:1.2050,
+     nom:{fr:"La Vierge des gabariers",en:"The Bargemen's Virgin",es:"La Virgen de los gabarreros"},
+     kind:{fr:"Patrimoine & batellerie",en:"Heritage & river trade",es:"Patrimonio y navegación"},
+     txt:{
+      fr:"Après le premier pont, environ un kilomètre plus bas, levez les yeux sur votre droite : en hauteur dans la falaise veille la Vierge des gabariers. Les gabariers étaient les bateliers de la Dordogne ; sur leurs bateaux à fond plat, les gabarres, ils descendaient jusqu'à Bordeaux pour commercer, chargés de bois de chêne et de châtaignier. Avant de partir affronter les rapides et les longues semaines de voyage, ils se recommandaient à cette Vierge pour un retour sain et sauf. C'était un métier dangereux : pour beaucoup, chaque départ pouvait être le dernier.",
+      en:"After the first bridge, about a kilometre downstream, look up to your right: high in the cliff watches the Bargemen's Virgin. The gabariers were the boatmen of the Dordogne; on their flat-bottomed boats, the gabarres, they went down to Bordeaux to trade, loaded with oak and chestnut wood. Before facing the rapids and the long weeks of travel, they commended themselves to this Virgin for a safe return. It was a dangerous trade: for many, each departure could be the last.",
+      es:"Tras el primer puente, aproximadamente un kilómetro más abajo, alza la vista a tu derecha: en lo alto del acantilado vela la Virgen de los gabarreros. Los gabarreros eran los barqueros del Dordoña; en sus barcas de fondo plano, las gabarras, descendían hasta Burdeos para comerciar, cargadas de madera de roble y castaño. Antes de afrontar los rápidos y las largas semanas de viaje, se encomendaban a esta Virgen para un regreso sano y salvo. Era un oficio peligroso: para muchos, cada partida podía ser la última."}},
+    {km:1.5,lat:44.8230,lng:1.1990,
+     nom:{fr:"La cavité d'Aliénor",en:"Eleanor's Cave",es:"La cavidad de Leonor"},
+     kind:{fr:"Histoire & géologie",en:"History & geology",es:"Historia y geología"},
+     txt:{
+      fr:"Un peu plus loin, à un kilomètre et demi du départ, observez sur votre droite une cavité naturelle creusée dans la falaise calcaire. La tradition locale raconte qu'Aliénor d'Aquitaine la fit aménager en poste de guet : duchesse d'Aquitaine puis reine d'Angleterre, elle aurait fait surveiller depuis cet abri les remontées des troupes anglaises sur la rivière, à l'époque où l'Aquitaine passait sous domination anglaise. La roche tendre du Crétacé, vieille de près de 90 millions d'années, se creuse facilement : toute la vallée est ainsi percée d'abris et de grottes que les hommes occupent depuis la préhistoire.",
+      en:"A little further on, a kilometre and a half from the start, look to your right at a natural cavity carved into the limestone cliff. Local tradition says Eleanor of Aquitaine had it fitted out as a lookout post: Duchess of Aquitaine and later Queen of England, she is said to have watched from this shelter the movements of English troops along the river, at a time when Aquitaine was under English rule. The soft Cretaceous rock, nearly 90 million years old, is easily hollowed: the whole valley is thus pierced with shelters and caves that people have occupied since prehistory.",
+      es:"Un poco más adelante, a un kilómetro y medio de la salida, observa a tu derecha una cavidad natural excavada en el acantilado calcáreo. La tradición local cuenta que Leonor de Aquitania la mandó acondicionar como puesto de vigilancia: duquesa de Aquitania y luego reina de Inglaterra, habría hecho vigilar desde este refugio las subidas de las tropas inglesas por el río, en la época en que Aquitania pasaba bajo dominio inglés. La roca blanda del Cretácico, de casi 90 millones de años, se excava con facilidad: todo el valle está así horadado de refugios y cuevas que el hombre ocupa desde la prehistoria."}},
+    {km:3,lat:44.8090,lng:1.2010,
+     nom:{fr:"La Bastide de Domme",en:"The Bastide of Domme",es:"La Bastida de Domme"},
+     kind:{fr:"Patrimoine & flore",en:"Heritage & flora",es:"Patrimonio y flora"},
+     txt:{
+      fr:"En descendant, vous apercevez en face, perchée sur sa falaise rive gauche, Domme, l'un des Plus Beaux Villages de France. C'est une vraie bastide : une ville neuve fortifiée fondée en 1281 par le roi Philippe le Hardi, au plan régulier, avec sa place à arcades et ses remparts. De là-haut, le panorama embrasse toute la vallée. Au fil de l'eau, observez aussi la flore des berges : saules blancs et aulnes tiennent les rives, l'iris des marais éclate en jaune au printemps, la salicaire dresse ses épis roses en été. Cette ripisylve, la forêt des rives, abrite hérons, martins-pêcheurs et libellules.",
+      en:"As you drift down, you see ahead, perched on its cliff on the left bank, Domme, one of the Most Beautiful Villages of France. It is a true bastide: a fortified new town founded in 1281 by King Philip the Bold, with a regular plan, its arcaded square and ramparts. From up there, the view takes in the whole valley. Along the water, look too at the riverbank flora: white willows and alders hold the banks, the yellow flag iris blazes in spring, purple loosestrife raises its pink spikes in summer. This ripisylve, the riverside forest, shelters herons, kingfishers and dragonflies.",
+      es:"Mientras desciendes, ves enfrente, encaramada en su acantilado de la orilla izquierda, Domme, uno de los Pueblos más Bellos de Francia. Es una auténtica bastida: una ciudad nueva fortificada fundada en 1281 por el rey Felipe el Atrevido, de plano regular, con su plaza porticada y sus murallas. Desde allá arriba, el panorama abarca todo el valle. A lo largo del agua, observa también la flora de las orillas: sauces blancos y alisos sujetan las riberas, el lirio amarillo de agua estalla en primavera, la salicaria alza sus espigas rosadas en verano. Esta ripisilva, el bosque de ribera, alberga garzas, martines pescadores y libélulas."}},
+    {km:3.5,lat:44.8060,lng:1.1900,bridge:true,
+     nom:{fr:"Pont de Cénac — église Saint-Julien",en:"Cénac Bridge — Saint-Julien church",es:"Puente de Cénac — iglesia de Saint-Julien"},
+     kind:{fr:"Repère · Pont 2 & visite",en:"Landmark · Bridge 2 & visit",es:"Referencia · Puente 2 y visita"},
+     txt:{
+      fr:"Deuxième pont : le pont de Cénac, au pied de Domme. Environ 300 mètres après le pont, on peut accoster sur la rive et marcher à peu près un kilomètre pour visiter l'église Saint-Julien de Cénac, un joyau de l'art roman périgourdin du XIᵉ siècle, ancien prieuré, célèbre pour ses chapiteaux sculptés d'animaux et de scènes bibliques. Une halte paisible, à l'écart de la rivière, pour qui veut découvrir le patrimoine roman de la vallée. Reprenez ensuite le canoë pour continuer vers La Roque-Gageac.",
+      en:"Second bridge: the Cénac bridge, at the foot of Domme. About 300 metres after the bridge, you can land on the bank and walk roughly one kilometre to visit the church of Saint-Julien de Cénac, a gem of 11th-century Romanesque Périgord art, a former priory famous for its carved capitals of animals and biblical scenes. A peaceful stop, away from the river, for those who want to discover the valley's Romanesque heritage. Then take to the canoe again to continue towards La Roque-Gageac.",
+      es:"Segundo puente: el puente de Cénac, al pie de Domme. Unos 300 metros después del puente, se puede atracar en la orilla y caminar aproximadamente un kilómetro para visitar la iglesia de Saint-Julien de Cénac, una joya del arte románico perigordino del siglo XI, antiguo priorato célebre por sus capiteles esculpidos con animales y escenas bíblicas. Una parada apacible, apartada del río, para quien quiera descubrir el patrimonio románico del valle. Luego retoma la canoa para continuar hacia La Roque-Gageac."}},
+    {km:7.3,lat:44.8270,lng:1.1830,photo:"La%20Roque-Gageac.JPG",
+     nom:{fr:"La Roque-Gageac",en:"La Roque-Gageac",es:"La Roque-Gageac"},
+     kind:{fr:"Architecture & microclimat",en:"Architecture & microclimate",es:"Arquitectura y microclima"},
+     txt:{
+      fr:"Vous longez La Roque-Gageac, blottie entre la falaise et l'eau, exposée plein sud. Les maisons de pierre blonde grimpent au pied du rocher, dominées par le fort troglodytique accroché à 120 mètres de haut. Grâce à ce microclimat chaud et abrité, un jardin exotique y prospère : palmiers, bananiers et bambous en plein Périgord. C'était l'un des plus actifs ports de gabariers de la vallée. La légende dit qu'un batelier, ayant fait naufrage contre les falaises en amont, jura de faire poser une statue s'il survivait : l'ex-voto est toujours là.",
+      en:"You glide past La Roque-Gageac, nestled between cliff and water, facing due south. Honey-coloured stone houses climb the foot of the rock, crowned by the troglodyte fort clinging 120 metres up. Thanks to this warm, sheltered microclimate, an exotic garden thrives here: palm trees, banana plants and bamboo in the heart of the Périgord. It was one of the busiest bargemen's ports in the valley. Legend says a boatman, wrecked against the cliffs upstream, vowed to have a statue placed if he survived: the ex-voto is still there.",
+      es:"Bordeas La Roque-Gageac, acurrucada entre el acantilado y el agua, orientada al sur. Las casas de piedra dorada trepan al pie de la roca, dominadas por el fuerte troglodita colgado a 120 metros de altura. Gracias a este microclima cálido y resguardado, prospera aquí un jardín exótico: palmeras, bananos y bambúes en pleno Périgord. Fue uno de los puertos de gabarreros más activos del valle. La leyenda dice que un barquero, naufragado contra los acantilados río arriba, juró colocar una estatua si sobrevivía: el exvoto sigue allí."}},
+    {km:7.8,lat:44.8275,lng:1.1783,photo:"La%20plage%20de%20la%20malartrie.JPG",
+     nom:{fr:"Château de la Malartrie & sa plage",en:"Château de la Malartrie & its beach",es:"Castillo de la Malartrie y su playa"},
+     kind:{fr:"Architecture & baignade",en:"Architecture & swimming",es:"Arquitectura y baño"},
+     txt:{
+      fr:"Juste après La Roque-Gageac, sur la rive droite, le château de la Malartrie surgit au pied des falaises, exposé plein sud dans une boucle de la Dordogne. Le site est ancien : au XIIᵉ siècle se dressait ici un hôpital pour lépreux. À la fin du XIXᵉ siècle, le comte de Saint-Aulaire, ambassadeur de France en Angleterre, fit reconstruire la demeure dans le style Renaissance qu'on admire aujourd'hui, avec ses tours et sa chapelle gothique. Au pied du domaine s'étend la plage de la Malartrie, une plage naturelle de galets et de sable où l'on peut accoster pour se baigner directement dans la rivière : une halte rafraîchissante, l'une des plus belles du parcours, face aux falaises et au village.",
+      en:"Just past La Roque-Gageac, on the right bank, the château of La Malartrie rises at the foot of the cliffs, facing due south in a bend of the Dordogne. The site is old: in the 12th century a leper hospital stood here. In the late 19th century, the Count of Saint-Aulaire, French ambassador to England, had the house rebuilt in the Renaissance style you admire today, with its towers and gothic chapel. Below the estate lies the Malartrie beach, a natural beach of pebbles and sand where you can land to swim straight in the river: a refreshing stop, one of the finest on the route, facing the cliffs and the village.",
+      es:"Justo después de La Roque-Gageac, en la orilla derecha, el castillo de la Malartrie surge al pie de los acantilados, orientado al sur en un meandro del Dordoña. El lugar es antiguo: en el siglo XII se alzaba aquí un hospital para leprosos. A finales del siglo XIX, el conde de Saint-Aulaire, embajador de Francia en Inglaterra, mandó reconstruir la mansión en el estilo renacentista que se admira hoy, con sus torres y su capilla gótica. Al pie de la finca se extiende la playa de la Malartrie, una playa natural de cantos y arena donde se puede atracar para bañarse directamente en el río: una parada refrescante, una de las más bellas del recorrido, frente a los acantilados y al pueblo."}},
+    {km:9,lat:44.8255,lng:1.1670,bridge:false,
+     nom:{fr:"Belvédère de Marqueyssac",en:"Marqueyssac Belvedere",es:"Mirador de Marqueyssac"},
+     kind:{fr:"Jardins & panorama",en:"Gardens & panorama",es:"Jardines y panorama"},
+     txt:{
+      fr:"Quelques centaines de mètres après le château de la Malartrie, levez les yeux sur votre droite, en hauteur : le belvédère des jardins suspendus de Marqueyssac veille sur la rivière. Ces jardins du XIXᵉ siècle alignent près de 150 000 buis taillés à la main en courbes et en vagues, sur un éperon rocheux dominant la vallée. Du haut du belvédère, à 130 mètres au-dessus de l'eau, la vue embrasse d'un seul regard Beynac, Castelnaud, La Roque-Gageac et Domme. Depuis le canoë, on devine le promontoire et la silhouette du belvédère parmi les arbres.",
+      en:"A few hundred metres past the château of La Malartrie, look up to your right, high above: the belvedere of the hanging gardens of Marqueyssac watches over the river. These 19th-century gardens align nearly 150,000 hand-trimmed boxwoods in curves and waves, on a rocky spur above the valley. From the top of the belvedere, 130 metres above the water, the view takes in Beynac, Castelnaud, La Roque-Gageac and Domme all at once. From the canoe, you can make out the promontory and the outline of the belvedere among the trees.",
+      es:"A unos cientos de metros tras el castillo de la Malartrie, alza la vista a tu derecha, en lo alto: el mirador de los jardines colgantes de Marqueyssac vela sobre el río. Estos jardines del siglo XIX alinean cerca de 150 000 bojes podados a mano en curvas y olas, sobre un espolón rocoso que domina el valle. Desde lo alto del mirador, a 130 metros sobre el agua, la vista abarca de un vistazo Beynac, Castelnaud, La Roque-Gageac y Domme. Desde la canoa se adivina el promontorio y la silueta del mirador entre los árboles."}},
+    {km:10,lat:44.8200,lng:1.1585,bridge:false,
+     nom:{fr:"La Bulide",en:"The Bulide",es:"La Bulide"},
+     kind:{fr:"Résurgence & histoire",en:"Resurgence & history",es:"Resurgencia e historia"},
+     txt:{
+      fr:"Quelques centaines de mètres avant le pont de Castelnaud, sur votre droite, se jette la Bulide, une source dont l'eau, autour de 16 degrés, reste fraîche toute l'année. C'est une résurgence karstique : l'eau s'infiltre dans le plateau calcaire et ressort ici, claire et fraîche — elle alimente d'ailleurs en eau potable les villages de Vézac, Castelnaud et Veyrines-de-Domme. La Bulide naît à quelque 500 mètres en amont, au milieu des champs de noyers, l'arbre emblématique du Périgord, et rejoint la Dordogne en rive droite. On raconte que son cours passe sous les vestiges d'un ancien pont gallo-romain, près duquel on ramenait jadis les gabarres à la remonte, halées par des ânes, lors du retour depuis Bordeaux. Un peu plus loin, sur votre gauche, vous croiserez l'embouchure du Céou, juste avant le pont.",
+      en:"A few hundred metres before the Castelnaud bridge, on your right, flows the Bulide, a spring whose water, around 16 degrees, stays cool all year round. It is a karstic resurgence: the water seeps into the limestone plateau and re-emerges here, clear and cool — it even supplies drinking water to the villages of Vézac, Castelnaud and Veyrines-de-Domme. The Bulide rises some 500 metres upstream, amid walnut groves — the Périgord's emblematic tree — and joins the Dordogne on the right bank. It is said its course passes beneath the remains of an old Gallo-Roman bridge, near which the gabarres were once hauled back upstream by donkeys, on the return journey from Bordeaux. A little further on, on your left, you'll pass the mouth of the Céou, just before the bridge.",
+      es:"Unos cientos de metros antes del puente de Castelnaud, a tu derecha, desemboca la Bulide, un manantial cuya agua, en torno a los 16 grados, se mantiene fresca todo el año. Es una resurgencia kárstica: el agua se infiltra en la meseta calcárea y vuelve a salir aquí, clara y fresca — de hecho abastece de agua potable a los pueblos de Vézac, Castelnaud y Veyrines-de-Domme. La Bulide nace unos 500 metros aguas arriba, en medio de campos de nogales — el árbol emblemático del Périgord — y se une a la Dordoña en la orilla derecha. Se cuenta que su curso pasa bajo los vestigios de un antiguo puente galo-romano, cerca del cual antaño se remolcaban las gabarras de vuelta río arriba, tiradas por burros, en el regreso desde Burdeos. Un poco más adelante, a tu izquierda, cruzarás la desembocadura del Céou, justo antes del puente."}},
+    {km:10.1,lat:44.8198,lng:1.1572,bridge:false,photo:"Ceou.png",
+     nom:{fr:"Embouchure du Céou",en:"Mouth of the Céou",es:"Desembocadura del Céou"},
+     kind:{fr:"Rivière & nature",en:"River & nature",es:"Río y naturaleza"},
+     txt:{
+      fr:"Juste avant le pont de Castelnaud, sur votre gauche, observez l'embouchure du Céou, un affluent qui se jette dans la Dordogne sur la même rive que Castelnaud. Ses eaux sont claires, cristallines et très fraîches : le Céou naît sur le causse de Gramat, dans le Lot, et coule en grande partie sous terre dans le karst calcaire avant de ressurgir. C'est une rivière sauvage et préservée, classée pour sa qualité, dont les eaux fraîches abritent encore de belles truites sauvages, emblème de la vallée du Céou.",
+      en:"Just before the Castelnaud bridge, on your left, look at the mouth of the Céou, a tributary that flows into the Dordogne on the same bank as Castelnaud. Its waters are clear, crystalline and very cool: the Céou rises on the Gramat causse, in the Lot, and runs largely underground through the limestone karst before resurfacing. It is a wild, well-preserved river, recognised for its quality, whose cool waters still shelter fine wild trout, the emblem of the Céou valley.",
+      es:"Justo antes del puente de Castelnaud, a tu izquierda, observa la desembocadura del Céou, un afluente que desemboca en la Dordoña en la misma orilla que Castelnaud. Sus aguas son claras, cristalinas y muy frescas: el Céou nace en el causse de Gramat, en el Lot, y corre en gran parte bajo tierra por el karst calcáreo antes de resurgir. Es un río salvaje y preservado, reconocido por su calidad, cuyas aguas frescas todavía albergan hermosas truchas salvajes, emblema del valle del Céou."}},
+    {km:10.2,lat:44.8195,lng:1.1560,bridge:true,
+     nom:{fr:"Pont de Castelnaud",en:"Castelnaud Bridge",es:"Puente de Castelnaud"},
+     kind:{fr:"Repère · Pont 3",en:"Landmark · Bridge 3",es:"Referencia · Puente 3"},
+     txt:{
+      fr:"Troisième pont : le pont de Castelnaud, juste avant le château. Au pied du château s'étage le bourg de Castelnaud-la-Chapelle, classé parmi les Plus Beaux Villages de France : un village médiéval bâti en terrasses sur l'éperon rocheux, aux ruelles escarpées et aux maisons de pierre blonde coiffées de lauzes. Passez sous l'arche principale : le château se dresse déjà devant vous, rive gauche.",
+      en:"Third bridge: the Castelnaud bridge, just before the castle. At the foot of the castle climbs the village of Castelnaud-la-Chapelle, listed among the Most Beautiful Villages of France: a medieval village built in terraces on the rocky spur, with steep lanes and honey-coloured stone houses roofed with lauzes. Pass under the main arch: the castle already rises ahead of you, on the left bank.",
+      es:"Tercer puente: el puente de Castelnaud, justo antes del castillo. Al pie del castillo se escalona el pueblo de Castelnaud-la-Chapelle, clasificado entre los Pueblos más Bellos de Francia: una villa medieval construida en terrazas sobre el espolón rocoso, de callejuelas escarpadas y casas de piedra dorada cubiertas de lauzes. Pasa bajo el arco principal: el castillo ya se alza ante ti, orilla izquierda."}},
+    {km:10.4,lat:44.8180,lng:1.1530,bridge:false,photo:"Castelnaud.JPG",
+     nom:{fr:"Château de Castelnaud",en:"Château de Castelnaud",es:"Castillo de Castelnaud"},
+     kind:{fr:"Architecture & histoire",en:"Architecture & history",es:"Arquitectura e historia"},
+     txt:{
+      fr:"Sur la rive gauche se dresse la puissante forteresse de Castelnaud-la-Chapelle, sur son promontoire rocheux. Elle abrite aujourd'hui le musée de la guerre au Moyen Âge, avec ses machines de siège reconstituées : trébuchets, mangonneaux, bricoles. Pendant la guerre de Cent Ans, Castelnaud et Beynac, son rival juste en face, étaient les deux frères ennemis de la vallée. La famille de Caumont, seigneurs de Castelnaud, penchait le plus souvent du côté anglais, tandis que les barons de Beynac étaient plutôt fidèles au roi de France — mais le château changea de camp sept fois au gré des alliances avant d'être repris par les Français en 1442. Son village est lui aussi classé parmi les Plus Beaux Villages de France.",
+      en:"On the left bank rises the powerful fortress of Castelnaud-la-Chapelle, on its rocky promontory. Today it houses the museum of medieval warfare, with reconstructed siege engines: trebuchets, mangonels, bricoles. During the Hundred Years' War, Castelnaud and Beynac, its rival just opposite, were the two enemy brothers of the valley. The Caumont family, lords of Castelnaud, most often leaned to the English side, while the barons of Beynac were rather loyal to the king of France — but the castle changed sides seven times with shifting alliances before being retaken by the French in 1442. Its village too is listed among the Most Beautiful Villages of France.",
+      es:"En la orilla izquierda se alza la poderosa fortaleza de Castelnaud-la-Chapelle, sobre su promontorio rocoso. Hoy alberga el museo de la guerra en la Edad Media, con sus máquinas de asedio reconstruidas: trabucos, mangoneles, briconas. Durante la guerra de los Cien Años, Castelnaud y Beynac, su rival justo enfrente, eran los dos hermanos enemigos del valle. La familia de Caumont, señores de Castelnaud, se inclinaba casi siempre del lado inglés, mientras que los barones de Beynac eran más bien fieles al rey de Francia — pero el castillo cambió de bando siete veces según las alianzas antes de ser recuperado por los franceses en 1442. Su pueblo también está clasificado entre los Pueblos más Bellos de Francia."}},
+    {km:12.2,lat:44.8265,lng:1.1480,bridge:false,photo:"Fayrac.png",
+     nom:{fr:"Château de Fayrac",en:"Château de Fayrac",es:"Castillo de Fayrac"},
+     kind:{fr:"Architecture",en:"Architecture",es:"Arquitectura"},
+     txt:{
+      fr:"Un kilomètre environ après Castelnaud, sur la même rive gauche, le château de Fayrac apparaît discrètement au détour d'un méandre, niché dans la végétation. Avec ses tours rondes coiffées en poivrière et ses deux ponts-levis, c'est un manoir privé du XVᵉ et XVIᵉ siècle, d'une silhouette romantique. Pendant la guerre de Cent Ans, quand Castelnaud tenait pour les Anglais, on y avait installé un poste avancé pour surveiller Beynac, juste en face. On le voit bien depuis l'eau avant qu'il ne se cache à nouveau derrière les arbres.",
+      en:"About a kilometre after Castelnaud, on the same left bank, the château of Fayrac appears discreetly at the bend of a meander, nestled in the greenery. With its round pepper-pot towers and its two drawbridges, it is a private manor from the 15th and 16th centuries, with a romantic outline. During the Hundred Years' War, when Castelnaud held for the English, a forward post was set up here to watch Beynac, just opposite. It shows clearly from the water before hiding again behind the trees.",
+      es:"Aproximadamente un kilómetro después de Castelnaud, en la misma orilla izquierda, el castillo de Fayrac aparece discretamente en el recodo de un meandro, anidado en la vegetación. Con sus torres redondas rematadas en pimentero y sus dos puentes levadizos, es una mansión privada de los siglos XV y XVI, de silueta romántica. Durante la guerra de los Cien Años, cuando Castelnaud tenía por los ingleses, se instaló aquí un puesto avanzado para vigilar Beynac, justo enfrente. Se ve bien desde el agua antes de que vuelva a esconderse tras los árboles."}},
+    {km:12.8,lat:44.8340,lng:1.1450,bridge:true,
+     nom:{fr:"Pont de chemin de fer de Vézac",en:"Vézac Railway Bridge",es:"Puente de ferrocarril de Vézac"},
+     kind:{fr:"Repère · Pont 4",en:"Landmark · Bridge 4",es:"Referencia · Puente 4"},
+     txt:{
+      fr:"Quatrième pont : le pont de chemin de fer de Vézac, à la hauteur de Fayrac, juste avant Beynac. Construit vers 1884 quand la ligne Bordeaux-Sarlat arriva dans la vallée, c'est le chemin de fer qui remplaça les gabarres pour le transport des marchandises. Détail d'histoire : les cavités sous le pont servaient à cacher des armes pendant la Seconde Guerre mondiale. Son tablier de pierre se voit de loin : passez sous l'arche principale en restant dans le courant. Le château de Beynac apparaît déjà droit devant, rive droite.",
+      en:"Fourth bridge: the Vézac railway bridge, level with Fayrac, just before Beynac. Built around 1884 when the Bordeaux-Sarlat line reached the valley, it was the railway that replaced the gabarres for transporting goods. A historical detail: the cavities under the bridge were used to hide weapons during the Second World War. Its stone deck is visible from afar: pass under the main arch, staying in the current. The château of Beynac already appears straight ahead, on the right bank.",
+      es:"Cuarto puente: el puente de ferrocarril de Vézac, a la altura de Fayrac, justo antes de Beynac. Construido hacia 1884 cuando la línea Burdeos-Sarlat llegó al valle, fue el ferrocarril el que reemplazó a las gabarras para el transporte de mercancías. Detalle histórico: las cavidades bajo el puente servían para esconder armas durante la Segunda Guerra Mundial. Su tablero de piedra se ve desde lejos: pasa bajo el arco principal manteniéndote en la corriente. El castillo de Beynac ya aparece justo enfrente, orilla derecha."}},
+    {km:13.2,lat:44.8389,lng:1.1447,
+     nom:{fr:"Château de Beynac",en:"Château de Beynac",es:"Castillo de Beynac"},
+     kind:{fr:"Architecture",en:"Architecture",es:"Arquitectura"},
+     txt:{
+      fr:"Le château de Beynac domine la rivière du haut de sa falaise, 150 mètres au-dessus de l'eau. Forteresse du XIIᵉ siècle, l'une des quatre baronnies du Périgord, elle a vu passer Richard Cœur de Lion et Aliénor d'Aquitaine, et sa conservation exceptionnelle en fait un décor de cinéma régulier. À la sortie du village, la rivière se divise en deux bras : gardez le bras gauche. Plus qu'une vingtaine de minutes jusqu'à l'arrivée.",
+      en:"The château of Beynac dominates the river from the top of its cliff, 150 metres above the water. A 12th-century fortress and one of the four baronies of the Périgord, it has seen Richard the Lionheart and Eleanor of Aquitaine pass through, and its outstanding preservation makes it a frequent film set. As you leave the village, the river splits into two arms: keep to the left arm. Only about twenty minutes left to the finish.",
+      es:"El castillo de Beynac domina el río desde lo alto de su acantilado, 150 metros sobre el agua. Fortaleza del siglo XII y una de las cuatro baronías del Périgord, vio pasar a Ricardo Corazón de León y a Leonor de Aquitania, y su conservación excepcional lo convierte en escenario habitual de cine. A la salida del pueblo, el río se divide en dos brazos: mantente en el brazo izquierdo. Quedan apenas unos veinte minutos hasta la llegada."}},
+    {km:15,lat:44.8430,lng:1.1370,bridge:false,
+     nom:{fr:"Château des Milandes — Joséphine Baker",en:"Château des Milandes — Joséphine Baker",es:"Castillo de los Milandes — Joséphine Baker"},
+     kind:{fr:"Architecture & rapaces",en:"Architecture & birds of prey",es:"Arquitectura y rapaces"},
+     txt:{
+      fr:"Avant d'arriver au dernier pont, si vous regardez sur votre droite, en hauteur, vous pouvez apercevoir le château des Milandes, un château emblématique. Construit en 1489 par les seigneurs de Castelnaud, il fut la demeure de Joséphine Baker, l'artiste de music-hall, résistante et militante des droits civiques, qui y installa son « village du monde » et ses enfants adoptés. Aujourd'hui, le domaine accueille une soixantaine de rapaces et propose chaque jour un spectacle de fauconnerie en vol libre — aigles, faucons, buses et chouettes — dans les jardins à la française. Une silhouette discrète mais chargée d'histoire.",
+      en:"Before reaching the last bridge, if you look to your right, up high, you can glimpse the château des Milandes, an emblematic castle. Built in 1489 by the lords of Castelnaud, it was the home of Joséphine Baker, the music-hall artist, Resistance member and civil-rights activist, who set up her \"village of the world\" and her adopted children here. Today the estate is home to some sixty birds of prey and stages a free-flight falconry show every day — eagles, falcons, buzzards and owls — in its French gardens. A discreet outline, but heavy with history.",
+      es:"Antes de llegar al último puente, si miras a tu derecha, en lo alto, puedes vislumbrar el castillo de los Milandes, un castillo emblemático. Construido en 1489 por los señores de Castelnaud, fue la morada de Joséphine Baker, la artista de music-hall, miembro de la Resistencia y activista de los derechos civiles, que instaló aquí su «aldea del mundo» y sus hijos adoptados. Hoy la finca alberga unos sesenta rapaces y ofrece cada día un espectáculo de cetrería en vuelo libre — águilas, halcones, busardos y búhos — en sus jardines a la francesa. Una silueta discreta pero cargada de historia."}},
+    {km:16,lat:44.8455,lng:1.1320,bridge:true,
+     nom:{fr:"Pont de Pech",en:"Pont de Pech",es:"Pont de Pech"},
+     kind:{fr:"Arrivée · Pont 5",en:"Arrival · Bridge 5",es:"Llegada · Puente 5"},
+     txt:{
+      fr:"Cinquième et dernier pont : le Pont de Pech, l'ancien pont de chemin de fer qui enjambe la Dordogne après Beynac. C'est ici que s'arrêtent les canoës : accostez sur la rive gauche, juste après le pont, à gauche. Votre descente de 16 kilomètres s'achève. Sortez le canoë de l'eau et regardez en arrière le chemin parcouru — cinq ponts, une dizaine de châteaux, des falaises et des villages. La rivière, elle, poursuit sa route vers Bergerac puis l'estuaire de la Gironde, comme le faisaient les gabariers d'autrefois.",
+      en:"Fifth and last bridge: the Pont de Pech, the old railway bridge that spans the Dordogne beyond Beynac. This is where the canoes stop: land on the left bank, just after the bridge, on the left. Your 16-kilometre descent is over. Lift the canoe from the water and look back at the way you've come — five bridges, a dozen castles, cliffs and villages. The river itself flows on towards Bergerac and then the Gironde estuary, just as the bargemen did long ago.",
+      es:"Quinto y último puente: el Pont de Pech, el antiguo puente de ferrocarril que cruza el Dordoña pasado Beynac. Aquí es donde paran las canoas: atraca en la orilla izquierda, justo después del puente, a la izquierda. Tu descenso de 16 kilómetros termina. Saca la canoa del agua y mira atrás el camino recorrido — cinco puentes, una decena de castillos, acantilados y pueblos. El río sigue su curso hacia Bergerac y luego el estuario de la Gironda, como hacían los gabarreros de antaño."}}
+  ]
+};
+
+/* ---- Étape d'arrivée propre au parcours court Vitrac → Castelnaud ----
+   Remplace l'étape "Pont de Castelnaud" du parcours complet : ici le pont
+   et l'arrivée ne font qu'une seule étape, sous le nom du pont. */
+const ARRIVEE_CASTELNAUD={km:10.4,lat:44.8180,lng:1.1525,bridge:true,
+ nom:{fr:"Pont de Castelnaud",en:"Castelnaud Bridge",es:"Puente de Castelnaud"},
+ kind:{fr:"Arrivée · Pont de Castelnaud",en:"Arrival · Castelnaud Bridge",es:"Llegada · Puente de Castelnaud"},
+ txt:{
+  fr:"Passez sous le pont de Castelnaud : l'arrêt final se fait environ 200 mètres après, sur la rive gauche. Votre descente de 10,4 kilomètres s'achève au pied du village et de sa forteresse. Sortez le canoë de l'eau — le bourg médiéval de Castelnaud-la-Chapelle, classé parmi les Plus Beaux Villages de France, grimpe juste au-dessus de vous.",
+  en:"Pass under the Castelnaud bridge: the final stop is about 200 metres further on, on the left bank. Your 10.4-kilometre descent ends at the foot of the village and its fortress. Lift the canoe from the water — the medieval village of Castelnaud-la-Chapelle, listed among the Most Beautiful Villages of France, climbs right above you.",
+  es:"Pasa bajo el puente de Castelnaud: la parada final se hace unos 200 metros más adelante, en la orilla izquierda. Tu descenso de 10,4 kilómetros termina al pie del pueblo y su fortaleza. Saca la canoa del agua — el pueblo medieval de Castelnaud-la-Chapelle, clasificado entre los Pueblos más Bellos de Francia, se eleva justo encima de ti."}};
+
+const RANDO_SHORT={
+  id:"vitrac-castelnaud",icon:"🛶",total:10.4,
+  start:RANDO_FULL.start,end:{lat:44.8180,lng:1.1525},
+  nom:{fr:"Vitrac → Castelnaud",en:"Vitrac → Castelnaud",es:"Vitrac → Castelnaud"},
+  sousTitre:{fr:"Descente courte de la Dordogne · 10,4 km · ~1h45",en:"Short Dordogne descent · 10.4 km · ~1h45",es:"Descenso corto del Dordoña · 10,4 km · ~1h45"},
+  tags:{fr:["Canoë","Court","Familles"],en:["Canoe","Short","Families"],es:["Canoa","Corto","Familias"]},
+  steps:RANDO_FULL.steps.slice(0,11).concat([ARRIVEE_CASTELNAUD])
+};
+
+const RANDOS=[RANDO_FULL,RANDO_SHORT];
+
+/* ---- Tuile « centres d'intérêt » : restaurants & visites à pied à moins de 200 m de l'eau ---- */
+const POI_TILE={
+  icon:"🍽️",
+  nom:{fr:"Autour de la descente",en:"Around the descent",es:"Alrededor del descenso"},
+  sousTitre:{fr:"Restaurants & visites à pied · à moins de 200 m de l'eau",en:"Restaurants & walks · within 200 m of the water",es:"Restaurantes y visitas a pie · a menos de 200 m del agua"},
+  tags:{fr:["Restos","Pause","À pied"],en:["Food","Break","On foot"],es:["Restaurantes","Pausa","A pie"]},
+  items:[
+    {village:{fr:"Vitrac",en:"Vitrac",es:"Vitrac"},dist:{fr:"~50 m du débarcadère",en:"~50 m from the launch",es:"~50 m del embarcadero"},
+     nom:{fr:"Guinguette du port",en:"Riverside guinguette",es:"Guinguette del puerto"},type:{fr:"🍴 Restaurant",en:"🍴 Restaurant",es:"🍴 Restaurante"},
+     txt:{fr:"Terrasse au bord de l'eau, juste à côté de l'embarcadère : cuisine périgourdine simple et grillades, idéal avant le départ.",en:"A waterside terrace right by the launch point: simple Périgord cooking and grills, perfect before setting off.",es:"Terraza junto al agua, justo al lado del embarcadero: cocina perigordina sencilla y parrilladas, ideal antes de salir."}},
+    {village:{fr:"La Roque-Gageac",en:"La Roque-Gageac",es:"La Roque-Gageac"},dist:{fr:"~100 m de la berge",en:"~100 m from the bank",es:"~100 m de la orilla"},
+     nom:{fr:"Terrasses face à la falaise",en:"Terraces facing the cliff",es:"Terrazas frente al acantilado"},type:{fr:"🍴 Restaurants",en:"🍴 Restaurants",es:"🍴 Restaurantes"},
+     txt:{fr:"Plusieurs restaurants alignés sur le quai, à l'ombre du rocher : un des plus beaux cadres de la descente pour une pause déjeuner.",en:"Several restaurants line the quay in the shade of the cliff: one of the prettiest spots on the descent for a lunch break.",es:"Varios restaurantes alineados en el muelle, a la sombra de la roca: uno de los lugares más bonitos del descenso para una pausa de almuerzo."}},
+    {village:{fr:"La Roque-Gageac",en:"La Roque-Gageac",es:"La Roque-Gageac"},dist:{fr:"~150 m à pied",en:"~150 m on foot",es:"~150 m a pie"},
+     nom:{fr:"Jardin exotique & fort troglodytique",en:"Exotic garden & troglodyte fort",es:"Jardín exótico y fuerte troglodita"},type:{fr:"🚶 Visite à pied",en:"🚶 Walking visit",es:"🚶 Visita a pie"},
+     txt:{fr:"Depuis le quai, une ruelle grimpe vers le jardin exotique (palmiers, bananiers) et le fort troglodytique accroché à la falaise.",en:"From the quay, a lane climbs to the exotic garden (palms, banana trees) and the troglodyte fort clinging to the cliff.",es:"Desde el muelle, una callejuela sube hasta el jardín exótico (palmeras, bananos) y el fuerte troglodita colgado del acantilado."}},
+    {village:{fr:"Plage de la Malartrie",en:"Malartrie beach",es:"Playa de la Malartrie"},dist:{fr:"0 m — accès direct à l'eau",en:"0 m — direct water access",es:"0 m — acceso directo al agua"},
+     nom:{fr:"Halte baignade",en:"Swimming stop",es:"Parada de baño"},type:{fr:"🏖️ Pause",en:"🏖️ Break",es:"🏖️ Pausa"},
+     txt:{fr:"Plage naturelle de galets au pied du château, face aux falaises : la pause baignade la plus simple du parcours.",en:"A natural pebble beach at the foot of the château, facing the cliffs: the easiest swim stop on the route.",es:"Playa natural de cantos al pie del castillo, frente a los acantilados: la parada de baño más sencilla del recorrido."}},
+    {village:{fr:"Castelnaud",en:"Castelnaud",es:"Castelnaud"},dist:{fr:"~150 m du pont",en:"~150 m from the bridge",es:"~150 m del puente"},
+     nom:{fr:"Restaurants au pied du château",en:"Restaurants below the château",es:"Restaurantes al pie del castillo"},type:{fr:"🍴 Restaurants",en:"🍴 Restaurants",es:"🍴 Restaurantes"},
+     txt:{fr:"Près du pont et du débarcadère, quelques tables et terrasses ombragées avec vue sur la forteresse.",en:"Near the bridge and the landing point, a few shaded tables and terraces with views of the fortress.",es:"Cerca del puente y del embarcadero, algunas mesas y terrazas a la sombra con vistas a la fortaleza."}},
+    {village:{fr:"Beynac",en:"Beynac",es:"Beynac"},dist:{fr:"~120 m de la rive",en:"~120 m from the bank",es:"~120 m de la orilla"},
+     nom:{fr:"Guinguettes du bord de Dordogne",en:"Riverside guinguettes",es:"Guinguettes a orillas del Dordoña"},type:{fr:"🍴 Restaurants",en:"🍴 Restaurants",es:"🍴 Restaurantes"},
+     txt:{fr:"Au pied du village, terrasses ombragées les pieds presque dans l'eau, vue plongeante sur le château.",en:"At the foot of the village, shaded terraces almost at the water's edge, with views up to the château.",es:"Al pie del pueblo, terrazas a la sombra casi con los pies en el agua, con vistas al castillo."}},
+    {village:{fr:"Beynac",en:"Beynac",es:"Beynac"},dist:{fr:"~180 m à pied",en:"~180 m on foot",es:"~180 m a pie"},
+     nom:{fr:"Ruelles médiévales du village",en:"Medieval village lanes",es:"Callejuelas medievales del pueblo"},type:{fr:"🚶 Visite à pied",en:"🚶 Walking visit",es:"🚶 Visita a pie"},
+     txt:{fr:"Depuis la berge, les ruelles pavées montent en lacets entre les maisons de pierre ; l'entrée du château reste plus haut.",en:"From the bank, cobbled lanes wind up between stone houses; the château entrance itself is higher up.",es:"Desde la orilla, las callejuelas empedradas suben en zigzag entre casas de piedra; la entrada del castillo queda más arriba."}}
+  ]
+};
+
+/* ---- État ---- */
+let lang='fr',stepIdx=0,playing=false,playTimer=null,mapCtx=null,speaking=false,currentUtterance=null,mapPositions=[],CUR=RANDO_FULL;
+function t(){return UI[lang];}
+
+/* ---- Langue ---- */
+function setLang(l){
+  lang=l;document.documentElement.lang=l;
+  document.querySelectorAll('.flag').forEach(f=>f.classList.toggle('on',f.dataset.lang===l));
+  stopVoice();
+  applyStaticUI();
+  renderHome();
+  if(document.getElementById('trail').style.display==='flex')showStep(stepIdx);
+  if(document.getElementById('identify').style.display==='flex')applyIdentifyUI();
+  if(document.getElementById('poi').style.display==='flex')renderPoi();
+}
+function applyStaticUI(){
+  document.getElementById('homeTagline').textContent=t().tagline;
+}
+
+/* ---- Accueil ---- */
+function renderHome(){
+  const list=document.getElementById('randoList');list.innerHTML='';
+  RANDOS.forEach((r,idx)=>{
+    const c=document.createElement('div');c.className='rando-card';c.onclick=()=>startTrail(idx);
+    c.innerHTML=`<div class="rando-ico">${r.icon}</div>
+      <div class="rando-meta"><h3>${r.nom[lang]}</h3><div class="sub">${r.sousTitre[lang]}</div>
+      <div class="tags">${r.tags[lang].map(x=>`<span class="tag">${x}</span>`).join('')}</div></div>`;
+    list.appendChild(c);
+  });
+  const p=document.createElement('div');p.className='rando-card';p.onclick=openPoi;
+  p.innerHTML=`<div class="rando-ico">${POI_TILE.icon}</div>
+    <div class="rando-meta"><h3>${POI_TILE.nom[lang]}</h3><div class="sub">${POI_TILE.sousTitre[lang]}</div>
+    <div class="tags">${POI_TILE.tags[lang].map(x=>`<span class="tag">${x}</span>`).join('')}</div></div>`;
+  list.appendChild(p);
+}
+
+/* ---- Démarrer ---- */
+function startTrail(idx){
+  CUR=RANDOS[idx];
+  stepIdx=0;
+  document.getElementById('home').style.display='none';
+  document.getElementById('trail').style.display='flex';
+  document.getElementById('trailName').textContent=CUR.nom[lang];
+  document.getElementById('trailSub').textContent=CUR.sousTitre[lang];
+  const sl=document.getElementById('slider');sl.max=CUR.steps.length-1;sl.value=0;
+  updateGpsBtn();
+  setupMap();showStep(0);
+}
+function goHome(){
+  stopPlay();stopVoice();stopGPS();
+  document.getElementById('trail').style.display='none';
+  document.getElementById('identify').style.display='none';
+  document.getElementById('poi').style.display='none';
+  document.getElementById('home').style.display='flex';
+}
+
+/* ---- Centres d'intérêt ---- */
+function openPoi(){
+  document.getElementById('home').style.display='none';
+  document.getElementById('poi').style.display='flex';
+  renderPoi();
+}
+function closePoi(){
+  document.getElementById('poi').style.display='none';
+  document.getElementById('home').style.display='flex';
+}
+function renderPoi(){
+  document.getElementById('poiTitle').textContent=POI_TILE.nom[lang];
+  document.getElementById('poiSub').textContent=POI_TILE.sousTitre[lang];
+  const list=document.getElementById('poiList');list.innerHTML='';
+  let lastVillage='';
+  POI_TILE.items.forEach(it=>{
+    if(it.village[lang]!==lastVillage){
+      lastVillage=it.village[lang];
+      const g=document.createElement('div');g.className='poi-group';g.textContent=lastVillage;
+      list.appendChild(g);
+    }
+    const c=document.createElement('div');c.className='poi-card';
+    c.innerHTML=`<h3>${it.nom[lang]}</h3><div class="poi-type">${it.type[lang]}</div><div class="poi-dist2">${it.dist[lang]}</div><p>${it.txt[lang]}</p>`;
+    list.appendChild(c);
+  });
+}
+
+/* ---- Étapes ---- */
+function showStep(i){
+  stepIdx=i;const s=CUR.steps[i];
+  document.getElementById('poiKind').textContent=(s.bridge?'🌉 ':'')+s.kind[lang];
+  document.getElementById('poiName').textContent=s.nom[lang];
+  document.getElementById('poiDist').textContent=t().kmOf+" "+s.km+" / "+CUR.total+" km";
+  document.getElementById('poiText').textContent=s.txt[lang];
+  document.getElementById('slider').value=i;
+  document.getElementById('progFill').style.width=(s.km/CUR.total*100)+'%';
+  document.getElementById('progDone').textContent=s.km+" "+t().kmDone;
+  document.getElementById('progLeft').textContent=(CUR.total-s.km).toFixed(1)+" "+t().kmLeft;
+  document.getElementById('liveTxt').textContent=playing?t().running:t().stopped;
+  document.getElementById('voiceBtn').innerHTML=speaking?t().stop:t().listen;
+  document.getElementById('camBtn').innerHTML=t().identify;
+  document.getElementById('photoStepBtn').innerHTML=t().photoBtn;
+  document.getElementById('trailName').textContent=CUR.nom[lang];
+  document.getElementById('trailSub').textContent=CUR.sousTitre[lang];
+  updateGpsBtn();
+  if(document.getElementById('photoModal').classList.contains('show'))openPhotoModal();
+  drawMap();
+}
+function goStep(i){stopVoice();showStep(i);}
+function nextStep(){if(stepIdx<CUR.steps.length-1){stopVoice();showStep(stepIdx+1);}else stopPlay();}
+function prevStep(){if(stepIdx>0){stopVoice();showStep(stepIdx-1);}}
+
+/* ---- Fenêtre photo d'un point ----
+   Chaque étape pourra recevoir un champ s.photo (URL/chemin d'image).
+   Tant qu'aucune image n'est fournie, on affiche un espace réservé. */
+function openPhotoModal(){
+  const s=CUR.steps[stepIdx];
+  document.getElementById('photoModalTitle').textContent=s.nom[lang];
+  document.getElementById('photoModalClose').textContent=t().photoClose;
+  const zone=document.getElementById('photoModalZone');
+  zone.innerHTML=s.photo?`<img src="${s.photo}" alt="">`:`<div class="ph"><span>🖼️</span><span>${t().photoNone}</span></div>`;
+  document.getElementById('photoModal').classList.add('show');
+}
+function closePhotoModal(){
+  document.getElementById('photoModal').classList.remove('show');
+}
+
+/* ---- Guide GPS ----
+   Demande la position en continu (watchPosition) et compare la distance
+   à chaque étape (formule de Haversine). Sous ~60 m d'un point, l'étape
+   s'affiche et se lit automatiquement, sans interrompre la navigation
+   manuelle (curseur/boutons) qui reste toujours disponible. */
+let gpsActive=false,gpsWatchId=null;
+function haversine(lat1,lng1,lat2,lng2){
+  const R=6371000,toRad=d=>d*Math.PI/180;
+  const dLat=toRad(lat2-lat1),dLng=toRad(lng2-lng1);
+  const a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLng/2)**2;
+  return 2*R*Math.asin(Math.sqrt(a));
+}
+function toggleGPS(){gpsActive?stopGPS():startGPS();}
+function startGPS(){
+  if(!('geolocation'in navigator)){toast(t().gpsUnavailable);return;}
+  gpsActive=true;updateGpsBtn();
+  gpsWatchId=navigator.geolocation.watchPosition(onGpsPos,onGpsErr,{enableHighAccuracy:true,maximumAge:5000,timeout:15000});
+}
+function stopGPS(){
+  gpsActive=false;updateGpsBtn();
+  if(gpsWatchId!==null&&'geolocation'in navigator)navigator.geolocation.clearWatch(gpsWatchId);
+  gpsWatchId=null;
+}
+function updateGpsBtn(){
+  const b=document.getElementById('gpsBtn');if(!b)return;
+  b.classList.toggle('active',gpsActive);
+  b.textContent=gpsActive?t().gpsOn:t().gpsOff;
+}
+function onGpsPos(pos){
+  if(!CUR)return;
+  const{latitude,longitude}=pos.coords;
+  let best=-1,bestD=Infinity;
+  CUR.steps.forEach((s,i)=>{const d=haversine(latitude,longitude,s.lat,s.lng);if(d<bestD){bestD=d;best=i;}});
+  if(best>=0&&bestD<60&&best!==stepIdx){
+    toast(t().gpsNear+" "+CUR.steps[best].nom[lang]);
+    stopPlay();stopVoice();
+    showStep(best);
+    speak(CUR.steps[best].txt[lang]);
+  }
+}
+function onGpsErr(err){
+  stopGPS();
+  toast(err.code===1?t().gpsDenied:t().gpsUnavailable);
+}
+
+/* ---- Lecture auto ----
+   playing = la séquence audio enchaîne les étapes.
+   Pause/Stop : on coupe la voix et on annule l'avance.
+   Le canoë reste figé exactement sur stepIdx (le point courant). */
+function togglePlay(){playing?stopPlay():startPlay();}
+function startPlay(){
+  playing=true;
+  document.getElementById('playBtn').textContent='⏸';
+  document.getElementById('liveDot').classList.add('live');
+  document.getElementById('liveTxt').textContent=t().running;
+  speak(CUR.steps[stepIdx].txt[lang],advanceAfterSpeech);
+}
+function stopPlay(){
+  playing=false;                       // empêche advanceAfterSpeech de continuer
+  clearTimeout(playTimer);playTimer=null;
+  stopVoice();                         // coupe la voix immédiatement
+  document.getElementById('playBtn').textContent='▶';
+  document.getElementById('liveDot').classList.remove('live');
+  document.getElementById('liveTxt').textContent=t().stopped;
+  // le canoë reste sur stepIdx — aucune avance n'est déclenchée
+}
+function advanceAfterSpeech(){
+  if(!playing)return;                  // si on a mis pause pendant la lecture, on s'arrête net
+  if(stepIdx<CUR.steps.length-1){
+    playTimer=setTimeout(()=>{
+      if(!playing)return;              // double sécurité avant d'avancer
+      showStep(stepIdx+1);
+      speak(CUR.steps[stepIdx].txt[lang],advanceAfterSpeech);
+    },1400);
+  }else stopPlay();
+}
+
+/* ---- Carte ---- */
+function setupMap(){
+  const c=document.getElementById('miniMap');const dpr=window.devicePixelRatio||1;
+  const rect=c.getBoundingClientRect();c.width=rect.width*dpr;c.height=rect.height*dpr;
+  mapCtx=c.getContext('2d');mapCtx.scale(dpr,dpr);drawMap();
+  if(!c._tapBound){
+    c._tapBound=true;
+    c.style.cursor='pointer';
+    const onTap=e=>{
+      const r=c.getBoundingClientRect();
+      const pt=e.touches&&e.touches[0]?e.touches[0]:e;
+      const x=pt.clientX-r.left, y=pt.clientY-r.top;
+      // cherche le point le plus proche du clic
+      let best=-1,bestD=Infinity;
+      mapPositions.forEach((p,i)=>{
+        const d=Math.hypot(p.x-x,p.y-y);
+        if(d<bestD){bestD=d;best=i;}
+      });
+      // ne réagit que si on a cliqué assez près d'un point (35 px)
+      if(best>=0&&bestD<35){
+        stopPlay();stopVoice();
+        showStep(best);
+        speak(CUR.steps[best].txt[lang]);
+      }
+    };
+    c.addEventListener('click',onTap);
+    c.addEventListener('touchstart',e=>{onTap(e);},{passive:true});
+  }
+}
+function drawMap(){
+  if(!mapCtx)return;
+  const c=document.getElementById('miniMap'),W=c.clientWidth,H=c.clientHeight,pad=50;
+  // efface tout le canvas (en pixels réels) pour éviter tout résidu de dessin
+  mapCtx.save();
+  mapCtx.setTransform(1,0,0,1,0,0);
+  mapCtx.clearRect(0,0,c.width,c.height);
+  mapCtx.restore();
+  const pts=CUR.steps,la=pts.map(p=>p.lat),ln=pts.map(p=>p.lng);
+  const minLat=Math.min(...la),maxLat=Math.max(...la),minLng=Math.min(...ln),maxLng=Math.max(...ln);
+  const spanLat=(maxLat-minLat)||.001,spanLng=(maxLng-minLng)||.001;
+  const proj=p=>({x:pad+((p.lng-minLng)/spanLng)*(W-2*pad),y:H-pad-((p.lat-minLat)/spanLat)*(H-2*pad)});
+  const route=pts.map(proj);
+  mapPositions=route;  // mémorise les positions écran pour le clic
+  // trace une courbe douce (spline Catmull-Rom) passant par les points => effet rivière sinueuse
+  const smooth=(p0,p1,p2,p3)=>{
+    const cp1x=p1.x+(p2.x-p0.x)/6, cp1y=p1.y+(p2.y-p0.y)/6;
+    const cp2x=p2.x-(p3.x-p1.x)/6, cp2y=p2.y-(p3.y-p1.y)/6;
+    mapCtx.bezierCurveTo(cp1x,cp1y,cp2x,cp2y,p2.x,p2.y);
+  };
+  const drawRiver=(arr)=>{
+    if(arr.length<2)return;
+    mapCtx.beginPath();mapCtx.moveTo(arr[0].x,arr[0].y);
+    for(let i=0;i<arr.length-1;i++){
+      const p0=arr[i-1]||arr[i],p1=arr[i],p2=arr[i+1],p3=arr[i+2]||arr[i+1];
+      smooth(p0,p1,p2,p3);
+    }
+    mapCtx.stroke();
+  };
+  mapCtx.strokeStyle='rgba(242,237,225,.18)';mapCtx.lineWidth=5;mapCtx.lineCap='round';mapCtx.lineJoin='round';
+  drawRiver(route);
+  mapCtx.strokeStyle='#e8a838';mapCtx.lineWidth=4;
+  drawRiver(route.slice(0,stepIdx+1));
+  pts.forEach((s,i)=>{
+    const p=proj(s),done=i<=stepIdx;
+    if(i===stepIdx)return;
+    if(s.bridge){
+      // pont : emoji repère
+      mapCtx.font='15px sans-serif';mapCtx.textAlign='center';mapCtx.textBaseline='middle';
+      mapCtx.globalAlpha=done?1:0.5;
+      mapCtx.fillText('🌉',p.x,p.y);
+      mapCtx.globalAlpha=1;mapCtx.textBaseline='alphabetic';
+      return;
+    }
+    mapCtx.beginPath();mapCtx.arc(p.x,p.y,6,0,7);
+    mapCtx.fillStyle=done?'#7fb069':'rgba(242,237,225,.45)';mapCtx.fill();
+    mapCtx.strokeStyle='#0a3024';mapCtx.lineWidth=2;mapCtx.stroke();
+  });
+  const cp=proj(pts[stepIdx]);
+  mapCtx.beginPath();mapCtx.arc(cp.x,cp.y,13,0,7);mapCtx.fillStyle='rgba(127,176,105,.25)';mapCtx.fill();
+  mapCtx.beginPath();mapCtx.arc(cp.x,cp.y,7,0,7);mapCtx.fillStyle='#7fb069';mapCtx.fill();
+  mapCtx.strokeStyle='#fff';mapCtx.lineWidth=2;mapCtx.stroke();
+  mapCtx.font='14px sans-serif';mapCtx.textAlign='center';mapCtx.fillText('🛶',cp.x,cp.y-16);
+  mapCtx.fillStyle='#2a7a8c';mapCtx.font='bold 11px sans-serif';
+  mapCtx.fillText('Vitrac',route[0].x,route[0].y+22);
+  mapCtx.fillStyle='#c45c4a';
+  mapCtx.fillText(pts[pts.length-1].nom[lang],route[route.length-1].x,route[route.length-1].y-14);
+}
+window.addEventListener('resize',()=>{if(document.getElementById('trail').style.display==='flex')setupMap();});
+
+/* ---- Voix ---- */
+/* Choisit la meilleure voix disponible pour la langue :
+   1) correspondance exacte du code régional (ex. en-US, es-ES)
+   2) à défaut, même langue de base (ex. n'importe quel 'es')
+   On privilégie les voix locales/de qualité quand le navigateur l'indique. */
+function pickVoice(){
+  const voices=window.speechSynthesis.getVoices();
+  if(!voices.length)return null;
+  const want=VOICE[lang].toLowerCase();      // ex. "en-us"
+  const base=lang.toLowerCase();             // ex. "en"
+  const score=v=>{
+    const vl=(v.lang||'').toLowerCase().replace('_','-');
+    let s=0;
+    if(vl===want)s+=100;                      // bon accent régional
+    else if(vl.startsWith(base))s+=40;        // bonne langue, autre accent
+    else return -1;
+    if(v.localService)s+=10;                  // voix installée = souvent meilleure
+    if(/google|natural|enhanced|premium|siri/i.test(v.name))s+=8;
+    return s;
+  };
+  let best=null,bestS=-1;
+  voices.forEach(v=>{const s=score(v);if(s>bestS){bestS=s;best=v;}});
+  return bestS>=0?best:null;
+}
+function speak(txt,onDone){
+  if(!('speechSynthesis'in window)){if(onDone)onDone();return;}
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(txt);
+  u.lang=VOICE[lang];u.rate=0.96;u.pitch=1;
+  const v=pickVoice();if(v)u.voice=v;
+  currentUtterance=u;
+  u.onstart=()=>{speaking=true;setVoiceBtn(true);};
+  u.onend=()=>{
+    speaking=false;setVoiceBtn(false);
+    if(u._cancelled)return;            // arrêt manuel : ne pas enchaîner
+    if(onDone)onDone();
+  };
+  u.onerror=()=>{speaking=false;setVoiceBtn(false);};
+  window.speechSynthesis.speak(u);
+}
+function stopVoice(){
+  if(currentUtterance)currentUtterance._cancelled=true;  // marque l'arrêt manuel
+  if('speechSynthesis'in window)window.speechSynthesis.cancel();
+  speaking=false;setVoiceBtn(false);
+}
+function toggleVoice(){if(speaking)stopVoice();else speak(CUR.steps[stepIdx].txt[lang]);}
+function setVoiceBtn(on){const b=document.getElementById('voiceBtn');b.classList.toggle('playing',on);b.innerHTML=on?t().stop:t().listen;}
+
+/* ---- Identification ---- */
+function applyIdentifyUI(){
+  document.getElementById('idTitle').textContent=t().idTitle;
+  document.getElementById('idSub').textContent=t().idSub;
+  document.getElementById('photoPhTxt').textContent=t().photoPh;
+  document.getElementById('idTakeBtn').textContent=t().takePhoto;
+}
+function openIdentify(){
+  stopPlay();
+  document.getElementById('trail').style.display='none';
+  document.getElementById('identify').style.display='flex';
+  document.getElementById('idOutput').innerHTML='';
+  document.getElementById('photoZone').innerHTML=`<div class="ph"><span>📷</span><span>${t().photoPh}</span></div>`;
+  applyIdentifyUI();
+}
+function closeIdentify(){
+  document.getElementById('identify').style.display='none';
+  document.getElementById('trail').style.display='flex';setupMap();showStep(stepIdx);
+}
+function handlePhoto(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=async ev=>{
+    document.getElementById('photoZone').innerHTML=`<img src="${ev.target.result}" alt="">`;
+    await identify(ev.target.result.split(',')[1],file.type||'image/jpeg');
+  };
+  reader.readAsDataURL(file);
+}
+async function identify(b64,mime){
+  const out=document.getElementById('idOutput');
+  if(!navigator.onLine){out.innerHTML=`<p class="net-warn">${t().noNet}</p>`;return;}
+  out.innerHTML=`<div class="spinner"></div><p class="net-warn">${t().analyzing}</p>`;
+  const langName={fr:"français",en:"English",es:"español"}[lang];
+  const prompt=`Tu es un naturaliste expert de la vallée de la Dordogne (Périgord, France). Identifie l'espèce sur la photo (plante, arbre, fleur, oiseau, insecte, poisson ou animal).
+Réponds UNIQUEMENT en JSON sans markdown, et rédige "nom" et "description" en ${langName} :
+{"nom":"nom commun","latin":"nom scientifique","description":"3-4 phrases : reconnaissance, habitat en Dordogne, fait intéressant."}
+Si incertain, donne l'hypothèse la plus probable et signale-le.`;
+  try{
+    const res=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,
+        messages:[{role:"user",content:[
+          {type:"image",source:{type:"base64",media_type:mime,data:b64}},
+          {type:"text",text:prompt}]}]})
+    });
+    const data=await res.json();
+    let txt=data.content.filter(i=>i.type==='text').map(i=>i.text).join('').replace(/```json|```/g,'').trim();
+    let o;try{o=JSON.parse(txt);}catch{o={nom:"—",latin:"",description:txt};}
+    out.innerHTML=`<div class="id-result"><h3>${o.nom}</h3>${o.latin?`<div class="latin">${o.latin}</div>`:''}<p>${o.description}</p></div>`;
+    speak(`${o.nom}. ${o.description}`);
+  }catch(err){out.innerHTML=`<p class="net-warn">${t().idFail}</p>`;}
+}
+
+/* ---- Toast ---- */
+let toastT;
+function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),3200);}
+
+/* ---- Init ---- */
+applyStaticUI();renderHome();
+if('speechSynthesis'in window){window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();window.speechSynthesis.getVoices();}
+</script>
+</body>
+</html>
