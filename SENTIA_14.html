@@ -68,6 +68,47 @@
   .modal-photo-zone .ph{text-align:center;color:var(--sand-dim);padding:24px;font-size:.92rem}
   .modal-photo-zone .ph span{font-size:2.2rem;display:block;margin-bottom:8px}
 
+  .dialog-overlay{display:none;position:fixed;inset:0;z-index:60;background:rgba(8,20,16,.78);backdrop-filter:blur(3px);align-items:center;justify-content:center;padding:20px}
+  .dialog-overlay.show{display:flex}
+  .dialog-card{background:var(--sand);color:var(--ink);border-radius:22px;max-width:92vw;width:340px;padding:22px;box-shadow:0 20px 50px rgba(0,0,0,.4);max-height:84dvh;overflow-y:auto}
+  .dialog-card.wide{width:420px}
+  .circuit-meta{font-size:.86rem;color:var(--bark);margin-bottom:10px}
+  .circuit-resume{font-size:.9rem;line-height:1.5;color:#3a3228;margin-bottom:14px}
+  .circuit-fees{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .circuit-fees span{font-size:.78rem;background:rgba(127,176,105,.18);color:var(--moss);padding:4px 10px;border-radius:99px}
+  .circuit-shuttle{font-size:.8rem;color:var(--river);margin-bottom:14px}
+  .circuit-steps{border-top:1px solid rgba(22,34,29,.1);padding-top:10px;margin-bottom:14px}
+  .circuit-step{display:flex;gap:10px;padding:6px 0;font-size:.86rem;border-bottom:1px dashed rgba(22,34,29,.08)}
+  .circuit-step .ckm{flex-shrink:0;width:48px;font-weight:700;color:var(--forest)}
+  .circuit-step .clieu{font-weight:600}
+  .circuit-step .cnote{display:block;font-size:.78rem;color:var(--bark)}
+  .canoe-info-card{background:rgba(255,255,255,.05);border:1px solid rgba(242,237,225,.12);border-radius:18px;padding:14px 16px;margin-bottom:14px;font-size:.82rem;color:var(--sand-dim);line-height:1.5}
+  .canoe-info-card b{color:var(--sand)}
+  .dialog-card h3{color:var(--forest);font-size:1.1rem;margin-bottom:8px}
+  .dialog-msg{font-size:.88rem;color:var(--bark);line-height:1.45;margin-bottom:14px}
+  .dialog-input{width:100%;border:2px solid rgba(22,34,29,.15);border-radius:12px;padding:11px 13px;font-size:1rem;font-family:inherit;background:#fff;color:var(--ink)}
+  .dialog-input:focus{outline:none;border-color:var(--moss)}
+  .dialog-error{font-size:.8rem;color:var(--danger);min-height:1.2em;margin-top:8px}
+  .dialog-actions{display:flex;gap:10px;margin-top:6px}
+  .dialog-actions .btn{background:rgba(22,34,29,.08);color:var(--ink)}
+  .dialog-actions a.btn{text-decoration:none}
+
+  .hike-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin:10px 0 16px}
+  .hike-stats div{font-size:.85rem}
+  .hike-stats .lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;color:var(--bark);display:block}
+  .hike-stats .dep{grid-column:1/-1}
+
+  .tag.diff-Facile{background:rgba(127,176,105,.18);color:var(--leaf)}
+  .tag.diff-Moyenne{background:rgba(232,168,56,.2);color:var(--sun)}
+  .tag.diff-Difficile,.tag.diff-TresDifficile{background:rgba(196,92,74,.22);color:#e3897a}
+
+  .lock-tag{position:absolute;top:10px;right:10px;font-size:.66rem;font-weight:700;padding:3px 9px;border-radius:99px;background:rgba(232,168,56,.92);color:#3a2c10}
+  .lock-tag.free{background:rgba(127,176,105,.92);color:#0d3b2e}
+  .rando-card{position:relative}
+
+  .gps-village{position:absolute;top:56px;left:12px;z-index:5;background:rgba(8,39,30,.82);border:1px solid rgba(242,237,225,.14);color:var(--sand);padding:5px 11px;border-radius:99px;font-size:.7rem;display:none}
+  .gps-village.show{display:block}
+
   .progress-bar{padding:12px 18px;background:rgba(8,39,30,.85)}
   .progress-track{height:7px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
   .progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--leaf),var(--sun));border-radius:99px;transition:width .5s}
@@ -131,6 +172,7 @@
     <div class="flag on" data-lang="fr" onclick="setLang('fr')">🇫🇷</div>
     <div class="flag" data-lang="en" onclick="setLang('en')">🇬🇧</div>
     <div class="flag" data-lang="es" onclick="setLang('es')">🇪🇸</div>
+    <div class="flag" id="lockToggleBtn" onclick="openCodeModal()">🔒</div>
   </div>
   <div class="home-head">
     <svg class="logo-mark" viewBox="0 0 64 64" fill="none">
@@ -174,8 +216,9 @@
     <canvas id="miniMap"></canvas>
     <div class="play-badge"><span class="dot" id="liveDot"></span><span id="liveTxt">—</span></div>
     <button class="gps-badge" id="gpsBtn" onclick="toggleGPS()">—</button>
+    <div class="gps-village" id="gpsVillage">—</div>
   </div>
-  <div class="progress-bar">
+  <div class="progress-bar" id="progressBar">
     <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
     <div class="progress-labels"><span id="progDone">—</span><span id="progLeft">—</span></div>
   </div>
@@ -184,7 +227,7 @@
     <h3 class="poi-name" id="poiName">—</h3>
     <div class="poi-dist" id="poiDist">—</div>
     <p class="poi-text" id="poiText">—</p>
-    <div class="demo-controls">
+    <div class="demo-controls" id="demoControls">
       <button onclick="prevStep()">‹‹</button>
       <button class="play-main" id="playBtn" onclick="togglePlay()">▶</button>
       <button onclick="nextStep()">››</button>
@@ -206,6 +249,47 @@
       <button class="modal-close" onclick="closePhotoModal()" id="photoModalClose">✕</button>
     </div>
     <div class="modal-photo-zone" id="photoModalZone"></div>
+  </div>
+</div>
+
+<!-- CODE D'ACCÈS -->
+<div class="dialog-overlay" id="codeModal">
+  <div class="dialog-card">
+    <h3 id="codeTitle">—</h3>
+    <p id="codeMsg" class="dialog-msg">—</p>
+    <input type="text" id="codeInput" class="dialog-input" autocomplete="off" autocapitalize="off" spellcheck="false" onkeydown="if(event.key==='Enter')submitCode()">
+    <p id="codeError" class="dialog-error"></p>
+    <div class="dialog-actions">
+      <button class="btn" id="codeCancelBtn" onclick="closeCodeModal()">—</button>
+      <button class="btn btn-cam" id="codeSubmitBtn" onclick="submitCode()">—</button>
+    </div>
+  </div>
+</div>
+
+<!-- FICHE DÉTAIL D'UNE RANDONNÉE PÉDESTRE -->
+<div class="dialog-overlay" id="hikeModal">
+  <div class="dialog-card">
+    <h3 id="hikeTitle">—</h3>
+    <div class="hike-stats" id="hikeStats"></div>
+    <div class="dialog-actions">
+      <button class="btn" id="hikeCloseBtn" onclick="closeHikeModal()">—</button>
+      <a class="btn btn-cam" id="hikeOpenBtn" href="#" target="_blank" rel="noopener">—</a>
+    </div>
+  </div>
+</div>
+
+<!-- FICHE DÉTAIL D'UN CIRCUIT CANOË (multi-jours/longue distance) -->
+<div class="dialog-overlay" id="circuitModal">
+  <div class="dialog-card wide">
+    <h3 id="circuitTitle">—</h3>
+    <div class="circuit-meta" id="circuitMeta">—</div>
+    <p class="circuit-resume" id="circuitResume">—</p>
+    <div class="circuit-fees" id="circuitFees"></div>
+    <div class="circuit-shuttle" id="circuitShuttle">—</div>
+    <div class="circuit-steps" id="circuitSteps"></div>
+    <div class="dialog-actions">
+      <button class="btn" id="circuitCloseBtn" onclick="closeCircuitModal()">—</button>
+    </div>
   </div>
 </div>
 
@@ -257,7 +341,16 @@ const UI={
     photoBtn:"🖼️ Photo",photoTitle:"Photo du point",photoNone:"Photo à venir pour ce point.",photoClose:"✕ Fermer",
     gpsOn:"📍 GPS activé",gpsOff:"📍 Activer le GPS",gpsUnavailable:"📡 La localisation n'est pas disponible sur cet appareil/navigateur.",
     gpsDenied:"📡 Localisation refusée. Autorisez l'accès à la position pour activer le guide GPS.",gpsNear:"Vous approchez d'un point :",
-    moreSoon:"De nouveaux parcours arrivent bientôt dans cette catégorie."},
+    moreSoon:"De nouveaux parcours arrivent bientôt dans cette catégorie.",
+    lockTitle:"Accès parcours",lockMsg:"Ce parcours est réservé. Entrez le code d'accès pour le débloquer.",
+    lockPh:"Code d'accès",lockBtn:"Déverrouiller",lockCancel:"Annuler",lockWrong:"❌ Code incorrect.",
+    lockOk:"🔓 Accès débloqué !",lockedTag:"🔒 Réservé",freeTag:"Gratuit",
+    nearVillage:"Près de",
+    hikeKm:"Distance",hikeDp:"Dénivelé +",hikeDn:"Dénivelé -",hikeT:"Durée",hikeF:"Difficulté",hikeDep:"Départ",
+    hikeOpen:"📍 Localiser sur Google Maps",hikeClose:"✕ Fermer",
+    circuitClose:"✕ Fermer",circuitAdult:"Adulte",circuitChild:"Enfant 5-12 ans",circuitKayak:"Kayak",
+    circuitSteps:"Étapes du parcours",circuitBase:"Base & équipement",circuitDeparts:"Départs",circuitModif:"Modification",
+    circuitEquip:"Équipement fourni"},
   en:{tagline:"Your guide that speaks. Pick a descent, let the river tell its story.",
     demo:"DEMO",stopped:"Paused",running:"Descent in progress…",
     listen:"🔊 Listen",stop:"⏹ Stop",identify:"📷 Identify",
@@ -270,7 +363,16 @@ const UI={
     photoBtn:"🖼️ Photo",photoTitle:"Point photo",photoNone:"Photo coming soon for this point.",photoClose:"✕ Close",
     gpsOn:"📍 GPS on",gpsOff:"📍 Turn on GPS",gpsUnavailable:"📡 Location isn't available on this device/browser.",
     gpsDenied:"📡 Location denied. Allow location access to enable the GPS guide.",gpsNear:"You're approaching a point:",
-    moreSoon:"New routes are coming soon in this category."},
+    moreSoon:"New routes are coming soon in this category.",
+    lockTitle:"Route access",lockMsg:"This route is locked. Enter the access code to unlock it.",
+    lockPh:"Access code",lockBtn:"Unlock",lockCancel:"Cancel",lockWrong:"❌ Wrong code.",
+    lockOk:"🔓 Access unlocked!",lockedTag:"🔒 Locked",freeTag:"Free",
+    nearVillage:"Near",
+    hikeKm:"Distance",hikeDp:"Ascent",hikeDn:"Descent",hikeT:"Duration",hikeF:"Difficulty",hikeDep:"Start",
+    hikeOpen:"📍 Locate on Google Maps",hikeClose:"✕ Close",
+    circuitClose:"✕ Close",circuitAdult:"Adult",circuitChild:"Child 5-12",circuitKayak:"Kayak",
+    circuitSteps:"Route stages",circuitBase:"Base & gear",circuitDeparts:"Departures",circuitModif:"Changes",
+    circuitEquip:"Gear provided"},
   es:{tagline:"Tu guía que habla. Elige un descenso y deja que el río se cuente.",
     demo:"DEMO",stopped:"En pausa",running:"Descenso en curso…",
     listen:"🔊 Escuchar",stop:"⏹ Parar",identify:"📷 Identificar",
@@ -283,7 +385,16 @@ const UI={
     photoBtn:"🖼️ Foto",photoTitle:"Foto del punto",photoNone:"Foto disponible próximamente para este punto.",photoClose:"✕ Cerrar",
     gpsOn:"📍 GPS activado",gpsOff:"📍 Activar GPS",gpsUnavailable:"📡 La localización no está disponible en este dispositivo/navegador.",
     gpsDenied:"📡 Localización denegada. Permite el acceso a la ubicación para activar la guía GPS.",gpsNear:"Te acercas a un punto:",
-    moreSoon:"Próximamente nuevas rutas en esta categoría."}
+    moreSoon:"Próximamente nuevas rutas en esta categoría.",
+    lockTitle:"Acceso a la ruta",lockMsg:"Esta ruta está bloqueada. Introduce el código de acceso para desbloquearla.",
+    lockPh:"Código de acceso",lockBtn:"Desbloquear",lockCancel:"Cancelar",lockWrong:"❌ Código incorrecto.",
+    lockOk:"🔓 ¡Acceso desbloqueado!",lockedTag:"🔒 Bloqueado",freeTag:"Gratis",
+    nearVillage:"Cerca de",
+    hikeKm:"Distancia",hikeDp:"Desnivel +",hikeDn:"Desnivel -",hikeT:"Duración",hikeF:"Dificultad",hikeDep:"Salida",
+    hikeOpen:"📍 Localizar en Google Maps",hikeClose:"✕ Cerrar",
+    circuitClose:"✕ Cerrar",circuitAdult:"Adulto",circuitChild:"Niño 5-12 años",circuitKayak:"Kayak",
+    circuitSteps:"Etapas de la ruta",circuitBase:"Base y material",circuitDeparts:"Salidas",circuitModif:"Modificación",
+    circuitEquip:"Material incluido"}
 };
 
 const VOICE={fr:'fr-FR',en:'en-US',es:'es-ES'};
@@ -445,7 +556,7 @@ const RANDO_SHORT={
   steps:RANDO_FULL.steps.slice(0,11).concat([ARRIVEE_CASTELNAUD])
 };
 
-const RANDOS=[RANDO_FULL,RANDO_SHORT];
+const RANDOS=[RANDO_SHORT,RANDO_FULL];
 
 /* ---- Tuile « centres d'intérêt » : restaurants & visites à pied à moins de 200 m de l'eau ---- */
 const POI_TILE={
@@ -494,21 +605,254 @@ const POI_TILE_PIED={
   items:[]
 };
 
+/* ---- Randonnées pédestres (secteur Saint-Geniès, Dordogne) ----
+   Pas de tracé GPS détaillé pour ces boucles : la tuile ouvre une fiche
+   avec les chiffres clés et localise le point de départ sur Google Maps. */
+function googleMapsSearchUrl(query){
+  return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(query);
+}
+const DIFF_LABEL={
+  "Facile":{fr:"Facile",en:"Easy",es:"Fácil"},
+  "Moyenne":{fr:"Moyenne",en:"Medium",es:"Media"},
+  "Difficile":{fr:"Difficile",en:"Hard",es:"Difícil"},
+  "Très difficile":{fr:"Très difficile",en:"Very hard",es:"Muy difícil"}
+};
+const DIFF_SLUG={"Facile":"Facile","Moyenne":"Moyenne","Difficile":"Difficile","Très difficile":"TresDifficile"};
+const DIFF_CODE={F:"Facile",M:"Moyenne",D:"Difficile",TD:"Très difficile"};
+function formatHours(h){
+  if(h==null)return "—";
+  if(h<1)return Math.round(h*60)+" min";
+  const hh=Math.floor(h),mm=Math.round((h-hh)*60);
+  return hh+"h"+(mm?String(mm).padStart(2,'0'):"");
+}
+const HIKES_PIED=[
+  {n:"Boucle de Marcillac",km:6.93,dp:122,dn:-117,t:"2h 20",f:"Facile",dep:"Marcillac-Saint-Quentin (Dordogne)"},
+  {n:"Boucle de la Turançonnaise",km:9.43,dp:173,dn:-173,t:"3h 10",f:"Facile",dep:"La Chapelle-Aubareil (Dordogne)"},
+  {n:"Boucle de l'Albaroise",km:10,dp:160,dn:-167,t:"3h 20",f:"Moyenne",dep:"La Chapelle-Aubareil (Dordogne)"},
+  {n:"Boucle de Proissans",km:11.7,dp:197,dn:-193,t:"3h 55",f:"Moyenne",dep:"Proissans (Dordogne)"},
+  {n:"Boucle Lauzes et Vieilles Pierres à Saint-Amand-de-Coly",km:13.61,dp:396,dn:-391,t:"5h 00",f:"Moyenne",dep:"Saint-Amand-de-Coly (Dordogne)"},
+  {n:"Vallées et coteaux à Saint-Amand-de-Coly",km:15.53,dp:480,dn:-477,t:"5h 50",f:"Moyenne",dep:"Saint-Amand-de-Coly (Dordogne)"},
+  {n:"Boucle entre bois et lauzes à Saint-Amand-de-Coly",km:7.29,dp:183,dn:-175,t:"2h 35",f:"Facile",dep:"Saint-Amand-de-Coly (Dordogne)"},
+  {n:"Boucle du Château de la Filolie à Saint-Amand-de-Coly",km:19.32,dp:430,dn:-430,t:"6h 45",f:"Difficile",dep:"Saint-Amand-de-Coly (Dordogne)"},
+  {n:"Boucle Tunnel Bois et Eaux à Saint-Amand-de-Coly",km:12.08,dp:282,dn:-274,t:"4h 15",f:"Moyenne",dep:"Saint-Amand-de-Coly (Dordogne)"},
+  {n:"Boucle des Murailles à Saint-Amand-de-Coly",km:6.32,dp:181,dn:-175,t:"2h 20",f:"Facile",dep:"Saint-Amand-de-Coly (Dordogne)"},
+  {n:"Boucle bois et prés à Saint-Amand-de-Coly",km:8.18,dp:203,dn:-195,t:"2h 55",f:"Facile",dep:"Saint-Amand-de-Coly (Dordogne)"},
+  {n:"Boucle soleil et ombrage à Saint-Amand-de-Coly",km:4.01,dp:94,dn:-94,t:"1h 25",f:"Facile",dep:"Saint-Amand-de-Coly (Dordogne)"},
+  {n:"Boucle des Rapiettes",km:4,dp:106,dn:-106,t:"1h 25",f:"Facile",dep:"Saint-Amand-de-Coly (Dordogne)"},
+  {n:"Sur les terres du seigneur de Lasserre",km:14.2,dp:271,dn:-272,t:"4h 50",f:"Moyenne",dep:"Marcillac-Saint-Quentin (Dordogne)"},
+  {n:"Boucle du Petit Salignac",km:9.94,dp:234,dn:-235,t:"3h 30",f:"Moyenne",dep:"Tamniès (Dordogne)"},
+  {n:"La Fontaine des Graves à Tamniès",km:9.13,dp:187,dn:-189,t:"3h 10",f:"Moyenne",dep:"Tamniès (Dordogne)"},
+  {n:"Boucle du Posadou à Valojoulx",km:5.15,dp:153,dn:-153,t:"1h 55",f:"Facile",dep:"Valojoulx (Dordogne)"},
+  {n:"Autour de la Grotte de Lascaux",km:2.99,dp:126,dn:-126,t:"1h 15",f:"Facile",dep:"Montignac (Dordogne)"},
+  {n:"Boucle de Fond de Bouch à Coly",km:5.76,dp:93,dn:-97,t:"1h 55",f:"Facile",dep:"Coly (Dordogne)"},
+  {n:"Boucle du Causse de Coly à Coly",km:11.59,dp:234,dn:-232,t:"4h 00",f:"Moyenne",dep:"Coly (Dordogne)"},
+  {n:"Balade de la biodiversité : Petite boucle de Coly",km:4.85,dp:86,dn:-86,t:"1h 40",f:"Facile",dep:"Coly (Dordogne)"},
+  {n:"Boucle des étangs de Coulonge",km:14.2,dp:306,dn:-314,t:"4h 55",f:"Moyenne",dep:"Montignac (Dordogne)"},
+  {n:"Boucle du Bois de la Saladi à Montignac",km:14.91,dp:300,dn:-293,t:"5h 05",f:"Moyenne",dep:"Montignac (Dordogne)"},
+  {n:"Promenade de Lascaux à Montignac-Lascaux",km:6.95,dp:138,dn:-138,t:"2h 25",f:"Facile",dep:"Montignac (Dordogne)"},
+  {n:"Boucle de Callabout à Marquay",km:9.4,dp:192,dn:-199,t:"3h 15",f:"Facile",dep:"Marquay (Dordogne)"},
+  {n:"Boucle des châteaux à Aubas",km:13.88,dp:276,dn:-275,t:"4h 45",f:"Moyenne",dep:"Aubas (Dordogne)"}
+];
+
+/* ---- Parcours vélo & VTT (Dordogne, dépt. 24) ---- */
+const VELO_RAW=[
+  {id:1,n:"Sarlat→Cazoulès",diff:"F",km:26,dp:55,t:1.5,gps:[44.8745,1.2317]},
+  {id:2,n:"Montignac Lascaux",diff:"F",km:7.4,dp:148,t:0.5,gps:[45.0667,1.1667]},
+  {id:3,n:"Montignac Aubas",diff:"F",km:10.1,dp:34,t:0.75,gps:[45.0667,1.1667]},
+  {id:4,n:"Rouffignac tour",diff:"F",km:5.5,dp:47,t:1,gps:[45.05,1.0333]},
+  {id:5,n:"Bugue Campagne",diff:"F",km:10.6,dp:54,t:0.75,gps:[44.92,0.9333]},
+  {id:6,n:"Bugue Malmussou",diff:"F",km:7.2,dp:8,t:0.5,gps:[44.92,0.9333]},
+  {id:7,n:"Chancelade",diff:"M",km:16.9,dp:270,t:2,gps:[45.17,0.6833]},
+  {id:8,n:"VTT Cause Clérans",diff:"M",km:28.4,dp:285,t:2.5,gps:[44.9,0.7667]},
+  {id:9,n:"VTT Commarque",diff:"M",km:17.1,dp:462,t:2,gps:[44.9333,1.0167]},
+  {id:10,n:"St-Léon Vézère",diff:"M",km:15.6,dp:361,t:1,gps:[45,1.1]},
+  {id:11,n:"Montignac Filolie",diff:"M",km:12.1,dp:162,t:1,gps:[45.0667,1.1667]},
+  {id:12,n:"Montignac Valojoulx vélo",diff:"M",km:17.9,dp:199,t:1,gps:[45.0667,1.1667]},
+  {id:13,n:"Montignac Chapelle-Aubareil",diff:"M",km:33.8,dp:392,t:2,gps:[45.0667,1.1667]},
+  {id:14,n:"Bugue Audrix Campagne",diff:"M",km:29.1,dp:661,t:3,gps:[44.92,0.9333]},
+  {id:15,n:"Bugue Ferrassie",diff:"M",km:24.9,dp:187,t:1.5,gps:[44.92,0.9333]},
+  {id:16,n:"Bugue Audrix",diff:"M",km:30.4,dp:349,t:2,gps:[44.92,0.9333]},
+  {id:17,n:"Bugue Journiac",diff:"M",km:30.6,dp:347,t:2,gps:[44.92,0.9333]},
+  {id:18,n:"Rouffignac Mauzens",diff:"M",km:28.3,dp:386,t:null,gps:[45.05,1.0333]},
+  {id:19,n:"Rouffignac Plazac",diff:"M",km:29.9,dp:381,t:2,gps:[45.05,1.0333]},
+  {id:20,n:"Madeleine Roque-St-Chr.",diff:"M",km:26,dp:554,t:2.5,gps:[44.9333,1.0167]},
+  {id:21,n:"Coulounieix boucle",diff:"M",km:14.2,dp:297,t:2,gps:[45.17,0.6833]},
+  {id:22,n:"Nabirat Liaubou",diff:"M",km:19.2,dp:224,t:2,gps:[44.7667,1.2333]},
+  {id:23,n:"Montignac Valojoulx VTT",diff:"D",km:26.5,dp:456,t:2,gps:[45.0667,1.1667]},
+  {id:24,n:"Bugue St-Cirq",diff:"D",km:22.5,dp:532,t:2,gps:[44.92,0.9333]},
+  {id:25,n:"Bugue Les Eyzies",diff:"D",km:39.1,dp:767,t:3,gps:[44.92,0.9333]},
+  {id:26,n:"Rouffignac Herm",diff:"D",km:30.4,dp:527,t:2.5,gps:[45.05,1.0333]},
+  {id:27,n:"Rouffignac Moustier",diff:"D",km:47.5,dp:774,t:3,gps:[45.05,1.0333]},
+  {id:28,n:"Montignac Sergeac",diff:"D",km:57.6,dp:855,t:4,gps:[45.0667,1.1667]},
+  {id:29,n:"Eyzies Peyzac-Moustier",diff:"D",km:89.2,dp:1031,t:6,gps:[44.9333,1.0167]},
+  {id:30,n:"Flow Vélo St-Geniès→Terrasson",diff:"D",km:50.8,dp:667,t:4,gps:[45.1333,1.3]},
+  {id:31,n:"Flow Vélo Sarlat→St-Geniès",diff:"D",km:52.5,dp:700,t:4,gps:[44.85,1.25]},
+  {id:32,n:"Carsac Cazoulès Carlux",diff:"D",km:42,dp:578,t:3,gps:[44.85,1.25]},
+  {id:33,n:"Montignac St-Léon",diff:"TD",km:48.4,dp:980,t:null,gps:[45.0667,1.1667]},
+  {id:34,n:"Bugue Coly St-Amand",diff:"TD",km:134.8,dp:1794,t:8,gps:[44.92,0.9333]}
+];
+const HIKES_VELO=VELO_RAW.map(v=>({
+  n:v.n,km:v.km,dp:v.dp,dn:null,t:formatHours(v.t),f:DIFF_CODE[v.diff]||v.diff,dep:null,gps:v.gps
+}));
+
+/* ---- Nouveaux circuits canoë longue distance (toujours sous code admin24) ---- */
+const CIRCUITS_CANOE=[
+  {id:"carsac-beynac",de:"Carsac-Aillac",a:"Beynac",km:25,duree:"4h30",nom:"Vallée des 6 Châteaux",
+   tarifs:{adulte:28,enfant_5_12:16,kayak:32},
+   navette:"Vitrac→Carsac 12min / retour toutes les heures",
+   resume:"Grande traversée au fil de la Dordogne depuis la grève de galets de Carsac jusqu'au village perché de Beynac. Six forteresses médiévales jalonnent les rives, entre falaises calcaires et hameaux du Périgord Noir.",
+   etapes:[
+     {km:0,lieu:"Plage de Carsac-Aillac",note:"mise à l'eau face à la falaise blanche"},
+     {km:2,lieu:"Falaise du Cingle de Monfort",note:"paroi abrupte dominant la rivière"},
+     {km:3,lieu:"Château de Monfort",note:"forteresse médiévale sur piton rocheux"},
+     {km:5.2,lieu:"Rocher de Caudon",note:"promontoire calcaire surplombant les eaux"},
+     {km:7.5,lieu:"Falaise de Vitrac",note:"muraille naturelle de 100m, grottes préhistoriques"},
+     {km:10.8,lieu:"Bastide de Domme",note:"cité médiévale fortifiée sur plateau"},
+     {km:15,lieu:"La Roque-Gageac",note:"village troglodytique niché dans la roche"},
+     {km:15.5,lieu:"Château de la Malartrie",note:"tours Renaissance en bord de berge"},
+     {km:18,lieu:"Castelnaud-la-Chapelle",note:"bourg médiéval avec château des guerres"},
+     {km:19.8,lieu:"Château de Fayrac",note:"manoir fortifié face à Beynac"},
+     {km:21,lieu:"Beynac",note:"village-rempart sur falaise dominant la vallée"},
+     {km:25,lieu:"Arrivée cabane",note:"dépôt embarcations, navette retour"}
+   ]},
+  {id:"carsac-vitrac",de:"Carsac-Aillac",a:"Vitrac",km:9,duree:"1h30",nom:"Le Cingle de Montfort",
+   tarifs:{adulte:18,enfant_5_12:11.5,kayak:22},
+   navette:"Vitrac→Carsac 12min / arrivée directe à la base",
+   resume:"Courte escapade idéale pour novices et familles. On serpente dans les méandres du Cingle de Monfort entre escarpements calcaires et berges sauvages, avant de rejoindre la base en douceur.",
+   etapes:[
+     {km:0,lieu:"Plage de Carsac-Aillac",note:"embarcadère face à la paroi blanche"},
+     {km:2,lieu:"Falaise du Cingle de Monfort",note:"éperon rocheux en virage serré"},
+     {km:3,lieu:"Château de Monfort",note:"donjon médiéval perché sur la crête"},
+     {km:5.2,lieu:"Rocher de Caudon",note:"masse minérale en surplomb des flots"},
+     {km:7.5,lieu:"Falaise de Vitrac",note:"haute strate calcaire aux grottes ancestrales"},
+     {km:9,lieu:"Arrivée base Canoës Loisirs",note:"débarquement directement au chalet"}
+   ]},
+  {id:"calviac-vitrac",de:"Calviac",a:"Vitrac",km:19,duree:"3h30",nom:"La Dordogne Nature",
+   tarifs:{adulte:25,enfant_5_12:15,kayak:29},
+   navette:"Vitrac→Calviac / arrivée directe à la base",
+   resume:"Itinéraire sauvage et historique depuis la cale de Calviac. On glisse au pied de demeures seigneuriales, d'un tablier de pont disgracieux et de berges habitées par les hirondelles, avant d'atteindre la tour de guet médiévale de Vitrac.",
+   etapes:[
+     {km:0,lieu:"Cale de Calviac",note:"vue sur Château de Fénelon, MH XIIe-XVIIe s."},
+     {km:4.5,lieu:"Château de Veyrignac",note:"demeure sur falaise rive gauche, décor de film"},
+     {km:6.5,lieu:"Pont de Groléjac",note:"confluence avec la Germaine, village pêcheur"},
+     {km:8.5,lieu:"Cale de Carsac",note:"nids d'hirondelles de rivage, îlot à franchir"},
+     {km:10.5,lieu:"Falaise du Cingle de Monfort",note:"vertigineux éperon dominant le coude"},
+     {km:12,lieu:"Château de Monfort",note:"citadelle rasée et rebâtie cinq fois, XIIIe s."},
+     {km:14,lieu:"Rocher de Caudon",note:"chaos rocheux en surplomb des eaux calmes"},
+     {km:19,lieu:"Falaise de Vitrac + Tour de guet",note:"vigie normande IXe-XIIe s., arrivée au chalet"}
+   ]}
+];
+
+/* ---- Coordonnées approximatives des lieux des circuits canoë ----
+   (placeholders pour dessiner le tracé ; la localisation GPS fine viendra ensuite) */
+const CANOE_COORDS={
+  "Plage de Carsac-Aillac":[44.8369,1.2549],"Cale de Carsac":[44.8369,1.2549],
+  "Falaise du Cingle de Monfort":[44.8295,1.2460],"Château de Monfort":[44.8276,1.2447],
+  "Rocher de Caudon":[44.8175,1.2350],"Falaise de Vitrac":[44.8258,1.2244],
+  "Falaise de Vitrac + Tour de guet":[44.8258,1.2244],"Arrivée base Canoës Loisirs":[44.8258,1.2244],
+  "Bastide de Domme":[44.8030,1.2153],"La Roque-Gageac":[44.8270,1.1830],
+  "Château de la Malartrie":[44.8275,1.1783],"Castelnaud-la-Chapelle":[44.8180,1.1530],
+  "Château de Fayrac":[44.8265,1.1480],"Beynac":[44.8389,1.1447],"Arrivée cabane":[44.8430,1.1400],
+  "Cale de Calviac":[44.8270,1.2900],"Château de Veyrignac":[44.8235,1.2760],"Pont de Groléjac":[44.8335,1.2690]
+};
+/* ---- Coordonnées approximatives des communes de départ (rando pédestre) ---- */
+const PIED_COORDS={
+  "Marcillac-Saint-Quentin":[44.945,1.143],"La Chapelle-Aubareil":[45.017,1.167],"Proissans":[44.918,1.240],
+  "Saint-Amand-de-Coly":[45.026,1.247],"Tamniès":[44.980,1.170],"Valojoulx":[44.997,1.145],
+  "Montignac":[45.066,1.166],"Coly":[45.033,1.273],"Marquay":[44.956,1.164],"Aubas":[45.050,1.203]
+};
+function slugify(s){return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');}
+function tri(s){return {fr:s,en:s,es:s};}
+
+/* Construit un tracé en boucle (placeholder) autour d'un centre, légèrement irrégulier. */
+function makeLoopTrack(lat,lng,seed){
+  const pts=[],N=18,rLat=0.010,rLng=0.013;
+  let h=seed;const rnd=()=>{h=(h*9301+49297)%233280;return h/233280;};
+  for(let i=0;i<=N;i++){
+    const a=(i/N)*Math.PI*2,j=0.78+rnd()*0.44;
+    pts.push({lat:lat+Math.sin(a)*rLat*j,lng:lng+Math.cos(a)*rLng*j});
+  }
+  return pts;
+}
+
+/* Circuit canoë (liste d'étapes réelles) -> parcours linéaire au même format que les descentes. */
+function makeCircuitRoute(ci){
+  const steps=ci.etapes.map((e,i)=>{
+    const co=CANOE_COORDS[e.lieu]||[44.82,1.20];
+    return {km:e.km,lat:co[0],lng:co[1],
+      nom:tri(e.lieu),kind:tri(i===0?"Départ":(i===ci.etapes.length-1?"Arrivée":"Étape")),txt:tri(e.note)};
+  });
+  return {id:ci.id,icon:"🛶",total:ci.km,mapMarker:"🛶",mapStart:ci.de,mapEnd:ci.a,
+    nom:tri(ci.nom),
+    sousTitre:{fr:`${ci.de} → ${ci.a} · ${ci.km} km · ${ci.duree}`,en:`${ci.de} → ${ci.a} · ${ci.km} km · ${ci.duree}`,es:`${ci.de} → ${ci.a} · ${ci.km} km · ${ci.duree}`},
+    tags:{fr:["Canoë",ci.duree],en:["Canoe",ci.duree],es:["Canoa",ci.duree]},
+    steps};
+}
+
+/* Randonnée en boucle (pédestre/vélo) -> parcours « boucle » avec 1 point de départ. */
+function makeLoopRoute(h,center,icon,marker){
+  const id=slugify(h.n);
+  const diff=(DIFF_LABEL[h.f]&&DIFF_LABEL[h.f])||tri(h.f);
+  const sub={
+    fr:`${h.km} km · ${h.t}${h.dep?' · '+h.dep:''}`,
+    en:`${h.km} km · ${h.t}${h.dep?' · '+h.dep:''}`,
+    es:`${h.km} km · ${h.t}${h.dep?' · '+h.dep:''}`};
+  const summary={
+    fr:`Boucle de ${h.km} km, environ ${h.t}, dénivelé +${h.dp} m. Difficulté : ${diff.fr}.${h.dep?' Départ : '+h.dep+'.':''}`,
+    en:`${h.km} km loop, about ${h.t}, ascent +${h.dp} m. Difficulty: ${diff.en}.${h.dep?' Start: '+h.dep+'.':''}`,
+    es:`Ruta circular de ${h.km} km, unos ${h.t}, desnivel +${h.dp} m. Dificultad: ${diff.es}.${h.dep?' Salida: '+h.dep+'.':''}`};
+  return {id:id,icon:icon,total:h.km,loop:true,mapMarker:marker,
+    mapStart:(h.dep?h.dep.split(' (')[0]:h.n),
+    nom:tri(h.n),sousTitre:sub,
+    tags:{fr:[diff.fr,h.km+" km"],en:[diff.en,h.km+" km"],es:[diff.es,h.km+" km"]},
+    track:makeLoopTrack(center[0],center[1],id.length*97+Math.round(h.km*10)),
+    steps:[{km:0,lat:center[0],lng:center[1],nom:tri(h.n),
+      kind:{fr:"Boucle · "+diff.fr,en:"Loop · "+diff.en,es:"Bucle · "+diff.es},txt:summary}]};
+}
+
+const CIRCUIT_ROUTES=CIRCUITS_CANOE.map(makeCircuitRoute);
+const VELO_ROUTES=HIKES_VELO.map(h=>makeLoopRoute(h,h.gps,"🚴","🚴"));
+const PIED_ROUTES=HIKES_PIED.map(h=>{
+  const commune=(h.dep||'').split(' (')[0];
+  const center=PIED_COORDS[commune]||[44.95,1.20];
+  return makeLoopRoute(h,center,"🥾","🥾");
+});
+
 /* ---- Catégories affichées à l'accueil ---- */
 const CATEGORIES=[
   {id:"canoe",icon:"🛶",
    nom:{fr:"Randonnée & Canoë",en:"Canoe trips",es:"Descensos en canoa"},
    sousTitre:{fr:"Descentes guidées de la Dordogne",en:"Guided Dordogne river descents",es:"Descensos guiados del Dordoña"},
-   randos:RANDOS,poi:POI_TILE},
+   randos:RANDOS.concat(CIRCUIT_ROUTES),poi:POI_TILE},
   {id:"velo",icon:"🚴",
    nom:{fr:"Randonnée vélo",en:"Bike trails",es:"Rutas en bici"},
-   sousTitre:{fr:"Parcours à vélo · à venir",en:"Bike routes · coming soon",es:"Rutas en bici · próximamente"},
-   randos:[],poi:POI_TILE_VELO},
+   sousTitre:{fr:"34 parcours vélo & VTT · Dordogne",en:"34 bike & MTB routes · Dordogne",es:"34 rutas en bici y BTT · Dordoña"},
+   randos:VELO_ROUTES,poi:POI_TILE_VELO},
   {id:"pied",icon:"🥾",
    nom:{fr:"Randonnée pédestre",en:"Walking trails",es:"Rutas a pie"},
-   sousTitre:{fr:"Parcours à pied · à venir",en:"Walking routes · coming soon",es:"Rutas a pie · próximamente"},
-   randos:[],poi:POI_TILE_PIED}
+   sousTitre:{fr:"26 boucles · secteur Saint-Geniès (Dordogne)",en:"26 loops · Saint-Geniès area (Dordogne)",es:"26 rutas circulares · zona Saint-Geniès (Dordoña)"},
+   randos:PIED_ROUTES,poi:POI_TILE_PIED}
 ];
+
+/* ---- Villages repères pour la localisation GPS ---- */
+const VILLAGES=[
+  {nom:{fr:"Vitrac",en:"Vitrac",es:"Vitrac"},lat:44.825768,lng:1.224381},
+  {nom:{fr:"Domme",en:"Domme",es:"Domme"},lat:44.8090,lng:1.2010},
+  {nom:{fr:"Cénac-et-Saint-Julien",en:"Cénac-et-Saint-Julien",es:"Cénac-et-Saint-Julien"},lat:44.8060,lng:1.1900},
+  {nom:{fr:"La Roque-Gageac",en:"La Roque-Gageac",es:"La Roque-Gageac"},lat:44.8270,lng:1.1830},
+  {nom:{fr:"Castelnaud-la-Chapelle",en:"Castelnaud-la-Chapelle",es:"Castelnaud-la-Chapelle"},lat:44.8195,lng:1.1560},
+  {nom:{fr:"Vézac",en:"Vézac",es:"Vézac"},lat:44.8340,lng:1.1450},
+  {nom:{fr:"Beynac-et-Cazenac",en:"Beynac-et-Cazenac",es:"Beynac-et-Cazenac"},lat:44.8389,lng:1.1447}
+];
+
+/* ---- Accès verrouillé ----
+   Un seul parcours (FREE_ROUTE_ID) reste accessible sans code ; tout le
+   reste se débloque avec ADMIN_CODE et l'état est mémorisé sur l'appareil. */
+const ADMIN_CODE="admin24";
+const FREE_ROUTE_ID="vitrac-castelnaud";
+let UNLOCKED=(function(){try{return localStorage.getItem('sentiaUnlocked')==='1';}catch(e){return false;}})();
+function isRouteFree(r){return r.id===FREE_ROUTE_ID;}
+function isRouteLocked(r){return !isRouteFree(r)&&!UNLOCKED;}
 
 /* ---- État ---- */
 let lang='fr',stepIdx=0,playing=false,playTimer=null,mapCtx=null,speaking=false,currentUtterance=null,mapPositions=[],CUR=RANDO_FULL,CURCAT=CATEGORIES[0];
@@ -525,9 +869,100 @@ function setLang(l){
   if(document.getElementById('trail').style.display==='flex')showStep(stepIdx);
   if(document.getElementById('identify').style.display==='flex')applyIdentifyUI();
   if(document.getElementById('poi').style.display==='flex')renderPoi();
+  if(document.getElementById('codeModal').classList.contains('show'))applyCodeUI();
+  if(document.getElementById('hikeModal').classList.contains('show')&&hikeIdx>=0)openHikeModal(hikeIdx);
+  if(document.getElementById('circuitModal').classList.contains('show')&&circuitIdx>=0)openCircuitModal(circuitIdx);
+  if(gpsActive&&gpsPos)updateGpsVillage();
+  updateLockIcon();
 }
 function applyStaticUI(){
   document.getElementById('homeTagline').textContent=t().tagline;
+}
+
+/* ---- Code d'accès ---- */
+function updateLockIcon(){
+  const b=document.getElementById('lockToggleBtn');if(!b)return;
+  b.textContent=UNLOCKED?'🔓':'🔒';
+}
+function applyCodeUI(){
+  document.getElementById('codeTitle').textContent=t().lockTitle;
+  document.getElementById('codeMsg').textContent=t().lockMsg;
+  document.getElementById('codeInput').placeholder=t().lockPh;
+  document.getElementById('codeCancelBtn').textContent=t().lockCancel;
+  document.getElementById('codeSubmitBtn').textContent=t().lockBtn;
+}
+function openCodeModal(){
+  applyCodeUI();
+  document.getElementById('codeError').textContent='';
+  document.getElementById('codeInput').value='';
+  document.getElementById('codeModal').classList.add('show');
+  setTimeout(()=>document.getElementById('codeInput').focus(),50);
+}
+function closeCodeModal(){
+  document.getElementById('codeModal').classList.remove('show');
+}
+function submitCode(){
+  const val=document.getElementById('codeInput').value.trim().toLowerCase();
+  if(val===ADMIN_CODE){
+    UNLOCKED=true;
+    try{localStorage.setItem('sentiaUnlocked','1');}catch(e){}
+    updateLockIcon();
+    closeCodeModal();
+    toast(t().lockOk);
+    if(document.getElementById('catList').style.display==='flex')renderCatList();
+  }else{
+    document.getElementById('codeError').textContent=t().lockWrong;
+  }
+}
+
+/* ---- Fiche détail d'une randonnée pédestre (sans tracé GPS : localisation sur Google Maps) ---- */
+let hikeIdx=-1;
+function openHikeModal(idx){
+  hikeIdx=idx;
+  const h=CURCAT.hikes[idx];
+  document.getElementById('hikeTitle').textContent=h.n;
+  const diffTag=(DIFF_LABEL[h.f]&&DIFF_LABEL[h.f][lang])||h.f;
+  const rows=[
+    `<div><span class="lbl">${t().hikeKm}</span>${h.km} km</div>`,
+    `<div><span class="lbl">${t().hikeT}</span>${h.t}</div>`,
+    `<div><span class="lbl">${t().hikeDp}</span>${h.dp} m</div>`
+  ];
+  if(h.dn!=null)rows.push(`<div><span class="lbl">${t().hikeDn}</span>${Math.abs(h.dn)} m</div>`);
+  rows.push(`<div><span class="lbl">${t().hikeF}</span>${diffTag}</div>`);
+  if(h.dep)rows.push(`<div class="dep"><span class="lbl">${t().hikeDep}</span>${h.dep}</div>`);
+  document.getElementById('hikeStats').innerHTML=rows.join('');
+  document.getElementById('hikeCloseBtn').textContent=t().hikeClose;
+  const openBtn=document.getElementById('hikeOpenBtn');
+  openBtn.textContent=t().hikeOpen;
+  openBtn.href=h.gps?googleMapsSearchUrl(h.gps[0]+","+h.gps[1]):googleMapsSearchUrl(h.n+", "+(h.dep||""));
+  document.getElementById('hikeModal').classList.add('show');
+}
+function closeHikeModal(){
+  document.getElementById('hikeModal').classList.remove('show');
+}
+
+/* ---- Fiche détail d'un circuit canoë longue distance ---- */
+let circuitIdx=-1;
+function openCircuitModal(idx){
+  const ci=CURCAT.circuits[idx];
+  if(isRouteLocked(ci)){openCodeModal();return;}
+  circuitIdx=idx;
+  document.getElementById('circuitTitle').textContent=ci.nom;
+  document.getElementById('circuitMeta').textContent=`${ci.de} → ${ci.a} · ${ci.km} km · ${ci.duree}`;
+  document.getElementById('circuitResume').textContent=ci.resume;
+  document.getElementById('circuitFees').innerHTML=
+    `<span>${t().circuitAdult}: ${ci.tarifs.adulte}€</span>
+     <span>${t().circuitChild}: ${ci.tarifs.enfant_5_12}€</span>
+     <span>${t().circuitKayak}: ${ci.tarifs.kayak}€</span>`;
+  document.getElementById('circuitShuttle').textContent=ci.navette;
+  const stepsHtml=`<div class="lbl" style="margin-bottom:6px">${t().circuitSteps}</div>`+
+    ci.etapes.map(e=>`<div class="circuit-step"><span class="ckm">${e.km} km</span><span><span class="clieu">${e.lieu}</span><span class="cnote">${e.note}</span></span></div>`).join('');
+  document.getElementById('circuitSteps').innerHTML=stepsHtml;
+  document.getElementById('circuitCloseBtn').textContent=t().circuitClose;
+  document.getElementById('circuitModal').classList.add('show');
+}
+function closeCircuitModal(){
+  document.getElementById('circuitModal').classList.remove('show');
 }
 
 /* ---- Accueil : choix de la catégorie ---- */
@@ -564,10 +999,14 @@ function renderCatList(){
     list.appendChild(empty);
   }
   CURCAT.randos.forEach((r,idx)=>{
-    const c=document.createElement('div');c.className='rando-card';c.onclick=()=>startTrail(idx);
-    c.innerHTML=`<div class="rando-ico">${r.icon}</div>
+    const locked=isRouteLocked(r);
+    const diffSlug=(r.tags&&r.tags.fr&&DIFF_SLUG[r.tags.fr[0]])||'';
+    const c=document.createElement('div');c.className='rando-card';
+    c.onclick=()=>locked?openCodeModal():startTrail(idx);
+    c.innerHTML=`<span class="lock-tag${locked?'':' free'}">${locked?t().lockedTag:t().freeTag}</span>
+      <div class="rando-ico">${r.icon}</div>
       <div class="rando-meta"><h3>${r.nom[lang]}</h3><div class="sub">${r.sousTitre[lang]}</div>
-      <div class="tags">${r.tags[lang].map(x=>`<span class="tag">${x}</span>`).join('')}</div></div>`;
+      <div class="tags">${r.tags[lang].map((x,k)=>`<span class="tag${k===0&&diffSlug?' diff-'+diffSlug:''}">${x}</span>`).join('')}</div></div>`;
     list.appendChild(c);
   });
   const p=document.createElement('div');p.className='rando-card';p.onclick=openPoi;
@@ -579,13 +1018,19 @@ function renderCatList(){
 
 /* ---- Démarrer ---- */
 function startTrail(idx){
-  CUR=CURCAT.randos[idx];
+  const r=CURCAT.randos[idx];
+  if(isRouteLocked(r)){openCodeModal();return;}
+  CUR=r;
   stepIdx=0;
   document.getElementById('catList').style.display='none';
   document.getElementById('trail').style.display='flex';
   document.getElementById('trailName').textContent=CUR.nom[lang];
   document.getElementById('trailSub').textContent=CUR.sousTitre[lang];
   const sl=document.getElementById('slider');sl.max=CUR.steps.length-1;sl.value=0;
+  // une boucle (rando pédestre/vélo) n'a qu'un point : on masque la lecture pas-à-pas et la barre de progression
+  const single=CUR.loop||CUR.steps.length<2;
+  document.getElementById('demoControls').style.display=single?'none':'flex';
+  document.getElementById('progressBar').style.display=single?'none':'block';
   updateGpsBtn();
   setupMap();showStep(0);
 }
@@ -692,6 +1137,7 @@ function stopGPS(){
   gpsActive=false;gpsPos=null;updateGpsBtn();
   if(gpsWatchId!==null&&'geolocation'in navigator)navigator.geolocation.clearWatch(gpsWatchId);
   gpsWatchId=null;
+  const v=document.getElementById('gpsVillage');if(v)v.classList.remove('show');
   drawMap();
 }
 function updateGpsBtn(){
@@ -699,10 +1145,23 @@ function updateGpsBtn(){
   b.classList.toggle('active',gpsActive);
   b.textContent=gpsActive?t().gpsOn:t().gpsOff;
 }
+function nearestVillage(lat,lng){
+  let best=null,bestD=Infinity;
+  VILLAGES.forEach(v=>{const d=haversine(lat,lng,v.lat,v.lng);if(d<bestD){bestD=d;best=v;}});
+  return best;
+}
+function updateGpsVillage(){
+  const v=document.getElementById('gpsVillage');if(!v||!gpsPos)return;
+  const village=nearestVillage(gpsPos.lat,gpsPos.lng);
+  if(!village)return;
+  v.textContent=t().nearVillage+" "+village.nom[lang];
+  v.classList.add('show');
+}
 function onGpsPos(pos){
   if(!CUR)return;
   const{latitude,longitude}=pos.coords;
   gpsPos={lat:latitude,lng:longitude};
+  updateGpsVillage();
   let best=-1,bestD=Infinity;
   CUR.steps.forEach((s,i)=>{const d=haversine(latitude,longitude,s.lat,s.lng);if(d<bestD){bestD=d;best=i;}});
   if(best>=0&&bestD<60&&best!==stepIdx){
@@ -788,11 +1247,15 @@ function drawMap(){
   mapCtx.setTransform(1,0,0,1,0,0);
   mapCtx.clearRect(0,0,c.width,c.height);
   mapCtx.restore();
-  const pts=CUR.steps,la=pts.map(p=>p.lat),ln=pts.map(p=>p.lng);
+  const pts=CUR.steps;                       // points d'intérêt cliquables
+  const track=CUR.track||CUR.steps;          // tracé dessiné (boucle ou ligne)
+  const allp=track.concat(pts);              // bornes englobant tracé + POI
+  const la=allp.map(p=>p.lat),ln=allp.map(p=>p.lng);
   const minLat=Math.min(...la),maxLat=Math.max(...la),minLng=Math.min(...ln),maxLng=Math.max(...ln);
   const spanLat=(maxLat-minLat)||.001,spanLng=(maxLng-minLng)||.001;
   const proj=p=>({x:pad+((p.lng-minLng)/spanLng)*(W-2*pad),y:H-pad-((p.lat-minLat)/spanLat)*(H-2*pad)});
-  const route=pts.map(proj);
+  const trackPx=track.map(proj);             // tracé projeté
+  const route=pts.map(proj);                 // POI projetés
   mapPositions=route;  // mémorise les positions écran pour le clic
   // trace une courbe douce (spline Catmull-Rom) passant par les points => effet rivière sinueuse
   const smooth=(p0,p1,p2,p3)=>{
@@ -810,9 +1273,11 @@ function drawMap(){
     mapCtx.stroke();
   };
   mapCtx.strokeStyle='rgba(242,237,225,.18)';mapCtx.lineWidth=5;mapCtx.lineCap='round';mapCtx.lineJoin='round';
-  drawRiver(route);
-  mapCtx.strokeStyle='#e8a838';mapCtx.lineWidth=4;
-  drawRiver(route.slice(0,stepIdx+1));
+  drawRiver(trackPx);
+  if(!CUR.loop){                              // progression dorée seulement pour les parcours linéaires
+    mapCtx.strokeStyle='#e8a838';mapCtx.lineWidth=4;
+    drawRiver(route.slice(0,stepIdx+1));
+  }
   pts.forEach((s,i)=>{
     const p=proj(s),done=i<=stepIdx;
     if(i===stepIdx)return;
@@ -832,11 +1297,17 @@ function drawMap(){
   mapCtx.beginPath();mapCtx.arc(cp.x,cp.y,13,0,7);mapCtx.fillStyle='rgba(127,176,105,.25)';mapCtx.fill();
   mapCtx.beginPath();mapCtx.arc(cp.x,cp.y,7,0,7);mapCtx.fillStyle='#7fb069';mapCtx.fill();
   mapCtx.strokeStyle='#fff';mapCtx.lineWidth=2;mapCtx.stroke();
-  mapCtx.font='14px sans-serif';mapCtx.textAlign='center';mapCtx.fillText('🛶',cp.x,cp.y-16);
-  mapCtx.fillStyle='#2a7a8c';mapCtx.font='bold 11px sans-serif';
-  mapCtx.fillText('Vitrac',route[0].x,route[0].y+22);
-  mapCtx.fillStyle='#c45c4a';
-  mapCtx.fillText(pts[pts.length-1].nom[lang],route[route.length-1].x,route[route.length-1].y-14);
+  mapCtx.font='14px sans-serif';mapCtx.textAlign='center';mapCtx.fillText(CUR.mapMarker||'🛶',cp.x,cp.y-16);
+  mapCtx.font='bold 11px sans-serif';
+  if(CUR.loop){
+    mapCtx.fillStyle='#2a7a8c';
+    mapCtx.fillText(CUR.mapStart||CUR.nom[lang],route[0].x,route[0].y+22);
+  }else{
+    mapCtx.fillStyle='#2a7a8c';
+    mapCtx.fillText(CUR.mapStart||pts[0].nom[lang],route[0].x,route[0].y+22);
+    mapCtx.fillStyle='#c45c4a';
+    mapCtx.fillText(CUR.mapEnd||pts[pts.length-1].nom[lang],route[route.length-1].x,route[route.length-1].y-14);
+  }
 }
 window.addEventListener('resize',()=>{if(document.getElementById('trail').style.display==='flex')setupMap();});
 
@@ -946,7 +1417,7 @@ let toastT;
 function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),3200);}
 
 /* ---- Init ---- */
-applyStaticUI();renderHome();
+applyStaticUI();renderHome();updateLockIcon();
 if('speechSynthesis'in window){window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();window.speechSynthesis.getVoices();}
 </script>
 </body>
