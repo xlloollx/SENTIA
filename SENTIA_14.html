@@ -142,6 +142,20 @@
     <h1>Sentia</h1>
     <p id="homeTagline">—</p>
   </div>
+  <div class="rando-list" id="categoryList"></div>
+</div>
+
+<!-- LISTE DES PARCOURS D'UNE CATÉGORIE -->
+<div class="screen" id="catList">
+  <div class="trail-top">
+    <button class="back-btn" onclick="closeCategory()">‹</button>
+    <div class="trail-title"><h2 id="catTitle">—</h2><div class="st" id="catSub">—</div></div>
+    <div class="lang-mini">
+      <div class="flag on" data-lang="fr" onclick="setLang('fr')">🇫🇷</div>
+      <div class="flag" data-lang="en" onclick="setLang('en')">🇬🇧</div>
+      <div class="flag" data-lang="es" onclick="setLang('es')">🇪🇸</div>
+    </div>
+  </div>
   <div class="rando-list" id="randoList"></div>
 </div>
 
@@ -242,7 +256,8 @@ const UI={
     needPoi:"Approchez d'un point pour écouter sa description.",
     photoBtn:"🖼️ Photo",photoTitle:"Photo du point",photoNone:"Photo à venir pour ce point.",photoClose:"✕ Fermer",
     gpsOn:"📍 GPS activé",gpsOff:"📍 Activer le GPS",gpsUnavailable:"📡 La localisation n'est pas disponible sur cet appareil/navigateur.",
-    gpsDenied:"📡 Localisation refusée. Autorisez l'accès à la position pour activer le guide GPS.",gpsNear:"Vous approchez d'un point :"},
+    gpsDenied:"📡 Localisation refusée. Autorisez l'accès à la position pour activer le guide GPS.",gpsNear:"Vous approchez d'un point :",
+    moreSoon:"De nouveaux parcours arrivent bientôt dans cette catégorie."},
   en:{tagline:"Your guide that speaks. Pick a descent, let the river tell its story.",
     demo:"DEMO",stopped:"Paused",running:"Descent in progress…",
     listen:"🔊 Listen",stop:"⏹ Stop",identify:"📷 Identify",
@@ -254,7 +269,8 @@ const UI={
     needPoi:"Get close to a point to hear its description.",
     photoBtn:"🖼️ Photo",photoTitle:"Point photo",photoNone:"Photo coming soon for this point.",photoClose:"✕ Close",
     gpsOn:"📍 GPS on",gpsOff:"📍 Turn on GPS",gpsUnavailable:"📡 Location isn't available on this device/browser.",
-    gpsDenied:"📡 Location denied. Allow location access to enable the GPS guide.",gpsNear:"You're approaching a point:"},
+    gpsDenied:"📡 Location denied. Allow location access to enable the GPS guide.",gpsNear:"You're approaching a point:",
+    moreSoon:"New routes are coming soon in this category."},
   es:{tagline:"Tu guía que habla. Elige un descenso y deja que el río se cuente.",
     demo:"DEMO",stopped:"En pausa",running:"Descenso en curso…",
     listen:"🔊 Escuchar",stop:"⏹ Parar",identify:"📷 Identificar",
@@ -266,7 +282,8 @@ const UI={
     needPoi:"Acércate a un punto para escuchar su descripción.",
     photoBtn:"🖼️ Foto",photoTitle:"Foto del punto",photoNone:"Foto disponible próximamente para este punto.",photoClose:"✕ Cerrar",
     gpsOn:"📍 GPS activado",gpsOff:"📍 Activar GPS",gpsUnavailable:"📡 La localización no está disponible en este dispositivo/navegador.",
-    gpsDenied:"📡 Localización denegada. Permite el acceso a la ubicación para activar la guía GPS.",gpsNear:"Te acercas a un punto:"}
+    gpsDenied:"📡 Localización denegada. Permite el acceso a la ubicación para activar la guía GPS.",gpsNear:"Te acercas a un punto:",
+    moreSoon:"Próximamente nuevas rutas en esta categoría."}
 };
 
 const VOICE={fr:'fr-FR',en:'en-US',es:'es-ES'};
@@ -461,8 +478,40 @@ const POI_TILE={
   ]
 };
 
+/* ---- Tuiles « centres d'intérêt » génériques pour les catégories pas encore garnies ---- */
+const POI_TILE_VELO={
+  icon:"🍽️",
+  nom:{fr:"Autour des parcours vélo",en:"Around the bike routes",es:"Alrededor de las rutas en bici"},
+  sousTitre:{fr:"Restaurants & visites à pied · à venir",en:"Restaurants & walks · coming soon",es:"Restaurantes y visitas a pie · próximamente"},
+  tags:{fr:["Restos","À pied"],en:["Food","On foot"],es:["Restaurantes","A pie"]},
+  items:[]
+};
+const POI_TILE_PIED={
+  icon:"🍽️",
+  nom:{fr:"Autour des randonnées pédestres",en:"Around the walking trails",es:"Alrededor de las rutas a pie"},
+  sousTitre:{fr:"Restaurants & visites à pied · à venir",en:"Restaurants & walks · coming soon",es:"Restaurantes y visitas a pie · próximamente"},
+  tags:{fr:["Restos","À pied"],en:["Food","On foot"],es:["Restaurantes","A pie"]},
+  items:[]
+};
+
+/* ---- Catégories affichées à l'accueil ---- */
+const CATEGORIES=[
+  {id:"canoe",icon:"🛶",
+   nom:{fr:"Randonnée & Canoë",en:"Canoe trips",es:"Descensos en canoa"},
+   sousTitre:{fr:"Descentes guidées de la Dordogne",en:"Guided Dordogne river descents",es:"Descensos guiados del Dordoña"},
+   randos:RANDOS,poi:POI_TILE},
+  {id:"velo",icon:"🚴",
+   nom:{fr:"Randonnée vélo",en:"Bike trails",es:"Rutas en bici"},
+   sousTitre:{fr:"Parcours à vélo · à venir",en:"Bike routes · coming soon",es:"Rutas en bici · próximamente"},
+   randos:[],poi:POI_TILE_VELO},
+  {id:"pied",icon:"🥾",
+   nom:{fr:"Randonnée pédestre",en:"Walking trails",es:"Rutas a pie"},
+   sousTitre:{fr:"Parcours à pied · à venir",en:"Walking routes · coming soon",es:"Rutas a pie · próximamente"},
+   randos:[],poi:POI_TILE_PIED}
+];
+
 /* ---- État ---- */
-let lang='fr',stepIdx=0,playing=false,playTimer=null,mapCtx=null,speaking=false,currentUtterance=null,mapPositions=[],CUR=RANDO_FULL;
+let lang='fr',stepIdx=0,playing=false,playTimer=null,mapCtx=null,speaking=false,currentUtterance=null,mapPositions=[],CUR=RANDO_FULL,CURCAT=CATEGORIES[0];
 function t(){return UI[lang];}
 
 /* ---- Langue ---- */
@@ -472,6 +521,7 @@ function setLang(l){
   stopVoice();
   applyStaticUI();
   renderHome();
+  if(document.getElementById('catList').style.display==='flex')renderCatList();
   if(document.getElementById('trail').style.display==='flex')showStep(stepIdx);
   if(document.getElementById('identify').style.display==='flex')applyIdentifyUI();
   if(document.getElementById('poi').style.display==='flex')renderPoi();
@@ -480,10 +530,40 @@ function applyStaticUI(){
   document.getElementById('homeTagline').textContent=t().tagline;
 }
 
-/* ---- Accueil ---- */
+/* ---- Accueil : choix de la catégorie ---- */
 function renderHome(){
+  const list=document.getElementById('categoryList');list.innerHTML='';
+  CATEGORIES.forEach((c,idx)=>{
+    const el=document.createElement('div');el.className='rando-card';el.onclick=()=>openCategory(idx);
+    el.innerHTML=`<div class="rando-ico">${c.icon}</div>
+      <div class="rando-meta"><h3>${c.nom[lang]}</h3><div class="sub">${c.sousTitre[lang]}</div></div>`;
+    list.appendChild(el);
+  });
+}
+
+/* ---- Liste des parcours d'une catégorie ---- */
+function openCategory(idx){
+  CURCAT=CATEGORIES[idx];
+  document.getElementById('home').style.display='none';
+  document.getElementById('catList').style.display='flex';
+  document.getElementById('catTitle').textContent=CURCAT.nom[lang];
+  document.getElementById('catSub').textContent=CURCAT.sousTitre[lang];
+  renderCatList();
+}
+function closeCategory(){
+  document.getElementById('catList').style.display='none';
+  document.getElementById('home').style.display='flex';
+}
+function renderCatList(){
+  document.getElementById('catTitle').textContent=CURCAT.nom[lang];
+  document.getElementById('catSub').textContent=CURCAT.sousTitre[lang];
   const list=document.getElementById('randoList');list.innerHTML='';
-  RANDOS.forEach((r,idx)=>{
+  if(!CURCAT.randos.length){
+    const empty=document.createElement('p');empty.className='poi-dist2';empty.style.padding='4px 4px 12px';
+    empty.textContent=t().moreSoon;
+    list.appendChild(empty);
+  }
+  CURCAT.randos.forEach((r,idx)=>{
     const c=document.createElement('div');c.className='rando-card';c.onclick=()=>startTrail(idx);
     c.innerHTML=`<div class="rando-ico">${r.icon}</div>
       <div class="rando-meta"><h3>${r.nom[lang]}</h3><div class="sub">${r.sousTitre[lang]}</div>
@@ -491,17 +571,17 @@ function renderHome(){
     list.appendChild(c);
   });
   const p=document.createElement('div');p.className='rando-card';p.onclick=openPoi;
-  p.innerHTML=`<div class="rando-ico">${POI_TILE.icon}</div>
-    <div class="rando-meta"><h3>${POI_TILE.nom[lang]}</h3><div class="sub">${POI_TILE.sousTitre[lang]}</div>
-    <div class="tags">${POI_TILE.tags[lang].map(x=>`<span class="tag">${x}</span>`).join('')}</div></div>`;
+  p.innerHTML=`<div class="rando-ico">${CURCAT.poi.icon}</div>
+    <div class="rando-meta"><h3>${CURCAT.poi.nom[lang]}</h3><div class="sub">${CURCAT.poi.sousTitre[lang]}</div>
+    <div class="tags">${CURCAT.poi.tags[lang].map(x=>`<span class="tag">${x}</span>`).join('')}</div></div>`;
   list.appendChild(p);
 }
 
 /* ---- Démarrer ---- */
 function startTrail(idx){
-  CUR=RANDOS[idx];
+  CUR=CURCAT.randos[idx];
   stepIdx=0;
-  document.getElementById('home').style.display='none';
+  document.getElementById('catList').style.display='none';
   document.getElementById('trail').style.display='flex';
   document.getElementById('trailName').textContent=CUR.nom[lang];
   document.getElementById('trailSub').textContent=CUR.sousTitre[lang];
@@ -514,25 +594,26 @@ function goHome(){
   document.getElementById('trail').style.display='none';
   document.getElementById('identify').style.display='none';
   document.getElementById('poi').style.display='none';
-  document.getElementById('home').style.display='flex';
+  document.getElementById('catList').style.display='flex';
+  renderCatList();
 }
 
 /* ---- Centres d'intérêt ---- */
 function openPoi(){
-  document.getElementById('home').style.display='none';
+  document.getElementById('catList').style.display='none';
   document.getElementById('poi').style.display='flex';
   renderPoi();
 }
 function closePoi(){
   document.getElementById('poi').style.display='none';
-  document.getElementById('home').style.display='flex';
+  document.getElementById('catList').style.display='flex';
 }
 function renderPoi(){
-  document.getElementById('poiTitle').textContent=POI_TILE.nom[lang];
-  document.getElementById('poiSub').textContent=POI_TILE.sousTitre[lang];
+  document.getElementById('poiTitle').textContent=CURCAT.poi.nom[lang];
+  document.getElementById('poiSub').textContent=CURCAT.poi.sousTitre[lang];
   const list=document.getElementById('poiList');list.innerHTML='';
   let lastVillage='';
-  POI_TILE.items.forEach(it=>{
+  CURCAT.poi.items.forEach(it=>{
     if(it.village[lang]!==lastVillage){
       lastVillage=it.village[lang];
       const g=document.createElement('div');g.className='poi-group';g.textContent=lastVillage;
@@ -542,6 +623,11 @@ function renderPoi(){
     c.innerHTML=`<h3>${it.nom[lang]}</h3><div class="poi-type">${it.type[lang]}</div><div class="poi-dist2">${it.dist[lang]}</div><p>${it.txt[lang]}</p>`;
     list.appendChild(c);
   });
+  if(!CURCAT.poi.items.length){
+    const empty=document.createElement('p');empty.className='poi-dist2';
+    empty.textContent=t().moreSoon;
+    list.appendChild(empty);
+  }
 }
 
 /* ---- Étapes ---- */
@@ -589,7 +675,7 @@ function closePhotoModal(){
    à chaque étape (formule de Haversine). Sous ~60 m d'un point, l'étape
    s'affiche et se lit automatiquement, sans interrompre la navigation
    manuelle (curseur/boutons) qui reste toujours disponible. */
-let gpsActive=false,gpsWatchId=null;
+let gpsActive=false,gpsWatchId=null,gpsPos=null;
 function haversine(lat1,lng1,lat2,lng2){
   const R=6371000,toRad=d=>d*Math.PI/180;
   const dLat=toRad(lat2-lat1),dLng=toRad(lng2-lng1);
@@ -603,9 +689,10 @@ function startGPS(){
   gpsWatchId=navigator.geolocation.watchPosition(onGpsPos,onGpsErr,{enableHighAccuracy:true,maximumAge:5000,timeout:15000});
 }
 function stopGPS(){
-  gpsActive=false;updateGpsBtn();
+  gpsActive=false;gpsPos=null;updateGpsBtn();
   if(gpsWatchId!==null&&'geolocation'in navigator)navigator.geolocation.clearWatch(gpsWatchId);
   gpsWatchId=null;
+  drawMap();
 }
 function updateGpsBtn(){
   const b=document.getElementById('gpsBtn');if(!b)return;
@@ -615,6 +702,7 @@ function updateGpsBtn(){
 function onGpsPos(pos){
   if(!CUR)return;
   const{latitude,longitude}=pos.coords;
+  gpsPos={lat:latitude,lng:longitude};
   let best=-1,bestD=Infinity;
   CUR.steps.forEach((s,i)=>{const d=haversine(latitude,longitude,s.lat,s.lng);if(d<bestD){bestD=d;best=i;}});
   if(best>=0&&bestD<60&&best!==stepIdx){
@@ -622,6 +710,8 @@ function onGpsPos(pos){
     stopPlay();stopVoice();
     showStep(best);
     speak(CUR.steps[best].txt[lang]);
+  }else{
+    drawMap();  // le petit canoë suit la position GPS réelle même sans changer d'étape
   }
 }
 function onGpsErr(err){
@@ -738,7 +828,7 @@ function drawMap(){
     mapCtx.fillStyle=done?'#7fb069':'rgba(242,237,225,.45)';mapCtx.fill();
     mapCtx.strokeStyle='#0a3024';mapCtx.lineWidth=2;mapCtx.stroke();
   });
-  const cp=proj(pts[stepIdx]);
+  const cp=(gpsActive&&gpsPos)?proj(gpsPos):proj(pts[stepIdx]);
   mapCtx.beginPath();mapCtx.arc(cp.x,cp.y,13,0,7);mapCtx.fillStyle='rgba(127,176,105,.25)';mapCtx.fill();
   mapCtx.beginPath();mapCtx.arc(cp.x,cp.y,7,0,7);mapCtx.fillStyle='#7fb069';mapCtx.fill();
   mapCtx.strokeStyle='#fff';mapCtx.lineWidth=2;mapCtx.stroke();
