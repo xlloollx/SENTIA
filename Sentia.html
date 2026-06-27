@@ -222,7 +222,6 @@
     <div class="sheet-actions">
       <button class="btn btn-voice" id="voiceBtn" onclick="toggleVoice()">🔊</button>
       <button class="btn btn-photo" id="photoStepBtn" onclick="openPhotoModal()">🖼️</button>
-      <button class="btn btn-cam" id="camBtn" onclick="openIdentify()">📷</button>
     </div>
   </div>
 </div>
@@ -249,22 +248,6 @@
       <button class="btn" id="codeCancelBtn" onclick="closeCodeModal()">—</button>
       <button class="btn btn-cam" id="codeSubmitBtn" onclick="submitCode()">—</button>
     </div>
-  </div>
-</div>
-
-<!-- IDENTIFICATION -->
-<div class="screen" id="identify">
-  <div class="id-top">
-    <button class="back-btn" onclick="closeIdentify()">‹</button>
-    <div class="trail-title"><h2 id="idTitle">—</h2><div class="st" id="idSub">—</div></div>
-  </div>
-  <div class="id-body">
-    <div class="photo-zone" id="photoZone" onclick="document.getElementById('camInput').click()">
-      <div class="ph" id="photoPh"><span>📷</span><span id="photoPhTxt">—</span></div>
-    </div>
-    <input type="file" accept="image/*" capture="environment" id="camInput" class="hidden" onchange="handlePhoto(event)">
-    <button class="btn btn-cam" id="idTakeBtn" onclick="document.getElementById('camInput').click()">—</button>
-    <div id="idOutput"></div>
   </div>
 </div>
 
@@ -661,7 +644,6 @@ function setLang(l){
   applyStaticUI();
   renderHome();
   if(document.getElementById('trail').style.display==='flex')showStep(stepIdx);
-  if(document.getElementById('identify').style.display==='flex')applyIdentifyUI();
   if(document.getElementById('poi').style.display==='flex')renderPoi();
   if(document.getElementById('codeModal').classList.contains('show'))applyCodeUI();
   if(gpsActive&&gpsPos)updateGpsVillage();
@@ -747,7 +729,6 @@ function startTrail(idx){
 function goHome(){
   stopPlay();stopVoice();stopGPS();
   document.getElementById('trail').style.display='none';
-  document.getElementById('identify').style.display='none';
   document.getElementById('poi').style.display='none';
   document.getElementById('home').style.display='flex';
 }
@@ -792,7 +773,6 @@ function showStep(i){
   document.getElementById('progLeft').textContent=(CUR.total-s.km).toFixed(1)+" "+t().kmLeft;
   document.getElementById('liveTxt').textContent=playing?t().running:t().stopped;
   document.getElementById('voiceBtn').innerHTML=speaking?t().stop:t().listen;
-  document.getElementById('camBtn').innerHTML=t().identify;
   document.getElementById('photoStepBtn').innerHTML=t().photoBtn;
   document.getElementById('trailName').textContent=CUR.nom[lang];
   document.getElementById('trailSub').textContent=CUR.sousTitre[lang];
@@ -824,7 +804,7 @@ function closePhotoModal(){
    à chaque étape (formule de Haversine). Sous ~60 m d'un point, l'étape
    s'affiche et se lit automatiquement, sans interrompre la navigation
    manuelle (curseur/boutons) qui reste toujours disponible. */
-let gpsActive=false,gpsWatchId=null,gpsPos=null;
+let gpsActive=false,gpsWatchId=null,gpsPos=null,gpsAnimFrame=null;
 function haversine(lat1,lng1,lat2,lng2){
   const R=6371000,toRad=d=>d*Math.PI/180;
   const dLat=toRad(lat2-lat1),dLng=toRad(lng2-lng1);
@@ -836,6 +816,13 @@ function startGPS(){
   if(!('geolocation'in navigator)){toast(t().gpsUnavailable);return;}
   gpsActive=true;updateGpsBtn();
   gpsWatchId=navigator.geolocation.watchPosition(onGpsPos,onGpsErr,{enableHighAccuracy:true,maximumAge:5000,timeout:15000});
+  if(gpsAnimFrame===null)gpsPulseLoop();
+}
+function gpsPulseLoop(){
+  // anime le pouls du marqueur en continu pendant que le GPS est actif
+  if(!gpsActive){gpsAnimFrame=null;return;}
+  drawMap();
+  gpsAnimFrame=requestAnimationFrame(gpsPulseLoop);
 }
 function stopGPS(){
   gpsActive=false;gpsPos=null;updateGpsBtn();
@@ -868,7 +855,7 @@ function onGpsPos(pos){
   updateGpsVillage();
   let best=-1,bestD=Infinity;
   CUR.steps.forEach((s,i)=>{const d=haversine(latitude,longitude,s.lat,s.lng);if(d<bestD){bestD=d;best=i;}});
-  if(best>=0&&bestD<60&&best!==stepIdx){
+  if(best>=0&&bestD<110&&best!==stepIdx){
     toast(t().gpsNear+" "+CUR.steps[best].nom[lang]);
     stopPlay();stopVoice();
     showStep(best);
@@ -998,10 +985,24 @@ function drawMap(){
     mapCtx.strokeStyle='#0a3024';mapCtx.lineWidth=2;mapCtx.stroke();
   });
   const cp=(gpsActive&&gpsPos)?proj(gpsPos):proj(pts[stepIdx]);
-  mapCtx.beginPath();mapCtx.arc(cp.x,cp.y,13,0,7);mapCtx.fillStyle='rgba(127,176,105,.25)';mapCtx.fill();
-  mapCtx.beginPath();mapCtx.arc(cp.x,cp.y,7,0,7);mapCtx.fillStyle='#7fb069';mapCtx.fill();
-  mapCtx.strokeStyle='#fff';mapCtx.lineWidth=2;mapCtx.stroke();
-  mapCtx.font='14px sans-serif';mapCtx.textAlign='center';mapCtx.fillText(CUR.mapMarker||'🛶',cp.x,cp.y-16);
+  if(gpsActive){
+    // anneau pulsant continu : rend la position GPS bien visible et clairement "vivante"
+    const phase=(Date.now()%1600)/1600;
+    mapCtx.beginPath();mapCtx.arc(cp.x,cp.y,10+phase*20,0,7);
+    mapCtx.strokeStyle=`rgba(127,176,105,${0.6*(1-phase)})`;mapCtx.lineWidth=3;mapCtx.stroke();
+  }
+  mapCtx.beginPath();mapCtx.arc(cp.x,cp.y,16,0,7);mapCtx.fillStyle='rgba(127,176,105,.3)';mapCtx.fill();
+  mapCtx.beginPath();mapCtx.arc(cp.x,cp.y,9,0,7);mapCtx.fillStyle='#7fb069';mapCtx.fill();
+  mapCtx.strokeStyle='#fff';mapCtx.lineWidth=2.5;mapCtx.stroke();
+  mapCtx.font='16px sans-serif';mapCtx.textAlign='center';mapCtx.fillText(CUR.mapMarker||'🛶',cp.x,cp.y-20);
+  if(gpsActive){
+    // nom du point courant affiché en permanence sous le marqueur pendant le suivi GPS
+    const label=pts[stepIdx].nom[lang];
+    mapCtx.font='bold 12px sans-serif';
+    const tw=mapCtx.measureText(label).width,by=cp.y+24,bw=tw+18,bx=cp.x-bw/2;
+    mapCtx.fillStyle='rgba(8,39,30,.88)';mapCtx.fillRect(bx,by-13,bw,22);
+    mapCtx.fillStyle='#fff';mapCtx.fillText(label,cp.x,by+3);
+  }
   mapCtx.font='bold 11px sans-serif';
   if(CUR.loop){
     mapCtx.fillStyle='#2a7a8c';
@@ -1062,59 +1063,6 @@ function stopVoice(){
 }
 function toggleVoice(){if(speaking)stopVoice();else speak(CUR.steps[stepIdx].txt[lang]);}
 function setVoiceBtn(on){const b=document.getElementById('voiceBtn');b.classList.toggle('playing',on);b.innerHTML=on?t().stop:t().listen;}
-
-/* ---- Identification ---- */
-function applyIdentifyUI(){
-  document.getElementById('idTitle').textContent=t().idTitle;
-  document.getElementById('idSub').textContent=t().idSub;
-  document.getElementById('photoPhTxt').textContent=t().photoPh;
-  document.getElementById('idTakeBtn').textContent=t().takePhoto;
-}
-function openIdentify(){
-  stopPlay();
-  document.getElementById('trail').style.display='none';
-  document.getElementById('identify').style.display='flex';
-  document.getElementById('idOutput').innerHTML='';
-  document.getElementById('photoZone').innerHTML=`<div class="ph"><span>📷</span><span>${t().photoPh}</span></div>`;
-  applyIdentifyUI();
-}
-function closeIdentify(){
-  document.getElementById('identify').style.display='none';
-  document.getElementById('trail').style.display='flex';setupMap();showStep(stepIdx);
-}
-function handlePhoto(e){
-  const file=e.target.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=async ev=>{
-    document.getElementById('photoZone').innerHTML=`<img src="${ev.target.result}" alt="">`;
-    await identify(ev.target.result.split(',')[1],file.type||'image/jpeg');
-  };
-  reader.readAsDataURL(file);
-}
-async function identify(b64,mime){
-  const out=document.getElementById('idOutput');
-  if(!navigator.onLine){out.innerHTML=`<p class="net-warn">${t().noNet}</p>`;return;}
-  out.innerHTML=`<div class="spinner"></div><p class="net-warn">${t().analyzing}</p>`;
-  const langName={fr:"français",en:"English",es:"español"}[lang];
-  const prompt=`Tu es un naturaliste expert de la vallée de la Dordogne (Périgord, France). Identifie l'espèce sur la photo (plante, arbre, fleur, oiseau, insecte, poisson ou animal).
-Réponds UNIQUEMENT en JSON sans markdown, et rédige "nom" et "description" en ${langName} :
-{"nom":"nom commun","latin":"nom scientifique","description":"3-4 phrases : reconnaissance, habitat en Dordogne, fait intéressant."}
-Si incertain, donne l'hypothèse la plus probable et signale-le.`;
-  try{
-    const res=await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,
-        messages:[{role:"user",content:[
-          {type:"image",source:{type:"base64",media_type:mime,data:b64}},
-          {type:"text",text:prompt}]}]})
-    });
-    const data=await res.json();
-    let txt=data.content.filter(i=>i.type==='text').map(i=>i.text).join('').replace(/```json|```/g,'').trim();
-    let o;try{o=JSON.parse(txt);}catch{o={nom:"—",latin:"",description:txt};}
-    out.innerHTML=`<div class="id-result"><h3>${o.nom}</h3>${o.latin?`<div class="latin">${o.latin}</div>`:''}<p>${o.description}</p></div>`;
-    speak(`${o.nom}. ${o.description}`);
-  }catch(err){out.innerHTML=`<p class="net-warn">${t().idFail}</p>`;}
-}
 
 /* ---- Toast ---- */
 let toastT;
