@@ -559,9 +559,9 @@ const CIRCUITS_CANOE=[
      {km:0,lieu:"Plage de Carsac-Aillac",note:"embarcadère face à la paroi blanche"},
      {km:2,lieu:"Falaise du Cingle de Monfort",note:"éperon rocheux en virage serré"},
      {km:3,lieu:"Château de Monfort",note:"donjon médiéval perché sur la crête"},
-     {km:5.2,lieu:"Rocher de Caudon",note:"masse minérale en surplomb des flots"},
+     {km:5.2,lieu:"Rocher de Caudon — la Maison du Passeur",note:"Au pied du rocher se dresse la Maison du Passeur, considérée comme l'un des premiers sites christianisés du Périgord. Le lieu garde des traces d'occupation gallo-romaine, avec des sarcophages et un enfeu taillés directement dans la roche. Son architecture médiévale a conservé un portail ouest, deux baies nord pour l'éclairage, et un clocher-mur sans cloche au sommet de la falaise."},
      {km:7.5,lieu:"Falaise de Vitrac",note:"haute strate calcaire aux grottes ancestrales"},
-     {km:9,lieu:"Arrivée base Canoës Loisirs",note:"débarquement directement au chalet"}
+     {km:9,lieu:"Port de Vitrac — la Maison du passeur",photo:"Vitrac%20port.JPG",note:"Vous accostez au port de Vitrac, juste en face de la Maison du passeur, perchée sur le rocher de la rive opposée et à demi cachée dans la végétation de la falaise. Pendant la Seconde Guerre mondiale, la ligne de démarcation qui coupait la France en deux traversait ici la rivière : cette maison servait à faire passer clandestinement les gens de la zone occupée à la zone libre. Le port abritait aussi un vivier où l'on gardait vivants les saumons pêchés dans la rivière avant de les vendre au marché de Sarlat-la-Canéda. Débarquement directement au chalet de la base."}
    ]},
   {id:"calviac-vitrac",de:"Calviac",a:"Vitrac",km:19,duree:"3h30",nom:"La Dordogne Nature",
    tarifs:{adulte:25,enfant_5_12:15,kayak:29},
@@ -584,8 +584,10 @@ const CIRCUITS_CANOE=[
 const CANOE_COORDS={
   "Plage de Carsac-Aillac":[44.8369,1.2549],"Cale de Carsac":[44.8369,1.2549],
   "Falaise du Cingle de Monfort":[44.8295,1.2460],"Château de Monfort":[44.8276,1.2447],
-  "Rocher de Caudon":[44.8175,1.2350],"Falaise de Vitrac":[44.8258,1.2244],
+  "Rocher de Caudon":[44.8175,1.2350],"Rocher de Caudon — la Maison du Passeur":[44.8175,1.2350],
+  "Falaise de Vitrac":[44.8258,1.2244],
   "Falaise de Vitrac + Tour de guet":[44.8258,1.2244],"Arrivée base Canoës Loisirs":[44.8258,1.2244],
+  "Port de Vitrac — la Maison du passeur":[44.825768,1.224381],
   "Bastide de Domme":[44.8030,1.2153],"La Roque-Gageac":[44.8270,1.1830],
   "Château de la Malartrie":[44.8275,1.1783],"Castelnaud-la-Chapelle":[44.8180,1.1530],
   "Château de Fayrac":[44.8265,1.1480],"Beynac":[44.8389,1.1447],"Arrivée cabane":[44.8430,1.1400],
@@ -597,7 +599,7 @@ function tri(s){return {fr:s,en:s,es:s};}
 function makeCircuitRoute(ci){
   const steps=ci.etapes.map((e,i)=>{
     const co=CANOE_COORDS[e.lieu]||[44.82,1.20];
-    return {km:e.km,lat:co[0],lng:co[1],
+    return {km:e.km,lat:co[0],lng:co[1],photo:e.photo,
       nom:tri(e.lieu),kind:tri(i===0?"Départ":(i===ci.etapes.length-1?"Arrivée":"Étape")),txt:tri(e.note)};
   });
   return {id:ci.id,icon:"🛶",total:ci.km,mapMarker:"🛶",mapStart:ci.de,mapEnd:ci.a,
