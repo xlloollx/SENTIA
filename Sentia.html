@@ -725,6 +725,7 @@ function startTrail(idx){
   const single=CUR.loop||CUR.steps.length<2;
   document.getElementById('demoControls').style.display=single?'none':'flex';
   document.getElementById('progressBar').style.display=single?'none':'block';
+  mapScale=1;mapOffX=0;mapOffY=0;manualStep=false;
   updateGpsBtn();
   setupMap();showStep(0);
 }
@@ -782,9 +783,9 @@ function showStep(i){
   if(document.getElementById('photoModal').classList.contains('show'))openPhotoModal();
   drawMap();
 }
-function goStep(i){stopVoice();showStep(i);}
-function nextStep(){if(stepIdx<CUR.steps.length-1){stopVoice();showStep(stepIdx+1);}else stopPlay();}
-function prevStep(){if(stepIdx>0){stopVoice();showStep(stepIdx-1);}}
+function goStep(i){stopVoice();if(gpsActive)manualStep=true;showStep(i);}
+function nextStep(){if(stepIdx<CUR.steps.length-1){stopVoice();if(gpsActive)manualStep=true;showStep(stepIdx+1);}else stopPlay();}
+function prevStep(){if(stepIdx>0){stopVoice();if(gpsActive)manualStep=true;showStep(stepIdx-1);}}
 
 /* ---- Fenêtre photo d'un point ----
    Chaque étape pourra recevoir un champ s.photo (URL/chemin d'image).
@@ -807,6 +808,7 @@ function closePhotoModal(){
    s'affiche et se lit automatiquement, sans interrompre la navigation
    manuelle (curseur/boutons) qui reste toujours disponible. */
 let gpsActive=false,gpsWatchId=null,gpsPos=null,gpsAnimFrame=null;
+let mapScale=1,mapOffX=0,mapOffY=0,manualStep=false;
 function haversine(lat1,lng1,lat2,lng2){
   const R=6371000,toRad=d=>d*Math.PI/180;
   const dLat=toRad(lat2-lat1),dLng=toRad(lng2-lng1);
@@ -857,7 +859,8 @@ function onGpsPos(pos){
   updateGpsVillage();
   let best=-1,bestD=Infinity;
   CUR.steps.forEach((s,i)=>{const d=haversine(latitude,longitude,s.lat,s.lng);if(d<bestD){bestD=d;best=i;}});
-  if(best>=0&&bestD<110&&best!==stepIdx){
+  if(best>=0&&bestD<110&&best>stepIdx){
+    manualStep=false;
     toast(t().gpsNear+" "+CUR.steps[best].nom[lang]);
     stopPlay();stopVoice();
     showStep(best);
@@ -915,21 +918,68 @@ function setupMap(){
       const r=c.getBoundingClientRect();
       const pt=e.touches&&e.touches[0]?e.touches[0]:e;
       const x=pt.clientX-r.left, y=pt.clientY-r.top;
-      // cherche le point le plus proche du clic
+      // mapPositions est déjà en coordonnées écran (après zoom/pan)
       let best=-1,bestD=Infinity;
       mapPositions.forEach((p,i)=>{
         const d=Math.hypot(p.x-x,p.y-y);
         if(d<bestD){bestD=d;best=i;}
       });
-      // ne réagit que si on a cliqué assez près d'un point (35 px)
-      if(best>=0&&bestD<35){
+      if(best>=0&&bestD<44){
         stopPlay();stopVoice();
+        if(gpsActive)manualStep=true;
         showStep(best);
         speak(CUR.steps[best].txt[lang]);
       }
     };
     c.addEventListener('click',onTap);
-    c.addEventListener('touchstart',e=>{onTap(e);},{passive:true});
+    // Tap simple seulement (1 doigt), pas pendant un pinch
+    c.addEventListener('touchstart',e=>{if(e.touches.length===1)onTap(e);},{passive:true});
+  }
+  if(!c._zoomBound){
+    c._zoomBound=true;
+    let _pA=false,_d0=0,_s0=1,_pcx=0,_pcy=0;  // état pinch
+    let _panA=false,_psx=0,_psy=0,_pox=0,_poy=0; // état pan
+    let _lastTap=0;
+    const gd=(t0,t1)=>Math.hypot(t1.clientX-t0.clientX,t1.clientY-t0.clientY);
+    c.addEventListener('touchstart',e=>{
+      if(e.touches.length===2){
+        _pA=true;_panA=false;
+        _d0=gd(e.touches[0],e.touches[1]);_s0=mapScale;
+        const r=c.getBoundingClientRect();
+        _pcx=(e.touches[0].clientX+e.touches[1].clientX)/2-r.left;
+        _pcy=(e.touches[0].clientY+e.touches[1].clientY)/2-r.top;
+      }else if(e.touches.length===1&&!_pA){
+        _panA=true;
+        _psx=e.touches[0].clientX;_psy=e.touches[0].clientY;
+        _pox=mapOffX;_poy=mapOffY;
+      }
+    },{passive:true});
+    c.addEventListener('touchmove',e=>{
+      if(_pA&&e.touches.length===2){
+        // Zoom autour du centre du pinch
+        const d=gd(e.touches[0],e.touches[1]),r=d/_d0;
+        const ns=Math.max(0.5,Math.min(6,_s0*r));
+        const ratio=ns/mapScale;
+        mapOffX=_pcx*(1-ratio)+mapOffX*ratio;
+        mapOffY=_pcy*(1-ratio)+mapOffY*ratio;
+        mapScale=ns;drawMap();
+      }else if(_panA&&!_pA&&e.touches.length===1){
+        // Pan 1 doigt
+        mapOffX=_pox+(e.touches[0].clientX-_psx);
+        mapOffY=_poy+(e.touches[0].clientY-_psy);
+        drawMap();
+      }
+    },{passive:true});
+    c.addEventListener('touchend',e=>{
+      if(e.touches.length<2)_pA=false;
+      if(e.touches.length===0){
+        _panA=false;
+        // Double-tap : réinitialiser le zoom
+        const now=Date.now();
+        if(now-_lastTap<300){mapScale=1;mapOffX=0;mapOffY=0;drawMap();}
+        _lastTap=now;
+      }
+    },{passive:true});
   }
 }
 function drawMap(){
@@ -940,6 +990,10 @@ function drawMap(){
   mapCtx.setTransform(1,0,0,1,0,0);
   mapCtx.clearRect(0,0,c.width,c.height);
   mapCtx.restore();
+  // Appliquer zoom/pan
+  mapCtx.save();
+  mapCtx.translate(mapOffX,mapOffY);
+  mapCtx.scale(mapScale,mapScale);
   const pts=CUR.steps;                       // points d'intérêt cliquables
   const track=CUR.track||CUR.steps;          // tracé dessiné (boucle ou ligne)
   const allp=track.concat(pts);              // bornes englobant tracé + POI
@@ -949,7 +1003,8 @@ function drawMap(){
   const proj=p=>({x:pad+((p.lng-minLng)/spanLng)*(W-2*pad),y:H-pad-((p.lat-minLat)/spanLat)*(H-2*pad)});
   const trackPx=track.map(proj);             // tracé projeté
   const route=pts.map(proj);                 // POI projetés
-  mapPositions=route;  // mémorise les positions écran pour le clic
+  // Positions en coordonnées écran (après transform) pour la détection de tap
+  mapPositions=route.map(p=>({x:p.x*mapScale+mapOffX,y:p.y*mapScale+mapOffY}));
   // trace une courbe douce (spline Catmull-Rom) passant par les points => effet rivière sinueuse
   const smooth=(p0,p1,p2,p3)=>{
     const cp1x=p1.x+(p2.x-p0.x)/6, cp1y=p1.y+(p2.y-p0.y)/6;
@@ -973,7 +1028,6 @@ function drawMap(){
   }
   pts.forEach((s,i)=>{
     const p=proj(s),done=i<=stepIdx;
-    if(i===stepIdx)return;
     if(s.bridge){
       // pont : emoji repère
       mapCtx.font='15px sans-serif';mapCtx.textAlign='center';mapCtx.textBaseline='middle';
@@ -982,28 +1036,37 @@ function drawMap(){
       mapCtx.globalAlpha=1;mapCtx.textBaseline='alphabetic';
       return;
     }
+    if(i===stepIdx){
+      // étape courante : cercle doré + 🛶 (toujours visible, que le GPS soit actif ou non)
+      mapCtx.beginPath();mapCtx.arc(p.x,p.y,10,0,7);
+      mapCtx.fillStyle='rgba(232,168,56,.25)';mapCtx.fill();
+      mapCtx.beginPath();mapCtx.arc(p.x,p.y,6,0,7);
+      mapCtx.fillStyle='#e8a838';mapCtx.fill();
+      mapCtx.strokeStyle='#fff';mapCtx.lineWidth=2;mapCtx.stroke();
+      mapCtx.font='16px sans-serif';mapCtx.textAlign='center';mapCtx.textBaseline='middle';
+      mapCtx.fillText(CUR.mapMarker||'🛶',p.x,p.y-20);
+      mapCtx.textBaseline='alphabetic';
+      return;
+    }
     mapCtx.beginPath();mapCtx.arc(p.x,p.y,6,0,7);
     mapCtx.fillStyle=done?'#7fb069':'rgba(242,237,225,.45)';mapCtx.fill();
     mapCtx.strokeStyle='#0a3024';mapCtx.lineWidth=2;mapCtx.stroke();
   });
-  const cp=(gpsActive&&gpsPos)?proj(gpsPos):proj(pts[stepIdx]);
-  if(gpsActive){
-    // anneau pulsant continu : rend la position GPS bien visible et clairement "vivante"
+  // Marqueur GPS (position réelle) — point bleu 📍, séparé du 🛶 de l'étape courante
+  if(gpsActive&&gpsPos){
+    const gp=proj(gpsPos);
     const phase=(Date.now()%1600)/1600;
-    mapCtx.beginPath();mapCtx.arc(cp.x,cp.y,10+phase*20,0,7);
-    mapCtx.strokeStyle=`rgba(127,176,105,${0.6*(1-phase)})`;mapCtx.lineWidth=3;mapCtx.stroke();
-  }
-  mapCtx.beginPath();mapCtx.arc(cp.x,cp.y,16,0,7);mapCtx.fillStyle='rgba(127,176,105,.3)';mapCtx.fill();
-  mapCtx.beginPath();mapCtx.arc(cp.x,cp.y,9,0,7);mapCtx.fillStyle='#7fb069';mapCtx.fill();
-  mapCtx.strokeStyle='#fff';mapCtx.lineWidth=2.5;mapCtx.stroke();
-  mapCtx.font='16px sans-serif';mapCtx.textAlign='center';mapCtx.fillText(CUR.mapMarker||'🛶',cp.x,cp.y-20);
-  if(gpsActive){
-    // nom du point courant affiché en permanence sous le marqueur pendant le suivi GPS
-    const label=pts[stepIdx].nom[lang];
-    mapCtx.font='bold 12px sans-serif';
-    const tw=mapCtx.measureText(label).width,by=cp.y+24,bw=tw+18,bx=cp.x-bw/2;
-    mapCtx.fillStyle='rgba(8,39,30,.88)';mapCtx.fillRect(bx,by-13,bw,22);
-    mapCtx.fillStyle='#fff';mapCtx.fillText(label,cp.x,by+3);
+    // anneau pulsant bleu
+    mapCtx.beginPath();mapCtx.arc(gp.x,gp.y,10+phase*18,0,7);
+    mapCtx.strokeStyle=`rgba(42,122,140,${0.65*(1-phase)})`;mapCtx.lineWidth=3;mapCtx.stroke();
+    // point bleu plein
+    mapCtx.beginPath();mapCtx.arc(gp.x,gp.y,8,0,7);
+    mapCtx.fillStyle='#2a7a8c';mapCtx.fill();
+    mapCtx.strokeStyle='#fff';mapCtx.lineWidth=2.5;mapCtx.stroke();
+    // icône 📍 au-dessus
+    mapCtx.font='13px sans-serif';mapCtx.textAlign='center';mapCtx.textBaseline='middle';
+    mapCtx.fillText('📍',gp.x,gp.y-17);
+    mapCtx.textBaseline='alphabetic';
   }
   mapCtx.font='bold 11px sans-serif';
   if(CUR.loop){
@@ -1015,6 +1078,7 @@ function drawMap(){
     mapCtx.fillStyle='#c45c4a';
     mapCtx.fillText(CUR.mapEnd||pts[pts.length-1].nom[lang],route[route.length-1].x,route[route.length-1].y-14);
   }
+  mapCtx.restore(); // fin du transform zoom/pan
 }
 window.addEventListener('resize',()=>{if(document.getElementById('trail').style.display==='flex')setupMap();});
 
@@ -1053,7 +1117,17 @@ function speak(txt,onDone){
   u.onend=()=>{
     speaking=false;setVoiceBtn(false);
     if(u._cancelled)return;            // arrêt manuel : ne pas enchaîner
-    if(onDone)onDone();
+    if(onDone){onDone();return;}
+    // Auto-retour au suivi GPS après lecture manuelle d'une étape
+    if(gpsActive&&gpsPos&&manualStep){
+      setTimeout(()=>{
+        if(!gpsActive||!gpsPos||!manualStep)return;
+        let best=stepIdx,bestD=Infinity;
+        CUR.steps.forEach((s,i)=>{const d=haversine(gpsPos.lat,gpsPos.lng,s.lat,s.lng);if(d<bestD){bestD=d;best=i;}});
+        manualStep=false;
+        if(best!==stepIdx){showStep(best);speak(CUR.steps[best].txt[lang]);}
+      },2500);
+    }
   };
   u.onerror=()=>{speaking=false;setVoiceBtn(false);};
   window.speechSynthesis.speak(u);
