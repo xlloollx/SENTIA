@@ -4,6 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0d3b2e">
+<meta name="description" content="Sentia — audioguide GPS trilingue (FR/EN/ES) pour la descente de la Dordogne en canoë. Châteaux, histoire et villages racontés au fil de l'eau, même sans réseau.">
+<meta property="og:title" content="Sentia — Canoë en Dordogne">
+<meta property="og:description" content="Votre guide qui parle. Choisissez une descente, laissez la rivière se raconter.">
+<meta property="og:image" content="https://xlloollx.github.io/SENTIA/fondo_web.jpg">
+<meta property="og:type" content="website">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sentia">
 <title>Sentia — Canoë en Dordogne</title>
 <style>
   :root{--forest:#0d3b2e;--moss:#1c5c45;--river:#2a7a8c;--sun:#e8a838;--bark:#5c4a3a;--sand:#f2ede1;--sand-dim:#d9d0bd;--ink:#16221d;--leaf:#7fb069;--danger:#c45c4a}
@@ -23,7 +35,8 @@
   .lang-mini .flag{width:30px;height:30px;font-size:1rem;border-width:2px}
 
   /* ACCUEIL */
-  #home{justify-content:flex-start;background:radial-gradient(120% 80% at 50% -10%,#1c5c45 0%,#0d3b2e 55%,#08271e 100%)}
+  #home{justify-content:flex-start;background:linear-gradient(to bottom,rgba(13,59,46,.55) 0%,rgba(13,59,46,.72) 45%,rgba(8,39,30,.92) 100%),url("fondo_web.jpg") center/cover no-repeat,radial-gradient(120% 80% at 50% -10%,#1c5c45 0%,#0d3b2e 55%,#08271e 100%)}
+  .home-head h1,.home-head p{text-shadow:0 1px 8px rgba(8,39,30,.7)}
   .home-head{padding:14px 26px 18px;text-align:center}
   .logo-mark{width:60px;height:60px;margin:8px auto 12px;display:block}
   .home-head h1{font-size:2.5rem;line-height:1}
@@ -173,6 +186,7 @@
     <div class="flag" data-lang="en" onclick="setLang('en')">🇬🇧</div>
     <div class="flag" data-lang="es" onclick="setLang('es')">🇪🇸</div>
     <div class="flag" id="lockToggleBtn" onclick="openCodeModal()">🔒</div>
+    <div class="flag hidden" id="installBtn" onclick="promptInstall()" title="Installer l'application">📲</div>
   </div>
   <div class="home-head">
     <svg class="logo-mark" viewBox="0 0 64 64" fill="none">
@@ -287,6 +301,7 @@ const UI={
     lockTitle:"Accès parcours",lockMsg:"Ce parcours est réservé. Entrez le code d'accès pour le débloquer.",
     lockPh:"Code d'accès",lockBtn:"Déverrouiller",lockCancel:"Annuler",lockWrong:"❌ Code incorrect.",
     lockOk:"🔓 Accès débloqué !",lockedTag:"🔒 Réservé",freeTag:"Gratuit",
+    offline:"📡 Hors connexion — vos parcours et photos restent disponibles.",
     nearVillage:"Près de",
     hikeKm:"Distance",hikeDp:"Dénivelé +",hikeDn:"Dénivelé -",hikeT:"Durée",hikeF:"Difficulté",hikeDep:"Départ",
     hikeOpen:"📍 Localiser sur Google Maps",hikeClose:"✕ Fermer",
@@ -309,6 +324,7 @@ const UI={
     lockTitle:"Route access",lockMsg:"This route is locked. Enter the access code to unlock it.",
     lockPh:"Access code",lockBtn:"Unlock",lockCancel:"Cancel",lockWrong:"❌ Wrong code.",
     lockOk:"🔓 Access unlocked!",lockedTag:"🔒 Locked",freeTag:"Free",
+    offline:"📡 Offline — your routes and photos are still available.",
     nearVillage:"Near",
     hikeKm:"Distance",hikeDp:"Ascent",hikeDn:"Descent",hikeT:"Duration",hikeF:"Difficulty",hikeDep:"Start",
     hikeOpen:"📍 Locate on Google Maps",hikeClose:"✕ Close",
@@ -331,6 +347,7 @@ const UI={
     lockTitle:"Acceso a la ruta",lockMsg:"Esta ruta está bloqueada. Introduce el código de acceso para desbloquearla.",
     lockPh:"Código de acceso",lockBtn:"Desbloquear",lockCancel:"Cancelar",lockWrong:"❌ Código incorrecto.",
     lockOk:"🔓 ¡Acceso desbloqueado!",lockedTag:"🔒 Bloqueado",freeTag:"Gratis",
+    offline:"📡 Sin conexión — tus rutas y fotos siguen disponibles.",
     nearVillage:"Cerca de",
     hikeKm:"Distancia",hikeDp:"Desnivel +",hikeDn:"Desnivel -",hikeT:"Duración",hikeF:"Dificultad",hikeDep:"Salida",
     hikeOpen:"📍 Localizar en Google Maps",hikeClose:"✕ Cerrar",
@@ -363,21 +380,21 @@ const RANDO_FULL={
       fr:"Premier repère : environ 300 mètres après la base de canoës de Vitrac, vous passez sous le pont de Vitrac, le premier des cinq ponts de la descente. Passez sous l'arche principale en restant dans le courant. C'est ici que commence vraiment votre voyage vers l'aval : derrière vous, l'embarcadère ; devant vous, seize kilomètres de châteaux, de falaises et de villages.",
       en:"First landmark: about 300 metres after the Vitrac canoe base, you pass under the Vitrac bridge, the first of the five bridges on the descent. Go under the main arch, staying in the current. This is where your journey downstream truly begins: behind you, the launch; ahead, sixteen kilometres of castles, cliffs and villages.",
       es:"Primera referencia: a unos 300 metros tras la base de canoas de Vitrac, pasas bajo el puente de Vitrac, el primero de los cinco puentes del descenso. Pasa bajo el arco principal manteniéndote en la corriente. Aquí empieza de verdad tu viaje río abajo: detrás de ti, el embarcadero; delante, dieciséis kilómetros de castillos, acantilados y pueblos."}},
-    {km:1,lat:44.8210,lng:1.2050,
+    {km:1,lat:44.8210,lng:1.2050,photo:"Vierge_gabariers_web.jpg",
      nom:{fr:"La Vierge des gabariers",en:"The Bargemen's Virgin",es:"La Virgen de los gabarreros"},
      kind:{fr:"Patrimoine & batellerie",en:"Heritage & river trade",es:"Patrimonio y navegación"},
      txt:{
       fr:"Après le premier pont, environ un kilomètre plus bas, levez les yeux sur votre droite : en hauteur dans la falaise veille la Vierge des gabariers. Les gabariers étaient les bateliers de la Dordogne ; sur leurs bateaux à fond plat, les gabarres, ils descendaient jusqu'à Bordeaux pour commercer, chargés de bois de chêne et de châtaignier. Avant de partir affronter les rapides et les longues semaines de voyage, ils se recommandaient à cette Vierge pour un retour sain et sauf. C'était un métier dangereux : pour beaucoup, chaque départ pouvait être le dernier.",
       en:"After the first bridge, about a kilometre downstream, look up to your right: high in the cliff watches the Bargemen's Virgin. The gabariers were the boatmen of the Dordogne; on their flat-bottomed boats, the gabarres, they went down to Bordeaux to trade, loaded with oak and chestnut wood. Before facing the rapids and the long weeks of travel, they commended themselves to this Virgin for a safe return. It was a dangerous trade: for many, each departure could be the last.",
       es:"Tras el primer puente, aproximadamente un kilómetro más abajo, alza la vista a tu derecha: en lo alto del acantilado vela la Virgen de los gabarreros. Los gabarreros eran los barqueros del Dordoña; en sus barcas de fondo plano, las gabarras, descendían hasta Burdeos para comerciar, cargadas de madera de roble y castaño. Antes de afrontar los rápidos y las largas semanas de viaje, se encomendaban a esta Virgen para un regreso sano y salvo. Era un oficio peligroso: para muchos, cada partida podía ser la última."}},
-    {km:1.5,lat:44.8230,lng:1.1990,photo:"La%20cavit%C3%A9%20d'Ali%C3%A9nor.png",
+    {km:1.5,lat:44.8230,lng:1.1990,photo:"La%20cavit%C3%A9%20d'Ali%C3%A9nor.jpg",
      nom:{fr:"La cavité d'Aliénor",en:"Eleanor's Cave",es:"La cavidad de Leonor"},
      kind:{fr:"Histoire & géologie",en:"History & geology",es:"Historia y geología"},
      txt:{
       fr:"Un peu plus loin, à un kilomètre et demi du départ, observez sur votre droite une cavité naturelle creusée dans la falaise calcaire. La tradition locale raconte qu'Aliénor d'Aquitaine la fit aménager en poste de guet : duchesse d'Aquitaine puis reine d'Angleterre, elle aurait fait surveiller depuis cet abri les remontées des troupes anglaises sur la rivière, à l'époque où l'Aquitaine passait sous domination anglaise. La roche tendre du Crétacé, vieille de près de 90 millions d'années, se creuse facilement : toute la vallée est ainsi percée d'abris et de grottes que les hommes occupent depuis la préhistoire.",
       en:"A little further on, a kilometre and a half from the start, look to your right at a natural cavity carved into the limestone cliff. Local tradition says Eleanor of Aquitaine had it fitted out as a lookout post: Duchess of Aquitaine and later Queen of England, she is said to have watched from this shelter the movements of English troops along the river, at a time when Aquitaine was under English rule. The soft Cretaceous rock, nearly 90 million years old, is easily hollowed: the whole valley is thus pierced with shelters and caves that people have occupied since prehistory.",
       es:"Un poco más adelante, a un kilómetro y medio de la salida, observa a tu derecha una cavidad natural excavada en el acantilado calcáreo. La tradición local cuenta que Leonor de Aquitania la mandó acondicionar como puesto de vigilancia: duquesa de Aquitania y luego reina de Inglaterra, habría hecho vigilar desde este refugio las subidas de las tropas inglesas por el río, en la época en que Aquitania pasaba bajo dominio inglés. La roca blanda del Cretácico, de casi 90 millones de años, se excava con facilidad: todo el valle está así horadado de refugios y cuevas que el hombre ocupa desde la prehistoria."}},
-    {km:3,lat:44.8090,lng:1.2010,photo:"bastide%20domme.png",
+    {km:3,lat:44.8090,lng:1.2010,photo:"bastide%20domme.jpg",
      nom:{fr:"La Bastide de Domme",en:"The Bastide of Domme",es:"La Bastida de Domme"},
      kind:{fr:"Patrimoine & flore",en:"Heritage & flora",es:"Patrimonio y flora"},
      txt:{
@@ -419,7 +436,7 @@ const RANDO_FULL={
       fr:"Quelques centaines de mètres avant le pont de Castelnaud, sur votre droite, se jette la Bulide, une source dont l'eau, autour de 16 degrés, reste fraîche toute l'année. C'est une résurgence karstique : l'eau s'infiltre dans le plateau calcaire et ressort ici, claire et fraîche — elle alimente d'ailleurs en eau potable les villages de Vézac, Castelnaud et Veyrines-de-Domme. La Bulide naît à quelque 500 mètres en amont, au milieu des champs de noyers, l'arbre emblématique du Périgord, et rejoint la Dordogne en rive droite. On raconte que son cours passe sous les vestiges d'un ancien pont gallo-romain, près duquel on ramenait jadis les gabarres à la remonte, halées par des ânes, lors du retour depuis Bordeaux. Un peu plus loin, sur votre gauche, vous croiserez l'embouchure du Céou, juste avant le pont.",
       en:"A few hundred metres before the Castelnaud bridge, on your right, flows the Bulide, a spring whose water, around 16 degrees, stays cool all year round. It is a karstic resurgence: the water seeps into the limestone plateau and re-emerges here, clear and cool — it even supplies drinking water to the villages of Vézac, Castelnaud and Veyrines-de-Domme. The Bulide rises some 500 metres upstream, amid walnut groves — the Périgord's emblematic tree — and joins the Dordogne on the right bank. It is said its course passes beneath the remains of an old Gallo-Roman bridge, near which the gabarres were once hauled back upstream by donkeys, on the return journey from Bordeaux. A little further on, on your left, you'll pass the mouth of the Céou, just before the bridge.",
       es:"Unos cientos de metros antes del puente de Castelnaud, a tu derecha, desemboca la Bulide, un manantial cuya agua, en torno a los 16 grados, se mantiene fresca todo el año. Es una resurgencia kárstica: el agua se infiltra en la meseta calcárea y vuelve a salir aquí, clara y fresca — de hecho abastece de agua potable a los pueblos de Vézac, Castelnaud y Veyrines-de-Domme. La Bulide nace unos 500 metros aguas arriba, en medio de campos de nogales — el árbol emblemático del Périgord — y se une a la Dordoña en la orilla derecha. Se cuenta que su curso pasa bajo los vestigios de un antiguo puente galo-romano, cerca del cual antaño se remolcaban las gabarras de vuelta río arriba, tiradas por burros, en el regreso desde Burdeos. Un poco más adelante, a tu izquierda, cruzarás la desembocadura del Céou, justo antes del puente."}},
-    {km:10.1,lat:44.8198,lng:1.1572,bridge:false,photo:"Ceou.png",
+    {km:10.1,lat:44.8198,lng:1.1572,bridge:false,photo:"Ceou.jpg",
      nom:{fr:"Embouchure du Céou",en:"Mouth of the Céou",es:"Desembocadura del Céou"},
      kind:{fr:"Rivière & nature",en:"River & nature",es:"Río y naturaleza"},
      txt:{
@@ -440,7 +457,7 @@ const RANDO_FULL={
       fr:"Sur la rive gauche se dresse la puissante forteresse de Castelnaud-la-Chapelle, sur son promontoire rocheux. Elle abrite aujourd'hui le musée de la guerre au Moyen Âge, avec ses machines de siège reconstituées : trébuchets, mangonneaux, bricoles. Pendant la guerre de Cent Ans, Castelnaud et Beynac, son rival juste en face, étaient les deux frères ennemis de la vallée. La famille de Caumont, seigneurs de Castelnaud, penchait le plus souvent du côté anglais, tandis que les barons de Beynac étaient plutôt fidèles au roi de France — mais le château changea de camp sept fois au gré des alliances avant d'être repris par les Français en 1442. Son village est lui aussi classé parmi les Plus Beaux Villages de France.",
       en:"On the left bank rises the powerful fortress of Castelnaud-la-Chapelle, on its rocky promontory. Today it houses the museum of medieval warfare, with reconstructed siege engines: trebuchets, mangonels, bricoles. During the Hundred Years' War, Castelnaud and Beynac, its rival just opposite, were the two enemy brothers of the valley. The Caumont family, lords of Castelnaud, most often leaned to the English side, while the barons of Beynac were rather loyal to the king of France — but the castle changed sides seven times with shifting alliances before being retaken by the French in 1442. Its village too is listed among the Most Beautiful Villages of France.",
       es:"En la orilla izquierda se alza la poderosa fortaleza de Castelnaud-la-Chapelle, sobre su promontorio rocoso. Hoy alberga el museo de la guerra en la Edad Media, con sus máquinas de asedio reconstruidas: trabucos, mangoneles, briconas. Durante la guerra de los Cien Años, Castelnaud y Beynac, su rival justo enfrente, eran los dos hermanos enemigos del valle. La familia de Caumont, señores de Castelnaud, se inclinaba casi siempre del lado inglés, mientras que los barones de Beynac eran más bien fieles al rey de Francia — pero el castillo cambió de bando siete veces según las alianzas antes de ser recuperado por los franceses en 1442. Su pueblo también está clasificado entre los Pueblos más Bellos de Francia."}},
-    {km:12.2,lat:44.8265,lng:1.1480,bridge:false,photo:"Fayrac.png",
+    {km:12.2,lat:44.8265,lng:1.1480,bridge:false,photo:"Fayrac.jpg",
      nom:{fr:"Château de Fayrac",en:"Château de Fayrac",es:"Castillo de Fayrac"},
      kind:{fr:"Architecture",en:"Architecture",es:"Arquitectura"},
      txt:{
@@ -531,7 +548,7 @@ const POI_TILE={
   ]
 };
 
-/* ---- Nouveaux circuits canoë longue distance (toujours sous code admin24) ---- */
+/* ---- Nouveaux circuits canoë longue distance (sous code d'accès) ---- */
 const CIRCUITS_CANOE=[
   {id:"carsac-beynac",de:"Carsac-Aillac",a:"Beynac",km:25,duree:"4h30",nom:"Vallée des 6 Châteaux",
    tarifs:{adulte:28,enfant_5_12:16,kayak:32},
@@ -543,7 +560,7 @@ const CIRCUITS_CANOE=[
      {km:3,lieu:"Château de Monfort",photo:"Monfort.jpg",note:"forteresse médiévale sur piton rocheux"},
      {km:5.2,lieu:"Rocher de Caudon",note:"promontoire calcaire surplombant les eaux"},
      {km:7.5,lieu:"Falaise de Vitrac",note:"muraille naturelle de 100m, grottes préhistoriques"},
-     {km:10.8,lieu:"Bastide de Domme",photo:"bastide%20domme.png",note:"cité médiévale fortifiée sur plateau"},
+     {km:10.8,lieu:"Bastide de Domme",photo:"bastide%20domme.jpg",note:"cité médiévale fortifiée sur plateau"},
      {km:15,lieu:"La Roque-Gageac",note:"village troglodytique niché dans la roche"},
      {km:15.5,lieu:"Château de la Malartrie",note:"tours Renaissance en bord de berge"},
      {km:18,lieu:"Castelnaud-la-Chapelle",note:"bourg médiéval avec château des guerres"},
@@ -627,8 +644,10 @@ const VILLAGES=[
 
 /* ---- Accès verrouillé ----
    Un seul parcours (FREE_ROUTE_ID) reste accessible sans code ; tout le
-   reste se débloque avec ADMIN_CODE et l'état est mémorisé sur l'appareil. */
-const ADMIN_CODE="admin24";
+   reste se débloque avec le code d'accès (stocké sous forme de hachage,
+   jamais en clair dans la source) et l'état est mémorisé sur l'appareil. */
+function codeHash(s){let x=5381;for(let i=0;i<s.length;i++)x=(((x<<5)+x)^s.charCodeAt(i))>>>0;return x.toString(36);}
+const ADMIN_HASH="1ebk4s";
 const FREE_ROUTE_ID="vitrac-castelnaud";
 let UNLOCKED=(function(){try{return localStorage.getItem('sentiaUnlocked')==='1';}catch(e){return false;}})();
 function isRouteFree(r){return r.id===FREE_ROUTE_ID;}
@@ -668,18 +687,17 @@ function applyCodeUI(){
   document.getElementById('codeSubmitBtn').textContent=t().lockBtn;
 }
 function openCodeModal(){
+  navPush();
   applyCodeUI();
   document.getElementById('codeError').textContent='';
   document.getElementById('codeInput').value='';
   document.getElementById('codeModal').classList.add('show');
   setTimeout(()=>document.getElementById('codeInput').focus(),50);
 }
-function closeCodeModal(){
-  document.getElementById('codeModal').classList.remove('show');
-}
+function closeCodeModal(){navBack();}
 function submitCode(){
   const val=document.getElementById('codeInput').value.trim().toLowerCase();
-  if(val===ADMIN_CODE){
+  if(codeHash(val)===ADMIN_HASH){
     UNLOCKED=true;
     try{localStorage.setItem('sentiaUnlocked','1');}catch(e){}
     updateLockIcon();
@@ -715,6 +733,7 @@ function renderHome(){
 function startTrail(idx){
   const r=CANOE_ROUTES[idx];
   if(isRouteLocked(r)){openCodeModal();return;}
+  navPush();
   CUR=r;
   stepIdx=0;
   document.getElementById('home').style.display='none';
@@ -729,23 +748,50 @@ function startTrail(idx){
   updateGpsBtn();
   setupMap();showStep(0);
 }
-function goHome(){
-  stopPlay();stopVoice();stopGPS();
-  document.getElementById('trail').style.display='none';
-  document.getElementById('poi').style.display='none';
-  document.getElementById('home').style.display='flex';
+/* ---- Navigation & bouton retour ----
+   Chaque écran/fenêtre empilé pousse une entrée dans l'historique :
+   le bouton retour d'Android (ou le geste iOS) ferme la couche du dessus
+   au lieu de quitter l'application. */
+let navDepth=0;
+function navPush(){navDepth++;history.pushState({sentia:navDepth},'');}
+function navBack(){if(navDepth>0)history.back();else closeTop();}
+window.addEventListener('popstate',()=>{if(navDepth>0){navDepth--;closeTop();}});
+function closeTop(){
+  const pm=document.getElementById('photoModal');
+  if(pm.classList.contains('show')){pm.classList.remove('show');return;}
+  const cm=document.getElementById('codeModal');
+  if(cm.classList.contains('show')){cm.classList.remove('show');return;}
+  const poi=document.getElementById('poi');
+  if(poi.style.display==='flex'){poi.style.display='none';document.getElementById('home').style.display='flex';return;}
+  const tr=document.getElementById('trail');
+  if(tr.style.display==='flex'){stopPlay();stopVoice();stopGPS();tr.style.display='none';document.getElementById('home').style.display='flex';return;}
 }
+function goHome(){navBack();}
+
+/* ---- Écran allumé (Wake Lock) ----
+   Sur la rivière, l'écran ne doit pas s'éteindre pendant que le GPS guide
+   ou que la lecture audio est en cours. */
+let wakeLock=null;
+async function updateWake(){
+  const need=gpsActive||playing;
+  if(need&&!wakeLock&&'wakeLock'in navigator){
+    try{wakeLock=await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release',()=>{wakeLock=null;});}catch(e){}
+  }else if(!need&&wakeLock){
+    try{wakeLock.release();}catch(e){}
+    wakeLock=null;
+  }
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')updateWake();});
 
 /* ---- Centres d'intérêt ---- */
 function openPoi(){
+  navPush();
   document.getElementById('home').style.display='none';
   document.getElementById('poi').style.display='flex';
   renderPoi();
 }
-function closePoi(){
-  document.getElementById('poi').style.display='none';
-  document.getElementById('home').style.display='flex';
-}
+function closePoi(){navBack();}
 function renderPoi(){
   document.getElementById('poiTitle').textContent=POI_TILE.nom[lang];
   document.getElementById('poiSub').textContent=POI_TILE.sousTitre[lang];
@@ -796,11 +842,10 @@ function openPhotoModal(){
   document.getElementById('photoModalClose').textContent=t().photoClose;
   const zone=document.getElementById('photoModalZone');
   zone.innerHTML=s.photo?`<img src="${s.photo}" alt="">`:`<div class="ph"><span>🖼️</span><span>${t().photoNone}</span></div>`;
-  document.getElementById('photoModal').classList.add('show');
+  const m=document.getElementById('photoModal');
+  if(!m.classList.contains('show')){navPush();m.classList.add('show');}
 }
-function closePhotoModal(){
-  document.getElementById('photoModal').classList.remove('show');
-}
+function closePhotoModal(){navBack();}
 
 /* ---- Guide GPS ----
    Demande la position en continu (watchPosition) et compare la distance
@@ -818,7 +863,7 @@ function haversine(lat1,lng1,lat2,lng2){
 function toggleGPS(){gpsActive?stopGPS():startGPS();}
 function startGPS(){
   if(!('geolocation'in navigator)){toast(t().gpsUnavailable);return;}
-  gpsActive=true;updateGpsBtn();
+  gpsActive=true;updateGpsBtn();updateWake();
   gpsWatchId=navigator.geolocation.watchPosition(onGpsPos,onGpsErr,{enableHighAccuracy:true,maximumAge:5000,timeout:15000});
   if(gpsAnimFrame===null)gpsPulseLoop();
 }
@@ -829,7 +874,7 @@ function gpsPulseLoop(){
   gpsAnimFrame=requestAnimationFrame(gpsPulseLoop);
 }
 function stopGPS(){
-  gpsActive=false;gpsPos=null;updateGpsBtn();
+  gpsActive=false;gpsPos=null;updateGpsBtn();updateWake();
   if(gpsWatchId!==null&&'geolocation'in navigator)navigator.geolocation.clearWatch(gpsWatchId);
   gpsWatchId=null;
   const v=document.getElementById('gpsVillage');if(v)v.classList.remove('show');
@@ -854,12 +899,17 @@ function updateGpsVillage(){
 }
 function onGpsPos(pos){
   if(!CUR)return;
-  const{latitude,longitude}=pos.coords;
+  const{latitude,longitude,accuracy}=pos.coords;
   gpsPos={lat:latitude,lng:longitude};
   updateGpsVillage();
+  // Position trop imprécise (falaises, canopée) : on suit sur la carte
+  // mais on ne déclenche pas d'étape pour éviter les faux positifs.
+  if(accuracy&&accuracy>150){drawMap();return;}
+  // Seuil adaptatif : 110 m de base, élargi si le GPS est moins précis.
+  const thr=Math.max(110,(accuracy||0)*1.5);
   let best=-1,bestD=Infinity;
   CUR.steps.forEach((s,i)=>{const d=haversine(latitude,longitude,s.lat,s.lng);if(d<bestD){bestD=d;best=i;}});
-  if(best>=0&&bestD<110&&best>stepIdx){
+  if(best>=0&&bestD<thr&&best>stepIdx){
     manualStep=false;
     toast(t().gpsNear+" "+CUR.steps[best].nom[lang]);
     stopPlay();stopVoice();
@@ -880,14 +930,14 @@ function onGpsErr(err){
    Le canoë reste figé exactement sur stepIdx (le point courant). */
 function togglePlay(){playing?stopPlay():startPlay();}
 function startPlay(){
-  playing=true;
+  playing=true;updateWake();
   document.getElementById('playBtn').textContent='⏸';
   document.getElementById('liveDot').classList.add('live');
   document.getElementById('liveTxt').textContent=t().running;
   speak(CUR.steps[stepIdx].txt[lang],advanceAfterSpeech);
 }
 function stopPlay(){
-  playing=false;                       // empêche advanceAfterSpeech de continuer
+  playing=false;updateWake();          // empêche advanceAfterSpeech de continuer
   clearTimeout(playTimer);playTimer=null;
   stopVoice();                         // coupe la voix immédiatement
   document.getElementById('playBtn').textContent='▶';
@@ -1000,7 +1050,12 @@ function drawMap(){
   const la=allp.map(p=>p.lat),ln=allp.map(p=>p.lng);
   const minLat=Math.min(...la),maxLat=Math.max(...la),minLng=Math.min(...ln),maxLng=Math.max(...ln);
   const spanLat=(maxLat-minLat)||.001,spanLng=(maxLng-minLng)||.001;
-  const proj=p=>({x:pad+((p.lng-minLng)/spanLng)*(W-2*pad),y:H-pad-((p.lat-minLat)/spanLat)*(H-2*pad)});
+  // Projection équirectangulaire : correction cos(lat) pour que les
+  // proportions du tracé correspondent au terrain réel (pas d'étirement).
+  const kx=Math.cos(((minLat+maxLat)/2)*Math.PI/180);
+  const sc=Math.min((W-2*pad)/(spanLng*kx),(H-2*pad)/spanLat);
+  const ox=(W-spanLng*kx*sc)/2,oy=(H-spanLat*sc)/2;
+  const proj=p=>({x:ox+(p.lng-minLng)*kx*sc,y:H-oy-(p.lat-minLat)*sc});
   const trackPx=track.map(proj);             // tracé projeté
   const route=pts.map(proj);                 // POI projetés
   // Positions en coordonnées écran (après transform) pour la détection de tap
@@ -1144,9 +1199,43 @@ function setVoiceBtn(on){const b=document.getElementById('voiceBtn');b.classList
 let toastT;
 function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),3200);}
 
+/* ---- PWA : service worker (hors connexion) ---- */
+if('serviceWorker'in navigator&&location.protocol!=='file:'){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+
+/* ---- PWA : proposition d'installation (Android/Chrome) ---- */
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();deferredPrompt=e;
+  const b=document.getElementById('installBtn');if(b)b.classList.remove('hidden');
+});
+function promptInstall(){
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();deferredPrompt=null;
+  document.getElementById('installBtn').classList.add('hidden');
+}
+window.addEventListener('appinstalled',()=>{document.getElementById('installBtn').classList.add('hidden');});
+
+/* ---- Hors connexion : rassurer l'utilisateur ---- */
+window.addEventListener('offline',()=>toast(t().offline));
+
+/* ---- iOS : la synthèse vocale exige un geste utilisateur préalable.
+   On "déverrouille" le moteur au premier toucher, silencieusement. ---- */
+let speechUnlocked=false;
+function unlockSpeech(){
+  if(speechUnlocked||!('speechSynthesis'in window))return;
+  speechUnlocked=true;
+  const u=new SpeechSynthesisUtterance(' ');u.volume=0;
+  window.speechSynthesis.speak(u);
+}
+document.addEventListener('touchend',unlockSpeech,{once:true});
+document.addEventListener('click',unlockSpeech,{once:true});
+
 /* ---- Init ---- */
 applyStaticUI();renderHome();updateLockIcon();
 if('speechSynthesis'in window){window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();window.speechSynthesis.getVoices();}
 </script>
 </body>
 </html>
+
