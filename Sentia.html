@@ -17,6 +17,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Sentia">
 <title>Sentia — Canoë en Dordogne</title>
+<script data-goatcounter="https://sentia-dordogne.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <style>
   :root{--forest:#0d3b2e;--moss:#1c5c45;--river:#2a7a8c;--sun:#e8a838;--bark:#5c4a3a;--sand:#f2ede1;--sand-dim:#d9d0bd;--ink:#16221d;--leaf:#7fb069;--danger:#c45c4a}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
@@ -555,44 +556,50 @@ const CIRCUITS_CANOE=[
    navette:"Vitrac→Carsac 12min / retour toutes les heures",
    resume:"Grande traversée au fil de la Dordogne depuis la grève de galets de Carsac jusqu'au village perché de Beynac. Six forteresses médiévales jalonnent les rives, entre falaises calcaires et hameaux du Périgord Noir.",
    etapes:[
-     {km:0,lieu:"Plage de Carsac-Aillac",photo:"Depart%20de%20Carsac.jpg",note:"mise à l'eau face à la falaise blanche"},
-     {km:2,lieu:"Falaise du Cingle de Monfort",note:"paroi abrupte dominant la rivière"},
-     {km:3,lieu:"Château de Monfort",photo:"Monfort.jpg",note:"forteresse médiévale sur piton rocheux"},
-     {km:5.2,lieu:"Rocher de Caudon",note:"promontoire calcaire surplombant les eaux"},
-     {km:7.5,lieu:"Falaise de Vitrac",note:"muraille naturelle de 100m, grottes préhistoriques"},
-     {km:10.8,lieu:"Bastide de Domme",photo:"bastide%20domme.jpg",note:"cité médiévale fortifiée sur plateau"},
-     {km:15,lieu:"La Roque-Gageac",note:"village troglodytique niché dans la roche"},
-     {km:15.5,lieu:"Château de la Malartrie",note:"tours Renaissance en bord de berge"},
-     {km:18,lieu:"Castelnaud-la-Chapelle",note:"bourg médiéval avec château des guerres"},
-     {km:19.8,lieu:"Château de Fayrac",note:"manoir fortifié face à Beynac"},
-     {km:21,lieu:"Beynac",photo:"Chateau%20de%20Beynac.jpg",note:"village-rempart sur falaise dominant la vallée"},
-     {km:25,lieu:"Arrivée cabane",note:"dépôt embarcations, navette retour"}
+     {km:0,lieu:"Plage de Carsac-Aillac",photo:"Depart%20de%20Carsac.jpg",note:{fr:"mise à l'eau face à la falaise blanche",en:"launch facing the white cliff",es:"puesta al agua frente al acantilado blanco"}},
+     {km:2,lieu:"Falaise du Cingle de Monfort",note:{fr:"paroi abrupte dominant la rivière",en:"sheer rock face towering over the river",es:"pared abrupta que domina el río"}},
+     {km:3,lieu:"Château de Monfort",photo:"Monfort.jpg",note:{fr:"forteresse médiévale sur piton rocheux",en:"medieval fortress on a rocky spur",es:"fortaleza medieval sobre un peñón rocoso"}},
+     {km:5.2,lieu:"Rocher de Caudon",note:{fr:"promontoire calcaire surplombant les eaux",en:"limestone promontory overlooking the water",es:"promontorio calcáreo sobre las aguas"}},
+     {km:7.5,lieu:"Falaise de Vitrac",note:{fr:"muraille naturelle de 100m, grottes préhistoriques",en:"natural 100-metre wall with prehistoric caves",es:"muralla natural de 100 m con cuevas prehistóricas"}},
+     {km:10.8,lieu:"Bastide de Domme",photo:"bastide%20domme.jpg",note:{fr:"cité médiévale fortifiée sur plateau",en:"fortified medieval town on the plateau",es:"ciudad medieval fortificada en la meseta"}},
+     {km:15,lieu:"La Roque-Gageac",note:{fr:"village troglodytique niché dans la roche",en:"troglodyte village nestled in the rock",es:"pueblo troglodita encajado en la roca"}},
+     {km:15.5,lieu:"Château de la Malartrie",note:{fr:"tours Renaissance en bord de berge",en:"Renaissance towers at the water's edge",es:"torres renacentistas al borde de la orilla"}},
+     {km:18,lieu:"Castelnaud-la-Chapelle",note:{fr:"bourg médiéval avec château des guerres",en:"medieval village with its warfare castle",es:"pueblo medieval con su castillo de las guerras"}},
+     {km:19.8,lieu:"Château de Fayrac",note:{fr:"manoir fortifié face à Beynac",en:"fortified manor facing Beynac",es:"mansión fortificada frente a Beynac"}},
+     {km:21,lieu:"Beynac",photo:"Chateau%20de%20Beynac.jpg",note:{fr:"village-rempart sur falaise dominant la vallée",en:"rampart-village on a cliff above the valley",es:"pueblo-muralla sobre el acantilado que domina el valle"}},
+     {km:25,lieu:"Arrivée cabane",note:{fr:"dépôt embarcations, navette retour",en:"boat drop-off, return shuttle",es:"entrega de embarcaciones, lanzadera de vuelta"}}
    ]},
   {id:"carsac-vitrac",de:"Carsac-Aillac",a:"Vitrac",km:9,duree:"1h30",nom:"Le Cingle de Montfort",
    tarifs:{adulte:18,enfant_5_12:11.5,kayak:22},
    navette:"Vitrac→Carsac 12min / arrivée directe à la base",
    resume:"Courte escapade idéale pour novices et familles. On serpente dans les méandres du Cingle de Monfort entre escarpements calcaires et berges sauvages, avant de rejoindre la base en douceur.",
    etapes:[
-     {km:0,lieu:"Plage de Carsac-Aillac",photo:"Depart%20de%20Carsac.jpg",note:"embarcadère face à la paroi blanche"},
-     {km:2,lieu:"Falaise du Cingle de Monfort",note:"éperon rocheux en virage serré"},
-     {km:3,lieu:"Château de Monfort",photo:"Monfort.jpg",note:"donjon médiéval perché sur la crête"},
-     {km:5.2,lieu:"Rocher de Caudon — la Maison du Passeur",note:"Au pied du rocher se dresse la Maison du Passeur, considérée comme l'un des premiers sites christianisés du Périgord. Le lieu garde des traces d'occupation gallo-romaine, avec des sarcophages et un enfeu taillés directement dans la roche. Son architecture médiévale a conservé un portail ouest, deux baies nord pour l'éclairage, et un clocher-mur sans cloche au sommet de la falaise."},
-     {km:7.5,lieu:"Falaise de Vitrac",note:"haute strate calcaire aux grottes ancestrales"},
-     {km:9,lieu:"Port de Vitrac — la Maison du passeur",photo:"Vitrac%20port.JPG",note:"Vous accostez au port de Vitrac, juste en face de la Maison du passeur, perchée sur le rocher de la rive opposée et à demi cachée dans la végétation de la falaise. Pendant la Seconde Guerre mondiale, la ligne de démarcation qui coupait la France en deux traversait ici la rivière : cette maison servait à faire passer clandestinement les gens de la zone occupée à la zone libre. Le port abritait aussi un vivier où l'on gardait vivants les saumons pêchés dans la rivière avant de les vendre au marché de Sarlat-la-Canéda. Débarquement directement au chalet de la base."}
+     {km:0,lieu:"Plage de Carsac-Aillac",photo:"Depart%20de%20Carsac.jpg",note:{fr:"embarcadère face à la paroi blanche",en:"launch facing the white rock face",es:"embarcadero frente a la pared blanca"}},
+     {km:2,lieu:"Falaise du Cingle de Monfort",note:{fr:"éperon rocheux en virage serré",en:"rocky spur on a tight bend",es:"espolón rocoso en curva cerrada"}},
+     {km:3,lieu:"Château de Monfort",photo:"Monfort.jpg",note:{fr:"donjon médiéval perché sur la crête",en:"medieval keep perched on the ridge",es:"torreón medieval encaramado en la cresta"}},
+     {km:5.2,lieu:"Rocher de Caudon — la Maison du Passeur",note:{
+      fr:"Au pied du rocher se dresse la Maison du Passeur, considérée comme l'un des premiers sites christianisés du Périgord. Le lieu garde des traces d'occupation gallo-romaine, avec des sarcophages et un enfeu taillés directement dans la roche. Son architecture médiévale a conservé un portail ouest, deux baies nord pour l'éclairage, et un clocher-mur sans cloche au sommet de la falaise.",
+      en:"At the foot of the rock stands the Maison du Passeur, considered one of the first Christianised sites in Périgord. The place keeps traces of Gallo-Roman occupation, with sarcophagi and a burial niche carved directly into the rock. Its medieval architecture has preserved a west portal, two north windows for light, and a bell-gable without its bell at the top of the cliff.",
+      es:"Al pie de la roca se alza la Maison du Passeur, considerada uno de los primeros lugares cristianizados del Périgord. El lugar conserva huellas de ocupación galorromana, con sarcófagos y un nicho funerario tallados directamente en la roca. Su arquitectura medieval conserva un portal oeste, dos vanos al norte para la iluminación y una espadaña sin campana en lo alto del acantilado."}},
+     {km:7.5,lieu:"Falaise de Vitrac",note:{fr:"haute strate calcaire aux grottes ancestrales",en:"high limestone strata with ancient caves",es:"altos estratos calcáreos con cuevas ancestrales"}},
+     {km:9,lieu:"Port de Vitrac — la Maison du passeur",photo:"Vitrac%20port.JPG",note:{
+      fr:"Vous accostez au port de Vitrac, juste en face de la Maison du passeur, perchée sur le rocher de la rive opposée et à demi cachée dans la végétation de la falaise. Pendant la Seconde Guerre mondiale, la ligne de démarcation qui coupait la France en deux traversait ici la rivière : cette maison servait à faire passer clandestinement les gens de la zone occupée à la zone libre. Le port abritait aussi un vivier où l'on gardait vivants les saumons pêchés dans la rivière avant de les vendre au marché de Sarlat-la-Canéda. Débarquement directement au chalet de la base.",
+      en:"You land at the port of Vitrac, right opposite the Ferryman's House, perched on the rock of the far bank and half hidden in the cliffside vegetation. During the Second World War, the demarcation line that split France in two crossed the river here: this house was used to smuggle people from the occupied zone to the free zone. The port also held a live-tank where salmon caught in the river were kept alive before being sold at the market of Sarlat-la-Canéda. You disembark right at the base's hut.",
+      es:"Desembarcas en el puerto de Vitrac, justo enfrente de la Casa del barquero, encaramada en la roca de la orilla opuesta y medio escondida entre la vegetación del acantilado. Durante la Segunda Guerra Mundial, la línea de demarcación que partía Francia en dos cruzaba aquí el río: esta casa servía para pasar clandestinamente a la gente de la zona ocupada a la zona libre. El puerto albergaba también un vivero donde se mantenían vivos los salmones pescados en el río antes de venderlos en el mercado de Sarlat-la-Canéda. Desembarco directamente en el chalet de la base."}}
    ]},
   {id:"calviac-vitrac",de:"Calviac",a:"Vitrac",km:19,duree:"3h30",nom:"La Dordogne Nature",
    tarifs:{adulte:25,enfant_5_12:15,kayak:29},
    navette:"Vitrac→Calviac / arrivée directe à la base",
    resume:"Itinéraire sauvage et historique depuis la cale de Calviac. On glisse au pied de demeures seigneuriales, d'un tablier de pont disgracieux et de berges habitées par les hirondelles, avant d'atteindre la tour de guet médiévale de Vitrac.",
    etapes:[
-     {km:0,lieu:"Cale de Calviac",photo:"Chateau%20de%20Fenelon.jpg",note:"vue sur Château de Fénelon, MH XIIe-XVIIe s."},
-     {km:4.5,lieu:"Château de Veyrignac",note:"demeure sur falaise rive gauche, décor de film"},
-     {km:6.5,lieu:"Pont de Groléjac",photo:"Embarcadere%20Grolegeac.jpg",note:"confluence avec la Germaine, village pêcheur"},
-     {km:8.5,lieu:"Cale de Carsac",note:"nids d'hirondelles de rivage, îlot à franchir"},
-     {km:10.5,lieu:"Falaise du Cingle de Monfort",note:"vertigineux éperon dominant le coude"},
-     {km:12,lieu:"Château de Monfort",photo:"Monfort.jpg",note:"citadelle rasée et rebâtie cinq fois, XIIIe s."},
-     {km:14,lieu:"Rocher de Caudon",note:"chaos rocheux en surplomb des eaux calmes"},
-     {km:19,lieu:"Falaise de Vitrac + Tour de guet",note:"vigie normande IXe-XIIe s., arrivée au chalet"}
+     {km:0,lieu:"Cale de Calviac",photo:"Chateau%20de%20Fenelon.jpg",note:{fr:"vue sur Château de Fénelon, MH XIIe-XVIIe s.",en:"view of Fénelon Castle, listed monument, 12th–17th c.",es:"vistas al castillo de Fénelon, monumento histórico, s. XII–XVII"}},
+     {km:4.5,lieu:"Château de Veyrignac",note:{fr:"demeure sur falaise rive gauche, décor de film",en:"cliff-top residence on the left bank, film location",es:"mansión sobre el acantilado de la orilla izquierda, escenario de cine"}},
+     {km:6.5,lieu:"Pont de Groléjac",photo:"Embarcadere%20Grolegeac.jpg",note:{fr:"confluence avec la Germaine, village pêcheur",en:"confluence with the Germaine, fishing village",es:"confluencia con el Germaine, pueblo pesquero"}},
+     {km:8.5,lieu:"Cale de Carsac",note:{fr:"nids d'hirondelles de rivage, îlot à franchir",en:"sand martin nests, small island to pass",es:"nidos de aviones zapadores, islote que franquear"}},
+     {km:10.5,lieu:"Falaise du Cingle de Monfort",note:{fr:"vertigineux éperon dominant le coude",en:"dizzying spur above the river bend",es:"vertiginoso espolón sobre el meandro"}},
+     {km:12,lieu:"Château de Monfort",photo:"Monfort.jpg",note:{fr:"citadelle rasée et rebâtie cinq fois, XIIIe s.",en:"citadel razed and rebuilt five times, 13th c.",es:"ciudadela arrasada y reconstruida cinco veces, s. XIII"}},
+     {km:14,lieu:"Rocher de Caudon",note:{fr:"chaos rocheux en surplomb des eaux calmes",en:"rocky chaos overhanging calm waters",es:"caos rocoso sobre las aguas tranquilas"}},
+     {km:19,lieu:"Falaise de Vitrac + Tour de guet",note:{fr:"vigie normande IXe-XIIe s., arrivée au chalet",en:"Norman watchtower, 9th–12th c., arrival at the base hut",es:"atalaya normanda, s. IX–XII, llegada al chalet de la base"}}
    ]}
 ];
 
@@ -613,11 +620,17 @@ const CANOE_COORDS={
 function tri(s){return {fr:s,en:s,es:s};}
 
 /* Circuit canoë (liste d'étapes réelles) -> parcours linéaire au même format que les descentes. */
+const KIND_I18N={
+  depart:{fr:"Départ",en:"Start",es:"Salida"},
+  etape:{fr:"Étape",en:"Stage",es:"Etapa"},
+  arrivee:{fr:"Arrivée",en:"Arrival",es:"Llegada"}
+};
 function makeCircuitRoute(ci){
   const steps=ci.etapes.map((e,i)=>{
     const co=CANOE_COORDS[e.lieu]||[44.82,1.20];
+    const kind=i===0?KIND_I18N.depart:(i===ci.etapes.length-1?KIND_I18N.arrivee:KIND_I18N.etape);
     return {km:e.km,lat:co[0],lng:co[1],photo:e.photo,
-      nom:tri(e.lieu),kind:tri(i===0?"Départ":(i===ci.etapes.length-1?"Arrivée":"Étape")),txt:tri(e.note)};
+      nom:tri(e.lieu),kind,txt:typeof e.note==='string'?tri(e.note):e.note};
   });
   return {id:ci.id,icon:"🛶",total:ci.km,mapMarker:"🛶",mapStart:ci.de,mapEnd:ci.a,
     nom:tri(ci.nom),
@@ -734,6 +747,7 @@ function startTrail(idx){
   const r=CANOE_ROUTES[idx];
   if(isRouteLocked(r)){openCodeModal();return;}
   navPush();
+  track('parcours:'+r.id);gcCount('parcours-'+r.id);
   CUR=r;
   stepIdx=0;
   document.getElementById('home').style.display='none';
@@ -1199,6 +1213,36 @@ function setVoiceBtn(on){const b=document.getElementById('voiceBtn');b.classList
 let toastT;
 function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),3200);}
 
+/* ---- Statistiques anonymes ----
+   Aucune donnée personnelle : on compte des événements (visite, installation,
+   parcours lancé) avec leur heure. Deux canaux :
+   1) GoatCounter (tableau de bord : https://sentia-dordogne.goatcounter.com)
+   2) STATS_ENDPOINT : le compteur Val Town qui envoie l'email du soir.
+      Les événements sont mis en file locale et expédiés au retour du réseau,
+      pour compter aussi les usages hors connexion sur la rivière. */
+const STATS_ENDPOINT="";   // URL du val Val Town — à renseigner après création
+function gcCount(path){
+  try{if(window.goatcounter&&window.goatcounter.count)window.goatcounter.count({path:path,event:true});}catch(e){}
+}
+function track(ev){
+  try{
+    const q=JSON.parse(localStorage.getItem('sentiaStats')||'[]');
+    q.push({t:Date.now(),ev:ev,lang:lang});
+    localStorage.setItem('sentiaStats',JSON.stringify(q.slice(-500)));
+  }catch(e){}
+  flushStats();
+}
+function flushStats(){
+  if(!STATS_ENDPOINT||!navigator.onLine)return;
+  let q;try{q=JSON.parse(localStorage.getItem('sentiaStats')||'[]');}catch(e){return;}
+  if(!q.length)return;
+  fetch(STATS_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({events:q})})
+    .then(r=>{if(r.ok){try{localStorage.setItem('sentiaStats','[]');}catch(e){}}})
+    .catch(()=>{});
+}
+window.addEventListener('online',flushStats);
+track('visite');
+
 /* ---- PWA : service worker (hors connexion) ---- */
 if('serviceWorker'in navigator&&location.protocol!=='file:'){
   window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
@@ -1215,7 +1259,10 @@ function promptInstall(){
   deferredPrompt.prompt();deferredPrompt=null;
   document.getElementById('installBtn').classList.add('hidden');
 }
-window.addEventListener('appinstalled',()=>{document.getElementById('installBtn').classList.add('hidden');});
+window.addEventListener('appinstalled',()=>{
+  document.getElementById('installBtn').classList.add('hidden');
+  track('installation');gcCount('installation');
+});
 
 /* ---- Hors connexion : rassurer l'utilisateur ---- */
 window.addEventListener('offline',()=>toast(t().offline));
