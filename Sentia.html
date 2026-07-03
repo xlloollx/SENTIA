@@ -172,6 +172,13 @@
   .poi-card .poi-dist2{font-size:.74rem;color:var(--sand-dim);margin-bottom:8px}
   .poi-card p{font-size:.92rem;line-height:1.5}
 
+  /* Mode veille : écran noir (économie batterie), le guide continue */
+  #blackout{display:none;position:fixed;inset:0;z-index:200;background:#000;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:30px;text-align:center}
+  #blackout.show{display:flex}
+  #blackout .bo-name{color:#3a3a3a;font-size:1.15rem;font-family:'Georgia',serif}
+  #blackout .bo-hint{color:#242424;font-size:.72rem;line-height:1.5}
+  .btn-eco{flex:0 0 58px;background:#16221d;color:var(--sand)}
+
   .hidden{display:none!important}
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--sand);padding:12px 20px;border-radius:99px;font-size:.85rem;z-index:99;opacity:0;transition:opacity .3s;border:1px solid rgba(242,237,225,.2);max-width:88vw;text-align:center}
   .toast.show{opacity:1}
@@ -237,6 +244,7 @@
     <div class="sheet-actions">
       <button class="btn btn-voice" id="voiceBtn" onclick="toggleVoice()">🔊</button>
       <button class="btn btn-photo" id="photoStepBtn" onclick="openPhotoModal()">🖼️</button>
+      <button class="btn btn-eco" onclick="ecoShow()" title="Écran noir — économie batterie">🌙</button>
     </div>
   </div>
 </div>
@@ -277,6 +285,12 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- MODE VEILLE (écran noir, guide actif) -->
+<div id="blackout" onclick="ecoHide()">
+  <div class="bo-name" id="boName">—</div>
+  <div class="bo-hint" id="boHint">—</div>
+</div>
+
 <script>
 /* ============================================================
    SENTIA — Descente Vitrac → Pont de Pech (16 km)
@@ -304,6 +318,7 @@ const UI={
     lockOk:"🔓 Accès débloqué !",lockedTag:"🔒 Réservé",freeTag:"Gratuit",
     offline:"📡 Hors connexion — vos parcours et photos restent disponibles.",
     iosInstall:"📲 Sur iPhone : bouton Partager, puis « Sur l'écran d'accueil ».",
+    ecoHint:"Écran en veille pour économiser la batterie. Le guide GPS et la voix continuent. Touchez pour rallumer. N'éteignez pas le téléphone avec le bouton.",
     nearVillage:"Près de",
     hikeKm:"Distance",hikeDp:"Dénivelé +",hikeDn:"Dénivelé -",hikeT:"Durée",hikeF:"Difficulté",hikeDep:"Départ",
     hikeOpen:"📍 Localiser sur Google Maps",hikeClose:"✕ Fermer",
@@ -328,6 +343,7 @@ const UI={
     lockOk:"🔓 Access unlocked!",lockedTag:"🔒 Locked",freeTag:"Free",
     offline:"📡 Offline — your routes and photos are still available.",
     iosInstall:"📲 On iPhone: tap Share, then “Add to Home Screen”.",
+    ecoHint:"Screen resting to save battery. The GPS guide and the voice keep running. Tap to wake. Don't switch the phone off with the power button.",
     nearVillage:"Near",
     hikeKm:"Distance",hikeDp:"Ascent",hikeDn:"Descent",hikeT:"Duration",hikeF:"Difficulty",hikeDep:"Start",
     hikeOpen:"📍 Locate on Google Maps",hikeClose:"✕ Close",
@@ -352,6 +368,7 @@ const UI={
     lockOk:"🔓 ¡Acceso desbloqueado!",lockedTag:"🔒 Bloqueado",freeTag:"Gratis",
     offline:"📡 Sin conexión — tus rutas y fotos siguen disponibles.",
     iosInstall:"📲 En iPhone: botón Compartir y luego «Añadir a pantalla de inicio».",
+    ecoHint:"Pantalla en reposo para ahorrar batería. El guía GPS y la voz siguen funcionando. Toca para reactivar. No apagues el teléfono con el botón.",
     nearVillage:"Cerca de",
     hikeKm:"Distancia",hikeDp:"Desnivel +",hikeDn:"Desnivel -",hikeT:"Duración",hikeF:"Dificultad",hikeDep:"Salida",
     hikeOpen:"📍 Localizar en Google Maps",hikeClose:"✕ Cerrar",
@@ -857,6 +874,34 @@ async function updateWake(){
 }
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')updateWake();});
 
+/* ---- Mode veille (écran noir) ----
+   Sur une longue descente, l'écran affiché noir économise la batterie
+   (pixels éteints sur OLED) pendant que le Wake Lock maintient l'app
+   vivante : le GPS suit, et chaque point déclenche sa lecture vocale.
+   Activation : bouton 🌙, ou automatique 30 s après le dernier toucher
+   quand le GPS est actif. Un toucher rallume l'écran. */
+let ecoTimer=null,ecoOn=false;
+function ecoShow(){
+  if(ecoOn)return;
+  ecoOn=true;
+  const s=CUR&&CUR.steps[stepIdx];
+  document.getElementById('boName').textContent=s?s.nom[lang]:'Sentia';
+  document.getElementById('boHint').textContent=t().ecoHint;
+  document.getElementById('blackout').classList.add('show');
+}
+function ecoHide(){
+  if(!ecoOn)return;
+  ecoOn=false;
+  document.getElementById('blackout').classList.remove('show');
+  drawMap();
+  ecoArm();
+}
+function ecoArm(){
+  clearTimeout(ecoTimer);
+  if(gpsActive)ecoTimer=setTimeout(ecoShow,30000);
+}
+document.addEventListener('touchstart',()=>{if(!ecoOn)ecoArm();},{passive:true});
+
 /* ---- Centres d'intérêt ---- */
 function openPoi(){
   navPush();
@@ -899,6 +944,7 @@ function showStep(i){
   document.getElementById('trailName').textContent=CUR.nom[lang];
   document.getElementById('trailSub').textContent=CUR.sousTitre[lang];
   updateGpsBtn();
+  if(ecoOn)document.getElementById('boName').textContent=s.nom[lang];
   if(document.getElementById('photoModal').classList.contains('show'))openPhotoModal();
   drawMap();
 }
@@ -936,18 +982,20 @@ function haversine(lat1,lng1,lat2,lng2){
 function toggleGPS(){gpsActive?stopGPS():startGPS();}
 function startGPS(){
   if(!('geolocation'in navigator)){toast(t().gpsUnavailable);return;}
-  gpsActive=true;updateGpsBtn();updateWake();
+  gpsActive=true;updateGpsBtn();updateWake();ecoArm();
   gpsWatchId=navigator.geolocation.watchPosition(onGpsPos,onGpsErr,{enableHighAccuracy:true,maximumAge:5000,timeout:15000});
   if(gpsAnimFrame===null)gpsPulseLoop();
 }
 function gpsPulseLoop(){
   // anime le pouls du marqueur en continu pendant que le GPS est actif
   if(!gpsActive){gpsAnimFrame=null;return;}
-  drawMap();
+  if(!ecoOn)drawMap();   // écran noir : on suspend le rendu (économie CPU/batterie)
   gpsAnimFrame=requestAnimationFrame(gpsPulseLoop);
 }
 function stopGPS(){
   gpsActive=false;gpsPos=null;updateGpsBtn();updateWake();
+  clearTimeout(ecoTimer);
+  if(ecoOn){ecoOn=false;document.getElementById('blackout').classList.remove('show');}
   if(gpsWatchId!==null&&'geolocation'in navigator)navigator.geolocation.clearWatch(gpsWatchId);
   gpsWatchId=null;
   const v=document.getElementById('gpsVillage');if(v)v.classList.remove('show');
@@ -1270,7 +1318,7 @@ function setVoiceBtn(on){const b=document.getElementById('voiceBtn');b.classList
 
 /* ---- Toast ---- */
 let toastT;
-function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),3200);}
+function toast(m,d){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),d||3200);}
 
 /* ---- Statistiques anonymes ----
    Aucune donnée personnelle : on compte des événements (visite, installation,
@@ -1319,7 +1367,7 @@ function promptInstall(){
     document.getElementById('installBtn').classList.add('hidden');
     return;
   }
-  if(IS_IOS)toast(t().iosInstall);
+  if(IS_IOS)toast(t().iosInstall,8000);
 }
 /* iOS ne propose pas d'installation automatique (pas de beforeinstallprompt) :
    on montre le bouton 📲 qui explique la manœuvre Partager → Écran d'accueil. */
