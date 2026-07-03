@@ -303,6 +303,7 @@ const UI={
     lockPh:"Code d'accès",lockBtn:"Déverrouiller",lockCancel:"Annuler",lockWrong:"❌ Code incorrect.",
     lockOk:"🔓 Accès débloqué !",lockedTag:"🔒 Réservé",freeTag:"Gratuit",
     offline:"📡 Hors connexion — vos parcours et photos restent disponibles.",
+    iosInstall:"📲 Sur iPhone : bouton Partager, puis « Sur l'écran d'accueil ».",
     nearVillage:"Près de",
     hikeKm:"Distance",hikeDp:"Dénivelé +",hikeDn:"Dénivelé -",hikeT:"Durée",hikeF:"Difficulté",hikeDep:"Départ",
     hikeOpen:"📍 Localiser sur Google Maps",hikeClose:"✕ Fermer",
@@ -326,6 +327,7 @@ const UI={
     lockPh:"Access code",lockBtn:"Unlock",lockCancel:"Cancel",lockWrong:"❌ Wrong code.",
     lockOk:"🔓 Access unlocked!",lockedTag:"🔒 Locked",freeTag:"Free",
     offline:"📡 Offline — your routes and photos are still available.",
+    iosInstall:"📲 On iPhone: tap Share, then “Add to Home Screen”.",
     nearVillage:"Near",
     hikeKm:"Distance",hikeDp:"Ascent",hikeDn:"Descent",hikeT:"Duration",hikeF:"Difficulty",hikeDep:"Start",
     hikeOpen:"📍 Locate on Google Maps",hikeClose:"✕ Close",
@@ -349,6 +351,7 @@ const UI={
     lockPh:"Código de acceso",lockBtn:"Desbloquear",lockCancel:"Cancelar",lockWrong:"❌ Código incorrecto.",
     lockOk:"🔓 ¡Acceso desbloqueado!",lockedTag:"🔒 Bloqueado",freeTag:"Gratis",
     offline:"📡 Sin conexión — tus rutas y fotos siguen disponibles.",
+    iosInstall:"📲 En iPhone: botón Compartir y luego «Añadir a pantalla de inicio».",
     nearVillage:"Cerca de",
     hikeKm:"Distancia",hikeDp:"Desnivel +",hikeDn:"Desnivel -",hikeT:"Duración",hikeF:"Dificultad",hikeDep:"Salida",
     hikeOpen:"📍 Localizar en Google Maps",hikeClose:"✕ Cerrar",
@@ -364,7 +367,7 @@ const RANDO_FULL={
   id:"vitrac-pech",icon:"🛶",total:16,mapStart:"Vitrac",mapEnd:"Pont de Pech",
   start:{lat:44.8167,lng:1.2167},end:{lat:44.8455,lng:1.1320},
   nom:{fr:"Vitrac → Beynac",en:"Vitrac → Beynac",es:"Vitrac → Beynac"},
-  sousTitre:{fr:"Descente de la Dordogne · 16 km · ~3h",en:"Dordogne river descent · 16 km · ~3h",es:"Descenso del Dordoña · 16 km · ~3h"},
+  sousTitre:{fr:"Vallée des 5 Châteaux · 16 km · ~3h",en:"Valley of the 5 Castles · 16 km · ~3h",es:"Valle de los 5 Castillos · 16 km · ~3h"},
   tags:{fr:["Canoë","Famille","Châteaux"],en:["Canoe","Family","Castles"],es:["Canoa","Familia","Castillos"]},
   steps:[
     {km:0,lat:44.825768,lng:1.224381,photo:"Vitrac%20port.JPG",
@@ -423,7 +426,7 @@ const RANDO_FULL={
       fr:"Juste après La Roque-Gageac, sur la rive droite, le château de la Malartrie surgit au pied des falaises, exposé plein sud dans une boucle de la Dordogne. Le site est ancien : au XIIᵉ siècle se dressait ici un hôpital pour lépreux. À la fin du XIXᵉ siècle, le comte de Saint-Aulaire, ambassadeur de France en Angleterre, fit reconstruire la demeure dans le style Renaissance qu'on admire aujourd'hui, avec ses tours et sa chapelle gothique. Au pied du domaine s'étend la plage de la Malartrie, une plage naturelle de galets et de sable où l'on peut accoster pour se baigner directement dans la rivière : une halte rafraîchissante, l'une des plus belles du parcours, face aux falaises et au village.",
       en:"Just past La Roque-Gageac, on the right bank, the château of La Malartrie rises at the foot of the cliffs, facing due south in a bend of the Dordogne. The site is old: in the 12th century a leper hospital stood here. In the late 19th century, the Count of Saint-Aulaire, French ambassador to England, had the house rebuilt in the Renaissance style you admire today, with its towers and gothic chapel. Below the estate lies the Malartrie beach, a natural beach of pebbles and sand where you can land to swim straight in the river: a refreshing stop, one of the finest on the route, facing the cliffs and the village.",
       es:"Justo después de La Roque-Gageac, en la orilla derecha, el castillo de la Malartrie surge al pie de los acantilados, orientado al sur en un meandro del Dordoña. El lugar es antiguo: en el siglo XII se alzaba aquí un hospital para leprosos. A finales del siglo XIX, el conde de Saint-Aulaire, embajador de Francia en Inglaterra, mandó reconstruir la mansión en el estilo renacentista que se admira hoy, con sus torres y su capilla gótica. Al pie de la finca se extiende la playa de la Malartrie, una playa natural de cantos y arena donde se puede atracar para bañarse directamente en el río: una parada refrescante, una de las más bellas del recorrido, frente a los acantilados y al pueblo."}},
-    {km:9,lat:44.8255,lng:1.1670,bridge:false,
+    {km:9,lat:44.8255,lng:1.1670,bridge:false,photo:"Belvedere_Marqueyssac_web.jpg",
      nom:{fr:"Belvédère de Marqueyssac",en:"Marqueyssac Belvedere",es:"Mirador de Marqueyssac"},
      kind:{fr:"Jardins & panorama",en:"Gardens & panorama",es:"Jardines y panorama"},
      txt:{
@@ -465,7 +468,7 @@ const RANDO_FULL={
       fr:"Un kilomètre environ après Castelnaud, sur la même rive gauche, le château de Fayrac apparaît discrètement au détour d'un méandre, niché dans la végétation. Avec ses tours rondes coiffées en poivrière et ses deux ponts-levis, c'est un manoir privé du XVᵉ et XVIᵉ siècle, d'une silhouette romantique. Pendant la guerre de Cent Ans, quand Castelnaud tenait pour les Anglais, on y avait installé un poste avancé pour surveiller Beynac, juste en face. On le voit bien depuis l'eau avant qu'il ne se cache à nouveau derrière les arbres.",
       en:"About a kilometre after Castelnaud, on the same left bank, the château of Fayrac appears discreetly at the bend of a meander, nestled in the greenery. With its round pepper-pot towers and its two drawbridges, it is a private manor from the 15th and 16th centuries, with a romantic outline. During the Hundred Years' War, when Castelnaud held for the English, a forward post was set up here to watch Beynac, just opposite. It shows clearly from the water before hiding again behind the trees.",
       es:"Aproximadamente un kilómetro después de Castelnaud, en la misma orilla izquierda, el castillo de Fayrac aparece discretamente en el recodo de un meandro, anidado en la vegetación. Con sus torres redondas rematadas en pimentero y sus dos puentes levadizos, es una mansión privada de los siglos XV y XVI, de silueta romántica. Durante la guerra de los Cien Años, cuando Castelnaud tenía por los ingleses, se instaló aquí un puesto avanzado para vigilar Beynac, justo enfrente. Se ve bien desde el agua antes de que vuelva a esconderse tras los árboles."}},
-    {km:12.8,lat:44.8340,lng:1.1450,bridge:true,
+    {km:12.8,lat:44.8340,lng:1.1450,bridge:true,photo:"Pont_de_Vezac_web.jpg",
      nom:{fr:"Pont de chemin de fer de Vézac",en:"Vézac Railway Bridge",es:"Puente de ferrocarril de Vézac"},
      kind:{fr:"Repère · Pont 4",en:"Landmark · Bridge 4",es:"Referencia · Puente 4"},
      txt:{
@@ -511,7 +514,7 @@ const RANDO_SHORT={
   id:"vitrac-castelnaud",icon:"🛶",total:10.4,mapStart:"Vitrac",mapEnd:"Castelnaud",
   start:RANDO_FULL.start,end:{lat:44.8180,lng:1.1525},
   nom:{fr:"Vitrac → Castelnaud",en:"Vitrac → Castelnaud",es:"Vitrac → Castelnaud"},
-  sousTitre:{fr:"Descente courte de la Dordogne · 10,4 km · ~1h45",en:"Short Dordogne descent · 10.4 km · ~1h45",es:"Descenso corto del Dordoña · 10,4 km · ~1h45"},
+  sousTitre:{fr:"Vallée des 2 Châteaux · 10,4 km · ~2h30",en:"Valley of the 2 Castles · 10.4 km · ~2h30",es:"Valle de los 2 Castillos · 10,4 km · ~2h30"},
   tags:{fr:["Canoë","Court","Familles"],en:["Canoe","Short","Families"],es:["Canoa","Corto","Familias"]},
   steps:RANDO_FULL.steps.slice(0,11).concat([ARRIVEE_CASTELNAUD])
 };
@@ -552,54 +555,95 @@ const POI_TILE={
 /* ---- Nouveaux circuits canoë longue distance (sous code d'accès) ---- */
 const CIRCUITS_CANOE=[
   {id:"carsac-beynac",de:"Carsac-Aillac",a:"Beynac",km:25,duree:"4h30",nom:"Vallée des 6 Châteaux",
-   tarifs:{adulte:28,enfant_5_12:16,kayak:32},
    navette:"Vitrac→Carsac 12min / retour toutes les heures",
    resume:"Grande traversée au fil de la Dordogne depuis la grève de galets de Carsac jusqu'au village perché de Beynac. Six forteresses médiévales jalonnent les rives, entre falaises calcaires et hameaux du Périgord Noir.",
    etapes:[
-     {km:0,lieu:"Plage de Carsac-Aillac",photo:"Depart%20de%20Carsac.jpg",note:{fr:"mise à l'eau face à la falaise blanche",en:"launch facing the white cliff",es:"puesta al agua frente al acantilado blanco"}},
-     {km:2,lieu:"Falaise du Cingle de Monfort",note:{fr:"paroi abrupte dominant la rivière",en:"sheer rock face towering over the river",es:"pared abrupta que domina el río"}},
-     {km:3,lieu:"Château de Monfort",photo:"Monfort.jpg",note:{fr:"forteresse médiévale sur piton rocheux",en:"medieval fortress on a rocky spur",es:"fortaleza medieval sobre un peñón rocoso"}},
-     {km:5.2,lieu:"Rocher de Caudon",note:{fr:"promontoire calcaire surplombant les eaux",en:"limestone promontory overlooking the water",es:"promontorio calcáreo sobre las aguas"}},
-     {km:7.5,lieu:"Falaise de Vitrac",note:{fr:"muraille naturelle de 100m, grottes préhistoriques",en:"natural 100-metre wall with prehistoric caves",es:"muralla natural de 100 m con cuevas prehistóricas"}},
-     {km:10.8,lieu:"Bastide de Domme",photo:"bastide%20domme.jpg",note:{fr:"cité médiévale fortifiée sur plateau",en:"fortified medieval town on the plateau",es:"ciudad medieval fortificada en la meseta"}},
-     {km:15,lieu:"La Roque-Gageac",note:{fr:"village troglodytique niché dans la roche",en:"troglodyte village nestled in the rock",es:"pueblo troglodita encajado en la roca"}},
-     {km:15.5,lieu:"Château de la Malartrie",note:{fr:"tours Renaissance en bord de berge",en:"Renaissance towers at the water's edge",es:"torres renacentistas al borde de la orilla"}},
-     {km:18,lieu:"Castelnaud-la-Chapelle",note:{fr:"bourg médiéval avec château des guerres",en:"medieval village with its warfare castle",es:"pueblo medieval con su castillo de las guerras"}},
-     {km:19.8,lieu:"Château de Fayrac",note:{fr:"manoir fortifié face à Beynac",en:"fortified manor facing Beynac",es:"mansión fortificada frente a Beynac"}},
-     {km:21,lieu:"Beynac",photo:"Chateau%20de%20Beynac.jpg",note:{fr:"village-rempart sur falaise dominant la vallée",en:"rampart-village on a cliff above the valley",es:"pueblo-muralla sobre el acantilado que domina el valle"}},
-     {km:25,lieu:"Arrivée cabane",note:{fr:"dépôt embarcations, navette retour",en:"boat drop-off, return shuttle",es:"entrega de embarcaciones, lanzadera de vuelta"}}
+     {km:0,lieu:"Plage de Carsac-Aillac",photo:"Depart%20de%20Carsac.jpg",note:{
+      fr:"Bienvenue à Carsac-Aillac, votre point de départ, à sept kilomètres seulement de Sarlat-la-Canéda, la capitale du Périgord Noir. Né en 1961 de l'union de deux villages, Carsac et Aillac, c'est aujourd'hui l'un des bourgs les plus vivants de la vallée — et un camp de base idéal : la voie verte qui le traverse invite à la balade à pied ou à vélo le long de la rivière, la bastide de Domme et la cité médiévale de Sarlat sont à deux pas. Mais c'est la Dordogne qui vous attend : mise à l'eau depuis la plage de galets, face à la grande falaise blanche. Bonne descente !",
+      en:"Welcome to Carsac-Aillac, your starting point, just seven kilometres from Sarlat-la-Canéda, the capital of Périgord Noir. Born in 1961 from the union of two villages, Carsac and Aillac, it is today one of the liveliest little towns in the valley — and an ideal base camp: the greenway running through it invites you to walk or cycle along the river, and the bastide of Domme and the medieval town of Sarlat are close by. But it's the Dordogne that awaits you now: launch from the pebble beach, facing the great white cliff. Enjoy the descent!",
+      es:"Bienvenido a Carsac-Aillac, tu punto de partida, a solo siete kilómetros de Sarlat-la-Canéda, la capital del Périgord Noir. Nacido en 1961 de la unión de dos pueblos, Carsac y Aillac, es hoy uno de los burgos más vivos del valle — y un campamento base ideal: la vía verde que lo atraviesa invita a pasear a pie o en bici junto al río, y la bastida de Domme y la ciudad medieval de Sarlat están a un paso. Pero es el Dordoña el que te espera: puesta al agua desde la playa de cantos, frente al gran acantilado blanco. ¡Buen descenso!"}},
+     {km:2,lieu:"Falaise du Cingle de Monfort",note:{
+      fr:"Entre Carsac-Aillac et Vitrac, la Dordogne dessine ici l'un de ses plus beaux méandres : le Cingle de Montfort, une boucle presque fermée, serrée entre des falaises abruptes. À l'intérieur de la boucle, la plaine est étonnamment plate — vue d'en haut, on dirait une île nichée au creux d'une montagne. La paroi calcaire est aujourd'hui un site d'escalade réputé. Et si la grimpe ne vous tente pas, un belvédère accessible en voiture couronne la falaise : le panorama sur le cingle, le château de Montfort et la campagne environnante y est exceptionnel.",
+      en:"Between Carsac-Aillac and Vitrac, the Dordogne traces one of its most beautiful meanders here: the Cingle de Montfort, an almost closed loop hemmed in by sheer cliffs. Inside the loop the plain is surprisingly flat — seen from above, it looks like an island nestled in the hollow of a mountain. The limestone wall is now a popular climbing site. And if climbing isn't your thing, a viewpoint reachable by car crowns the cliff: the panorama over the meander, Montfort castle and the surrounding countryside is exceptional.",
+      es:"Entre Carsac-Aillac y Vitrac, el Dordoña dibuja aquí uno de sus meandros más bellos: el Cingle de Montfort, un bucle casi cerrado, encajado entre acantilados abruptos. En el interior del bucle la llanura es sorprendentemente plana — vista desde arriba, parece una isla acurrucada en el hueco de una montaña. La pared calcárea es hoy un conocido sitio de escalada. Y si la escalada no te tienta, un mirador accesible en coche corona el acantilado: el panorama sobre el meandro, el castillo de Montfort y la campiña circundante es excepcional."}},
+     {km:3,lieu:"Château de Monfort",photo:"Monfort.jpg",note:{
+      fr:"Perché sur son piton au-dessus du méandre, le château de Montfort veille sur la rivière depuis le Moyen Âge. Détruit et rebâti cinq fois au fil des guerres, il doit son allure romantique aux restaurations du XIXe siècle. Ses tourelles dominent le village et le coude de la Dordogne : l'un des plus beaux coups d'œil de la descente.",
+      en:"Perched on its rocky spur above the meander, Montfort castle has watched over the river since the Middle Ages. Destroyed and rebuilt five times through the wars, it owes its romantic silhouette to 19th-century restorations. Its turrets dominate the village and the bend of the Dordogne: one of the finest sights of the descent.",
+      es:"Encaramado en su peñón sobre el meandro, el castillo de Montfort vela sobre el río desde la Edad Media. Destruido y reconstruido cinco veces a lo largo de las guerras, debe su silueta romántica a las restauraciones del siglo XIX. Sus torrecillas dominan el pueblo y el recodo del Dordoña: una de las vistas más bellas del descenso."}},
+     {km:5.2,lieu:"Rocher de Caudon",photo:"Rocher_de_Caudon_web.jpg",note:{
+      fr:"Le rocher de Caudon surplombe un passage d'eaux calmes de son promontoire calcaire. À son pied se cache la Maison du Passeur, site troglodytique considéré comme l'un des premiers lieux christianisés du Périgord, avec ses sarcophages et son enfeu taillés dans la roche.",
+      en:"The Caudon rock overhangs a stretch of calm water from its limestone promontory. At its foot hides the Maison du Passeur, a troglodyte site considered one of the first Christianised places in Périgord, with sarcophagi and a burial niche carved into the rock.",
+      es:"La roca de Caudon domina un tramo de aguas tranquilas desde su promontorio calcáreo. A sus pies se esconde la Maison du Passeur, un sitio troglodita considerado uno de los primeros lugares cristianizados del Périgord, con sarcófagos y un nicho funerario tallados en la roca."}},
+     {km:7.5,lieu:"Falaise de Vitrac",note:{
+      fr:"La haute muraille calcaire de Vitrac annonce la base : une centaine de mètres de strates empilées, creusées de cavités occupées dès la préhistoire. Levez les yeux — hirondelles et rapaces nichent aujourd'hui dans la paroi. À Vitrac, la grande descente des châteaux commence.",
+      en:"The high limestone wall of Vitrac announces the base: a hundred metres of stacked strata, hollowed with cavities occupied since prehistory. Look up — swallows and birds of prey now nest in the rock face. At Vitrac, the great castle descent begins.",
+      es:"La alta muralla calcárea de Vitrac anuncia la base: un centenar de metros de estratos apilados, horadados por cavidades ocupadas desde la prehistoria. Alza la vista — golondrinas y rapaces anidan hoy en la pared. En Vitrac empieza el gran descenso de los castillos."}}
    ]},
   {id:"carsac-vitrac",de:"Carsac-Aillac",a:"Vitrac",km:9,duree:"1h30",nom:"Le Cingle de Montfort",
-   tarifs:{adulte:18,enfant_5_12:11.5,kayak:22},
    navette:"Vitrac→Carsac 12min / arrivée directe à la base",
    resume:"Courte escapade idéale pour novices et familles. On serpente dans les méandres du Cingle de Monfort entre escarpements calcaires et berges sauvages, avant de rejoindre la base en douceur.",
    etapes:[
-     {km:0,lieu:"Plage de Carsac-Aillac",photo:"Depart%20de%20Carsac.jpg",note:{fr:"embarcadère face à la paroi blanche",en:"launch facing the white rock face",es:"embarcadero frente a la pared blanca"}},
-     {km:2,lieu:"Falaise du Cingle de Monfort",note:{fr:"éperon rocheux en virage serré",en:"rocky spur on a tight bend",es:"espolón rocoso en curva cerrada"}},
-     {km:3,lieu:"Château de Monfort",photo:"Monfort.jpg",note:{fr:"donjon médiéval perché sur la crête",en:"medieval keep perched on the ridge",es:"torreón medieval encaramado en la cresta"}},
-     {km:5.2,lieu:"Rocher de Caudon — la Maison du Passeur",note:{
+     {km:0,lieu:"Plage de Carsac-Aillac",photo:"Depart%20de%20Carsac.jpg",note:{
+      fr:"Bienvenue à Carsac-Aillac, votre point de départ, à sept kilomètres seulement de Sarlat-la-Canéda, la capitale du Périgord Noir. Né en 1961 de l'union de deux villages, Carsac et Aillac, c'est aujourd'hui l'un des bourgs les plus vivants de la vallée — et un camp de base idéal : la voie verte qui le traverse invite à la balade à pied ou à vélo le long de la rivière, la bastide de Domme et la cité médiévale de Sarlat sont à deux pas. Mais c'est la Dordogne qui vous attend : mise à l'eau depuis la plage de galets, face à la grande falaise blanche. Bonne descente !",
+      en:"Welcome to Carsac-Aillac, your starting point, just seven kilometres from Sarlat-la-Canéda, the capital of Périgord Noir. Born in 1961 from the union of two villages, Carsac and Aillac, it is today one of the liveliest little towns in the valley — and an ideal base camp: the greenway running through it invites you to walk or cycle along the river, and the bastide of Domme and the medieval town of Sarlat are close by. But it's the Dordogne that awaits you now: launch from the pebble beach, facing the great white cliff. Enjoy the descent!",
+      es:"Bienvenido a Carsac-Aillac, tu punto de partida, a solo siete kilómetros de Sarlat-la-Canéda, la capital del Périgord Noir. Nacido en 1961 de la unión de dos pueblos, Carsac y Aillac, es hoy uno de los burgos más vivos del valle — y un campamento base ideal: la vía verde que lo atraviesa invita a pasear a pie o en bici junto al río, y la bastida de Domme y la ciudad medieval de Sarlat están a un paso. Pero es el Dordoña el que te espera: puesta al agua desde la playa de cantos, frente al gran acantilado blanco. ¡Buen descenso!"}},
+     {km:2,lieu:"Falaise du Cingle de Monfort",note:{
+      fr:"Entre Carsac-Aillac et Vitrac, la Dordogne dessine ici l'un de ses plus beaux méandres : le Cingle de Montfort, une boucle presque fermée, serrée entre des falaises abruptes. À l'intérieur de la boucle, la plaine est étonnamment plate — vue d'en haut, on dirait une île nichée au creux d'une montagne. La paroi calcaire est aujourd'hui un site d'escalade réputé. Et si la grimpe ne vous tente pas, un belvédère accessible en voiture couronne la falaise : le panorama sur le cingle, le château de Montfort et la campagne environnante y est exceptionnel.",
+      en:"Between Carsac-Aillac and Vitrac, the Dordogne traces one of its most beautiful meanders here: the Cingle de Montfort, an almost closed loop hemmed in by sheer cliffs. Inside the loop the plain is surprisingly flat — seen from above, it looks like an island nestled in the hollow of a mountain. The limestone wall is now a popular climbing site. And if climbing isn't your thing, a viewpoint reachable by car crowns the cliff: the panorama over the meander, Montfort castle and the surrounding countryside is exceptional.",
+      es:"Entre Carsac-Aillac y Vitrac, el Dordoña dibuja aquí uno de sus meandros más bellos: el Cingle de Montfort, un bucle casi cerrado, encajado entre acantilados abruptos. En el interior del bucle la llanura es sorprendentemente plana — vista desde arriba, parece una isla acurrucada en el hueco de una montaña. La pared calcárea es hoy un conocido sitio de escalada. Y si la escalada no te tienta, un mirador accesible en coche corona el acantilado: el panorama sobre el meandro, el castillo de Montfort y la campiña circundante es excepcional."}},
+     {km:3,lieu:"Château de Monfort",photo:"Monfort.jpg",note:{
+      fr:"Perché sur son piton au-dessus du méandre, le château de Montfort veille sur la rivière depuis le Moyen Âge. Détruit et rebâti cinq fois au fil des guerres, il doit son allure romantique aux restaurations du XIXe siècle. Ses tourelles dominent le village et le coude de la Dordogne : l'un des plus beaux coups d'œil de la descente.",
+      en:"Perched on its rocky spur above the meander, Montfort castle has watched over the river since the Middle Ages. Destroyed and rebuilt five times through the wars, it owes its romantic silhouette to 19th-century restorations. Its turrets dominate the village and the bend of the Dordogne: one of the finest sights of the descent.",
+      es:"Encaramado en su peñón sobre el meandro, el castillo de Montfort vela sobre el río desde la Edad Media. Destruido y reconstruido cinco veces a lo largo de las guerras, debe su silueta romántica a las restauraciones del siglo XIX. Sus torrecillas dominan el pueblo y el recodo del Dordoña: una de las vistas más bellas del descenso."}},
+     {km:5.2,lieu:"Rocher de Caudon — la Maison du Passeur",photo:"Rocher_de_Caudon_web.jpg",note:{
       fr:"Au pied du rocher se dresse la Maison du Passeur, considérée comme l'un des premiers sites christianisés du Périgord. Le lieu garde des traces d'occupation gallo-romaine, avec des sarcophages et un enfeu taillés directement dans la roche. Son architecture médiévale a conservé un portail ouest, deux baies nord pour l'éclairage, et un clocher-mur sans cloche au sommet de la falaise.",
       en:"At the foot of the rock stands the Maison du Passeur, considered one of the first Christianised sites in Périgord. The place keeps traces of Gallo-Roman occupation, with sarcophagi and a burial niche carved directly into the rock. Its medieval architecture has preserved a west portal, two north windows for light, and a bell-gable without its bell at the top of the cliff.",
       es:"Al pie de la roca se alza la Maison du Passeur, considerada uno de los primeros lugares cristianizados del Périgord. El lugar conserva huellas de ocupación galorromana, con sarcófagos y un nicho funerario tallados directamente en la roca. Su arquitectura medieval conserva un portal oeste, dos vanos al norte para la iluminación y una espadaña sin campana en lo alto del acantilado."}},
-     {km:7.5,lieu:"Falaise de Vitrac",note:{fr:"haute strate calcaire aux grottes ancestrales",en:"high limestone strata with ancient caves",es:"altos estratos calcáreos con cuevas ancestrales"}},
+     {km:7.5,lieu:"Falaise de Vitrac",note:{
+      fr:"La haute muraille calcaire de Vitrac referme la descente : une centaine de mètres de strates empilées, creusées de cavités occupées dès la préhistoire. Levez les yeux — hirondelles et rapaces nichent aujourd'hui dans la paroi.",
+      en:"The high limestone wall of Vitrac closes the descent: a hundred metres of stacked strata, hollowed with cavities occupied since prehistory. Look up — swallows and birds of prey now nest in the rock face.",
+      es:"La alta muralla calcárea de Vitrac cierra el descenso: un centenar de metros de estratos apilados, horadados por cavidades ocupadas desde la prehistoria. Alza la vista — golondrinas y rapaces anidan hoy en la pared."}},
      {km:9,lieu:"Port de Vitrac — la Maison du passeur",photo:"Vitrac%20port.JPG",note:{
       fr:"Vous accostez au port de Vitrac, juste en face de la Maison du passeur, perchée sur le rocher de la rive opposée et à demi cachée dans la végétation de la falaise. Pendant la Seconde Guerre mondiale, la ligne de démarcation qui coupait la France en deux traversait ici la rivière : cette maison servait à faire passer clandestinement les gens de la zone occupée à la zone libre. Le port abritait aussi un vivier où l'on gardait vivants les saumons pêchés dans la rivière avant de les vendre au marché de Sarlat-la-Canéda. Débarquement directement au chalet de la base.",
       en:"You land at the port of Vitrac, right opposite the Ferryman's House, perched on the rock of the far bank and half hidden in the cliffside vegetation. During the Second World War, the demarcation line that split France in two crossed the river here: this house was used to smuggle people from the occupied zone to the free zone. The port also held a live-tank where salmon caught in the river were kept alive before being sold at the market of Sarlat-la-Canéda. You disembark right at the base's hut.",
       es:"Desembarcas en el puerto de Vitrac, justo enfrente de la Casa del barquero, encaramada en la roca de la orilla opuesta y medio escondida entre la vegetación del acantilado. Durante la Segunda Guerra Mundial, la línea de demarcación que partía Francia en dos cruzaba aquí el río: esta casa servía para pasar clandestinamente a la gente de la zona ocupada a la zona libre. El puerto albergaba también un vivero donde se mantenían vivos los salmones pescados en el río antes de venderlos en el mercado de Sarlat-la-Canéda. Desembarco directamente en el chalet de la base."}}
    ]},
   {id:"calviac-vitrac",de:"Calviac",a:"Vitrac",km:19,duree:"3h30",nom:"La Dordogne Nature",
-   tarifs:{adulte:25,enfant_5_12:15,kayak:29},
    navette:"Vitrac→Calviac / arrivée directe à la base",
    resume:"Itinéraire sauvage et historique depuis la cale de Calviac. On glisse au pied de demeures seigneuriales, d'un tablier de pont disgracieux et de berges habitées par les hirondelles, avant d'atteindre la tour de guet médiévale de Vitrac.",
    etapes:[
-     {km:0,lieu:"Cale de Calviac",photo:"Chateau%20de%20Fenelon.jpg",note:{fr:"vue sur Château de Fénelon, MH XIIe-XVIIe s.",en:"view of Fénelon Castle, listed monument, 12th–17th c.",es:"vistas al castillo de Fénelon, monumento histórico, s. XII–XVII"}},
-     {km:4.5,lieu:"Château de Veyrignac",note:{fr:"demeure sur falaise rive gauche, décor de film",en:"cliff-top residence on the left bank, film location",es:"mansión sobre el acantilado de la orilla izquierda, escenario de cine"}},
-     {km:6.5,lieu:"Pont de Groléjac",photo:"Embarcadere%20Grolegeac.jpg",note:{fr:"confluence avec la Germaine, village pêcheur",en:"confluence with the Germaine, fishing village",es:"confluencia con el Germaine, pueblo pesquero"}},
-     {km:8.5,lieu:"Cale de Carsac",note:{fr:"nids d'hirondelles de rivage, îlot à franchir",en:"sand martin nests, small island to pass",es:"nidos de aviones zapadores, islote que franquear"}},
-     {km:10.5,lieu:"Falaise du Cingle de Monfort",note:{fr:"vertigineux éperon dominant le coude",en:"dizzying spur above the river bend",es:"vertiginoso espolón sobre el meandro"}},
-     {km:12,lieu:"Château de Monfort",photo:"Monfort.jpg",note:{fr:"citadelle rasée et rebâtie cinq fois, XIIIe s.",en:"citadel razed and rebuilt five times, 13th c.",es:"ciudadela arrasada y reconstruida cinco veces, s. XIII"}},
-     {km:14,lieu:"Rocher de Caudon",note:{fr:"chaos rocheux en surplomb des eaux calmes",en:"rocky chaos overhanging calm waters",es:"caos rocoso sobre las aguas tranquilas"}},
-     {km:19,lieu:"Falaise de Vitrac + Tour de guet",note:{fr:"vigie normande IXe-XIIe s., arrivée au chalet",en:"Norman watchtower, 9th–12th c., arrival at the base hut",es:"atalaya normanda, s. IX–XII, llegada al chalet de la base"}}
+     {km:0,lieu:"Cale de Calviac",photo:"Chateau%20de%20Fenelon.jpg",note:{
+      fr:"Départ depuis la cale de Calviac, sur la rive la plus sauvage de la Dordogne. Au-dessus de vous, le château de Fénelon dresse sa triple enceinte : forteresse des XIIe-XVIIe siècles classée monument historique, coiffée d'une remarquable toiture de lauzes. C'est ici que naquit en 1651 François de Salignac de La Mothe-Fénelon, écrivain et précepteur du petit-fils de Louis XIV. Installez-vous, la rivière fait le reste.",
+      en:"You set off from the Calviac slipway, on the wildest bank of the Dordogne. Above you rises the triple wall of Fénelon castle: a 12th–17th-century fortress, a listed monument crowned with a remarkable stone-slab roof. François de Salignac de La Mothe-Fénelon, writer and tutor to Louis XIV's grandson, was born here in 1651. Settle in — the river does the rest.",
+      es:"Salida desde la rampa de Calviac, en la orilla más salvaje del Dordoña. Sobre ti se alza el triple recinto del castillo de Fénelon: fortaleza de los siglos XII-XVII, monumento histórico coronado por una notable techumbre de lajas. Aquí nació en 1651 François de Salignac de La Mothe-Fénelon, escritor y preceptor del nieto de Luis XIV. Acomódate — el río hace el resto."}},
+     {km:4.5,lieu:"Château de Veyrignac",note:{
+      fr:"Sur la falaise de la rive gauche apparaît le château de Veyrignac, élégante demeure du XVIIIe siècle. Incendié en 1944, il a été patiemment restauré et a retrouvé sa silhouette classique face à la rivière — un décor si photogénique qu'il a servi à des tournages.",
+      en:"On the cliff of the left bank appears Veyrignac castle, an elegant 18th-century residence. Burned in 1944, it was patiently restored and regained its classical silhouette facing the river — a setting so photogenic it has served as a film location.",
+      es:"Sobre el acantilado de la orilla izquierda aparece el castillo de Veyrignac, elegante mansión del siglo XVIII. Incendiado en 1944, fue pacientemente restaurado y recuperó su silueta clásica frente al río — un escenario tan fotogénico que ha servido para rodajes."}},
+     {km:6.5,lieu:"Pont de Groléjac",photo:"Embarcadere%20Grolegeac.jpg",note:{
+      fr:"Au pont de Groléjac, la Germaine vient rejoindre la Dordogne. Le village fut longtemps un port actif où pêcheurs et gabariers se croisaient ; sous les arches, l'eau calme invite à une pause avant la suite de la descente.",
+      en:"At Groléjac bridge, the Germaine stream joins the Dordogne. The village was long a busy little port where fishermen and bargemen crossed paths; beneath the arches, the calm water invites a pause before the rest of the descent.",
+      es:"En el puente de Groléjac, el arroyo Germaine se une al Dordoña. El pueblo fue durante mucho tiempo un pequeño puerto activo donde se cruzaban pescadores y gabarreros; bajo los arcos, el agua tranquila invita a una pausa antes de seguir el descenso."}},
+     {km:8.5,lieu:"Cale de Carsac",note:{
+      fr:"Dans les berges de terre meuble nichent les hirondelles de rivage : observez les petites galeries qu'elles creusent au-dessus de l'eau. Un îlot partage ici la rivière — suivez le bras principal, dans le courant.",
+      en:"Sand martins nest in the soft earth banks here: look for the little tunnels they dig above the water. A small island splits the river — follow the main channel, staying in the current.",
+      es:"En las orillas de tierra blanda anidan los aviones zapadores: observa las pequeñas galerías que excavan sobre el agua. Un islote divide aquí el río — sigue el brazo principal, en la corriente."}},
+     {km:10.5,lieu:"Falaise du Cingle de Monfort",note:{
+      fr:"Entre Carsac-Aillac et Vitrac, la Dordogne dessine ici l'un de ses plus beaux méandres : le Cingle de Montfort, une boucle presque fermée, serrée entre des falaises abruptes. À l'intérieur de la boucle, la plaine est étonnamment plate — vue d'en haut, on dirait une île nichée au creux d'une montagne. La paroi calcaire est aujourd'hui un site d'escalade réputé. Et si la grimpe ne vous tente pas, un belvédère accessible en voiture couronne la falaise : le panorama sur le cingle, le château de Montfort et la campagne environnante y est exceptionnel.",
+      en:"Between Carsac-Aillac and Vitrac, the Dordogne traces one of its most beautiful meanders here: the Cingle de Montfort, an almost closed loop hemmed in by sheer cliffs. Inside the loop the plain is surprisingly flat — seen from above, it looks like an island nestled in the hollow of a mountain. The limestone wall is now a popular climbing site. And if climbing isn't your thing, a viewpoint reachable by car crowns the cliff: the panorama over the meander, Montfort castle and the surrounding countryside is exceptional.",
+      es:"Entre Carsac-Aillac y Vitrac, el Dordoña dibuja aquí uno de sus meandros más bellos: el Cingle de Montfort, un bucle casi cerrado, encajado entre acantilados abruptos. En el interior del bucle la llanura es sorprendentemente plana — vista desde arriba, parece una isla acurrucada en el hueco de una montaña. La pared calcárea es hoy un conocido sitio de escalada. Y si la escalada no te tienta, un mirador accesible en coche corona el acantilado: el panorama sobre el meandro, el castillo de Montfort y la campiña circundante es excepcional."}},
+     {km:12,lieu:"Château de Monfort",photo:"Monfort.jpg",note:{
+      fr:"Perché sur son piton au-dessus du méandre, le château de Montfort veille sur la rivière depuis le Moyen Âge. Détruit et rebâti cinq fois au fil des guerres, il doit son allure romantique aux restaurations du XIXe siècle. Ses tourelles dominent le village et le coude de la Dordogne : l'un des plus beaux coups d'œil de la descente.",
+      en:"Perched on its rocky spur above the meander, Montfort castle has watched over the river since the Middle Ages. Destroyed and rebuilt five times through the wars, it owes its romantic silhouette to 19th-century restorations. Its turrets dominate the village and the bend of the Dordogne: one of the finest sights of the descent.",
+      es:"Encaramado en su peñón sobre el meandro, el castillo de Montfort vela sobre el río desde la Edad Media. Destruido y reconstruido cinco veces a lo largo de las guerras, debe su silueta romántica a las restauraciones del siglo XIX. Sus torrecillas dominan el pueblo y el recodo del Dordoña: una de las vistas más bellas del descenso."}},
+     {km:14,lieu:"Rocher de Caudon",photo:"Rocher_de_Caudon_web.jpg",note:{
+      fr:"Le rocher de Caudon surplombe un passage d'eaux calmes de son chaos de blocs calcaires. À son pied se cache la Maison du Passeur, site troglodytique considéré comme l'un des premiers lieux christianisés du Périgord, avec ses sarcophages et son enfeu taillés dans la roche.",
+      en:"The Caudon rock overhangs a stretch of calm water with its chaos of limestone blocks. At its foot hides the Maison du Passeur, a troglodyte site considered one of the first Christianised places in Périgord, with sarcophagi and a burial niche carved into the rock.",
+      es:"La roca de Caudon domina un tramo de aguas tranquilas con su caos de bloques calcáreos. A sus pies se esconde la Maison du Passeur, un sitio troglodita considerado uno de los primeros lugares cristianizados del Périgord, con sarcófagos y un nicho funerario tallados en la roca."}},
+     {km:19,lieu:"Falaise de Vitrac + Tour de guet",note:{
+      fr:"Dernière ligne droite sous la falaise de Vitrac et sa tour de guet, vigie normande élevée entre les IXe et XIIe siècles pour surveiller la rivière et prévenir les invasions venues de l'aval. Vous accostez directement au chalet de la base. Belle descente — à bientôt sur la Dordogne !",
+      en:"Final stretch beneath the Vitrac cliff and its watchtower, a Norman lookout built between the 9th and 12th centuries to watch the river and warn of invasions from downstream. You land directly at the base's hut. Well paddled — see you again on the Dordogne!",
+      es:"Última recta bajo el acantilado de Vitrac y su atalaya, vigía normanda levantada entre los siglos IX y XII para vigilar el río y prevenir invasiones llegadas de aguas abajo. Desembarcas directamente en el chalet de la base. ¡Buen descenso — hasta pronto en el Dordoña!"}}
    ]}
 ];
 
@@ -640,6 +684,21 @@ function makeCircuitRoute(ci){
 }
 
 const CIRCUIT_ROUTES=CIRCUITS_CANOE.map(makeCircuitRoute);
+
+/* ---- Vallée des 6 Châteaux = Carsac→Vitrac + Vitrac→Beynac ----
+   À partir de Vitrac (km 9), le circuit reprend intégralement les étapes
+   documentées de la descente Vitrac→Beynac : photos, récits trilingues,
+   ponts et châteaux (ordre conforme au plan Canoës Loisirs). */
+(function(){
+  const cb=CIRCUIT_ROUTES.find(r=>r.id==="carsac-beynac");
+  if(!cb)return;
+  const suite=RANDO_FULL.steps.map(s=>Object.assign({},s,{km:Math.round((s.km+9)*10)/10}));
+  const fin=suite[suite.length-1];
+  fin.txt={fr:fin.txt.fr.replace("16 kilomètres","25 kilomètres"),
+           en:fin.txt.en.replace("16-kilometre","25-kilometre"),
+           es:fin.txt.es.replace("16 kilómetros","25 kilómetros")};
+  cb.steps=cb.steps.filter(s=>s.km<9).concat(suite);
+})();
 
 /* ---- Liste des parcours canoë (descentes + circuits) ---- */
 const CANOE_ROUTES=RANDOS.concat(CIRCUIT_ROUTES);
@@ -1255,9 +1314,19 @@ window.addEventListener('beforeinstallprompt',e=>{
   const b=document.getElementById('installBtn');if(b)b.classList.remove('hidden');
 });
 function promptInstall(){
-  if(!deferredPrompt)return;
-  deferredPrompt.prompt();deferredPrompt=null;
-  document.getElementById('installBtn').classList.add('hidden');
+  if(deferredPrompt){
+    deferredPrompt.prompt();deferredPrompt=null;
+    document.getElementById('installBtn').classList.add('hidden');
+    return;
+  }
+  if(IS_IOS)toast(t().iosInstall);
+}
+/* iOS ne propose pas d'installation automatique (pas de beforeinstallprompt) :
+   on montre le bouton 📲 qui explique la manœuvre Partager → Écran d'accueil. */
+const IS_IOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+const IS_STANDALONE=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
+if(IS_IOS&&!IS_STANDALONE){
+  const b=document.getElementById('installBtn');if(b)b.classList.remove('hidden');
 }
 window.addEventListener('appinstalled',()=>{
   document.getElementById('installBtn').classList.add('hidden');
