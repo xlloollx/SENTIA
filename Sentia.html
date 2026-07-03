@@ -1220,7 +1220,7 @@ function toast(m){const el=document.getElementById('toast');el.textContent=m;el.
    2) STATS_ENDPOINT : le compteur Val Town qui envoie l'email du soir.
       Les événements sont mis en file locale et expédiés au retour du réseau,
       pour compter aussi les usages hors connexion sur la rivière. */
-const STATS_ENDPOINT="";   // URL du val Val Town — à renseigner après création
+const STATS_ENDPOINT="https://sentia--ded251e4769f11f180bc1607ee4eb77e.web.val.run";   // compteur Val Town
 function gcCount(path){
   try{if(window.goatcounter&&window.goatcounter.count)window.goatcounter.count({path:path,event:true});}catch(e){}
 }
