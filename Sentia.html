@@ -884,7 +884,7 @@ let ecoTimer=null,ecoOn=false;
 function ecoShow(){
   if(ecoOn)return;
   askMotion();
-  ecoOn=true;lastG=null;
+  ecoOn=true;gLP=null;
   const s=CUR&&CUR.steps[stepIdx];
   document.getElementById('boName').textContent=s?s.nom[lang]:'Sentia';
   document.getElementById('boHint').textContent=t().ecoHint;
@@ -908,7 +908,8 @@ document.addEventListener('touchstart',()=>{if(!ecoOn)ecoArm();},{passive:true})
    rallume que sur un mouvement franc (lever brusque, > 14 m/s²).
    iOS exige une autorisation, demandée lors d'un geste utilisateur
    (activation du GPS ou bouton 🌙). */
-let motionOK=false,lastG=null;
+let motionOK=false,gLP=null;
+const SHAKE_SEUIL=11;   // m/s² — clapot ≈ 2-3, coup de pagaie ≈ 5-8, secousse volontaire > 11
 function askMotion(){
   if(motionOK)return;
   if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function'){
@@ -919,16 +920,20 @@ window.addEventListener('devicemotion',e=>{
   if(!ecoOn)return;
   let m=0;
   const a=e.acceleration;
-  if(a&&a.x!==null){
-    m=Math.hypot(a.x,a.y,a.z);            // accélération sans la gravité
+  if(a&&a.x!==null&&(a.x!==0||a.y!==0||a.z!==0)){
+    m=Math.hypot(a.x,a.y,a.z);            // accélération linéaire (sans gravité)
   }else{
     const g=e.accelerationIncludingGravity;
     if(!g||g.x===null)return;
-    const cur=Math.hypot(g.x,g.y,g.z);    // repli : variation de |g|
-    if(lastG===null){lastG=cur;return;}
-    m=Math.abs(cur-lastG);lastG=cur;
+    if(!gLP){gLP={x:g.x,y:g.y,z:g.z};return;}
+    // passe-bas pour isoler la gravité, l'écart = la secousse (passe-haut)
+    const k=0.8;
+    gLP.x=k*gLP.x+(1-k)*g.x;
+    gLP.y=k*gLP.y+(1-k)*g.y;
+    gLP.z=k*gLP.z+(1-k)*g.z;
+    m=Math.hypot(g.x-gLP.x,g.y-gLP.y,g.z-gLP.z);
   }
-  if(m>14)ecoHide();
+  if(m>SHAKE_SEUIL)ecoHide();
 },{passive:true});
 
 /* ---- Centres d'intérêt ---- */
