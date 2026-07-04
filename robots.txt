@@ -1,2 +1,3 @@
+# Sentia — audioguide canoë Dordogne
 User-agent: *
 Allow: /
