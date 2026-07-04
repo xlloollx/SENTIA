@@ -318,7 +318,7 @@ const UI={
     lockOk:"🔓 Accès débloqué !",lockedTag:"🔒 Réservé",freeTag:"Gratuit",
     offline:"📡 Hors connexion — vos parcours et photos restent disponibles.",
     iosInstall:"📲 Sur iPhone : bouton Partager, puis « Sur l'écran d'accueil ».",
-    ecoHint:"Écran en veille pour économiser la batterie. Le guide GPS et la voix continuent. Touchez pour rallumer. N'éteignez pas le téléphone avec le bouton.",
+    ecoHint:"Écran en veille pour économiser la batterie. Le guide GPS et la voix continuent. Touchez l'écran ou secouez le téléphone pour rallumer. N'éteignez pas le téléphone avec le bouton.",
     nearVillage:"Près de",
     hikeKm:"Distance",hikeDp:"Dénivelé +",hikeDn:"Dénivelé -",hikeT:"Durée",hikeF:"Difficulté",hikeDep:"Départ",
     hikeOpen:"📍 Localiser sur Google Maps",hikeClose:"✕ Fermer",
@@ -343,7 +343,7 @@ const UI={
     lockOk:"🔓 Access unlocked!",lockedTag:"🔒 Locked",freeTag:"Free",
     offline:"📡 Offline — your routes and photos are still available.",
     iosInstall:"📲 On iPhone: tap Share, then “Add to Home Screen”.",
-    ecoHint:"Screen resting to save battery. The GPS guide and the voice keep running. Tap to wake. Don't switch the phone off with the power button.",
+    ecoHint:"Screen resting to save battery. The GPS guide and the voice keep running. Tap the screen or shake the phone to wake. Don't switch the phone off with the power button.",
     nearVillage:"Near",
     hikeKm:"Distance",hikeDp:"Ascent",hikeDn:"Descent",hikeT:"Duration",hikeF:"Difficulty",hikeDep:"Start",
     hikeOpen:"📍 Locate on Google Maps",hikeClose:"✕ Close",
@@ -368,7 +368,7 @@ const UI={
     lockOk:"🔓 ¡Acceso desbloqueado!",lockedTag:"🔒 Bloqueado",freeTag:"Gratis",
     offline:"📡 Sin conexión — tus rutas y fotos siguen disponibles.",
     iosInstall:"📲 En iPhone: botón Compartir y luego «Añadir a pantalla de inicio».",
-    ecoHint:"Pantalla en reposo para ahorrar batería. El guía GPS y la voz siguen funcionando. Toca para reactivar. No apagues el teléfono con el botón.",
+    ecoHint:"Pantalla en reposo para ahorrar batería. El guía GPS y la voz siguen funcionando. Toca la pantalla o agita el teléfono para reactivar. No apagues el teléfono con el botón.",
     nearVillage:"Cerca de",
     hikeKm:"Distancia",hikeDp:"Desnivel +",hikeDn:"Desnivel -",hikeT:"Duración",hikeF:"Dificultad",hikeDep:"Salida",
     hikeOpen:"📍 Localizar en Google Maps",hikeClose:"✕ Cerrar",
@@ -883,7 +883,8 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 let ecoTimer=null,ecoOn=false;
 function ecoShow(){
   if(ecoOn)return;
-  ecoOn=true;
+  askMotion();
+  ecoOn=true;lastG=null;
   const s=CUR&&CUR.steps[stepIdx];
   document.getElementById('boName').textContent=s?s.nom[lang]:'Sentia';
   document.getElementById('boHint').textContent=t().ecoHint;
@@ -901,6 +902,34 @@ function ecoArm(){
   if(gpsActive)ecoTimer=setTimeout(ecoShow,30000);
 }
 document.addEventListener('touchstart',()=>{if(!ecoOn)ecoArm();},{passive:true});
+
+/* ---- Réveil par secousse ----
+   Sur l'eau, le téléphone bouge en continu (clapot ≈ 2-3 m/s²) : on ne
+   rallume que sur un mouvement franc (lever brusque, > 14 m/s²).
+   iOS exige une autorisation, demandée lors d'un geste utilisateur
+   (activation du GPS ou bouton 🌙). */
+let motionOK=false,lastG=null;
+function askMotion(){
+  if(motionOK)return;
+  if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function'){
+    DeviceMotionEvent.requestPermission().then(s=>{motionOK=(s==='granted');}).catch(()=>{});
+  }else motionOK=true;
+}
+window.addEventListener('devicemotion',e=>{
+  if(!ecoOn)return;
+  let m=0;
+  const a=e.acceleration;
+  if(a&&a.x!==null){
+    m=Math.hypot(a.x,a.y,a.z);            // accélération sans la gravité
+  }else{
+    const g=e.accelerationIncludingGravity;
+    if(!g||g.x===null)return;
+    const cur=Math.hypot(g.x,g.y,g.z);    // repli : variation de |g|
+    if(lastG===null){lastG=cur;return;}
+    m=Math.abs(cur-lastG);lastG=cur;
+  }
+  if(m>14)ecoHide();
+},{passive:true});
 
 /* ---- Centres d'intérêt ---- */
 function openPoi(){
@@ -982,7 +1011,7 @@ function haversine(lat1,lng1,lat2,lng2){
 function toggleGPS(){gpsActive?stopGPS():startGPS();}
 function startGPS(){
   if(!('geolocation'in navigator)){toast(t().gpsUnavailable);return;}
-  gpsActive=true;updateGpsBtn();updateWake();ecoArm();
+  gpsActive=true;updateGpsBtn();updateWake();askMotion();ecoArm();
   gpsWatchId=navigator.geolocation.watchPosition(onGpsPos,onGpsErr,{enableHighAccuracy:true,maximumAge:5000,timeout:15000});
   if(gpsAnimFrame===null)gpsPulseLoop();
 }
