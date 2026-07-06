@@ -319,6 +319,8 @@ const UI={
     offline:"📡 Hors connexion — vos parcours et photos restent disponibles.",
     iosInstall:"📲 Sur iPhone : bouton Partager, puis « Sur l'écran d'accueil ».",
     ecoHint:"Écran en veille pour économiser la batterie. Le guide GPS et la voix continuent. Touchez l'écran ou secouez le téléphone pour rallumer. N'éteignez pas le téléphone avec le bouton.",
+    demoVoix:"🔊 La démo vocale s'arrête ici. Pour l'audioguide complet, demandez le code d'accès à votre base de location.",
+    needNet:"📡 Connexion nécessaire pour activer le code. Réessayez avec du réseau.",
     nearVillage:"Près de",
     hikeKm:"Distance",hikeDp:"Dénivelé +",hikeDn:"Dénivelé -",hikeT:"Durée",hikeF:"Difficulté",hikeDep:"Départ",
     hikeOpen:"📍 Localiser sur Google Maps",hikeClose:"✕ Fermer",
@@ -344,6 +346,8 @@ const UI={
     offline:"📡 Offline — your routes and photos are still available.",
     iosInstall:"📲 On iPhone: tap Share, then “Add to Home Screen”.",
     ecoHint:"Screen resting to save battery. The GPS guide and the voice keep running. Tap the screen or shake the phone to wake. Don't switch the phone off with the power button.",
+    demoVoix:"🔊 The voice demo stops here. For the full audioguide, ask your rental base for the access code.",
+    needNet:"📡 Internet connection needed to activate the code. Try again when you have network.",
     nearVillage:"Near",
     hikeKm:"Distance",hikeDp:"Ascent",hikeDn:"Descent",hikeT:"Duration",hikeF:"Difficulty",hikeDep:"Start",
     hikeOpen:"📍 Locate on Google Maps",hikeClose:"✕ Close",
@@ -369,6 +373,8 @@ const UI={
     offline:"📡 Sin conexión — tus rutas y fotos siguen disponibles.",
     iosInstall:"📲 En iPhone: botón Compartir y luego «Añadir a pantalla de inicio».",
     ecoHint:"Pantalla en reposo para ahorrar batería. El guía GPS y la voz siguen funcionando. Toca la pantalla o agita el teléfono para reactivar. No apagues el teléfono con el botón.",
+    demoVoix:"🔊 La demo de voz termina aquí. Para la audioguía completa, pide el código de acceso a tu base de alquiler.",
+    needNet:"📡 Se necesita conexión para activar el código. Inténtalo de nuevo con red.",
     nearVillage:"Cerca de",
     hikeKm:"Distancia",hikeDp:"Desnivel +",hikeDn:"Desnivel -",hikeT:"Duración",hikeF:"Dificultad",hikeDep:"Salida",
     hikeOpen:"📍 Localizar en Google Maps",hikeClose:"✕ Cerrar",
@@ -784,18 +790,72 @@ function openCodeModal(){
   setTimeout(()=>document.getElementById('codeInput').focus(),50);
 }
 function closeCodeModal(){navBack();}
+/* Deux familles de codes :
+   - le code maître (haché en local) : fonctionne toujours, même hors ligne ;
+   - les codes des bases clientes : vérifiés en ligne auprès du serveur de
+     licences (LICENCE_ENDPOINT), qui permet d'ajouter/désactiver une base
+     sans republier l'application. L'activation exige du réseau (elle se
+     fait à la base de location) ; ensuite tout fonctionne hors ligne. */
+const LICENCE_ENDPOINT="https://sentia--cf208fe4791b11f19a671607ee4eb77e.web.val.run";   // sentiaAdmin dans sentia/sentiaStats
+function unlockLocal(base){
+  UNLOCKED=true;
+  try{localStorage.setItem('sentiaUnlocked','1');localStorage.setItem('sentiaBase',base);}catch(e){}
+  updateLockIcon();
+  closeCodeModal();
+  toast(t().lockOk);
+  renderHome();
+}
 function submitCode(){
   const val=document.getElementById('codeInput').value.trim().toLowerCase();
-  if(codeHash(val)===ADMIN_HASH){
-    UNLOCKED=true;
-    try{localStorage.setItem('sentiaUnlocked','1');}catch(e){}
-    updateLockIcon();
-    closeCodeModal();
-    toast(t().lockOk);
-    renderHome();
-  }else{
-    document.getElementById('codeError').textContent=t().lockWrong;
+  const err=document.getElementById('codeError');
+  if(codeHash(val)===ADMIN_HASH){unlockLocal('master');return;}
+  if(!LICENCE_ENDPOINT){err.textContent=t().lockWrong;return;}
+  if(!navigator.onLine){err.textContent=t().needNet;return;}
+  err.textContent='…';
+  fetch(LICENCE_ENDPOINT+'/api/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:val})})
+    .then(r=>r.json())
+    .then(j=>{
+      if(j&&j.ok){
+        try{localStorage.setItem('sentiaCode',val);}catch(e){}
+        unlockLocal(j.base||'base');
+        track('activation:'+(j.base||'inconnue'));gcCount('activation-'+(j.base||'inconnue'));
+      }else err.textContent=t().lockWrong;
+    })
+    .catch(()=>{err.textContent=t().needNet;});
+}
+/* Revalidation silencieuse : à chaque ouverture avec réseau, on revérifie
+   le code de base mémorisé. Base désactivée (non renouvelée) → l'app se
+   reverrouille d'elle-même. Le code maître n'est jamais revalidé. */
+function revaliderLicence(){
+  let code=null;
+  try{code=localStorage.getItem('sentiaCode');}catch(e){}
+  if(!UNLOCKED||!code||!LICENCE_ENDPOINT||!navigator.onLine)return;
+  fetch(LICENCE_ENDPOINT+'/api/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:code})})
+    .then(r=>r.json())
+    .then(j=>{
+      if(j&&j.ok===false){
+        try{localStorage.removeItem('sentiaUnlocked');localStorage.removeItem('sentiaCode');localStorage.removeItem('sentiaBase');}catch(e){}
+        UNLOCKED=false;updateLockIcon();renderHome();
+      }
+    })
+    .catch(()=>{});
+}
+
+/* ---- Démo vocale limitée ----
+   Sans code, la route gratuite reste lisible en entier (texte), mais la
+   voix s'arrête après les premières étapes : la démo donne envie, le
+   produit complet se demande à la base de location. */
+const DEMO_VOIX_ETAPES=3;
+function voixAutorisee(){
+  return UNLOCKED||CUR.id!==FREE_ROUTE_ID||stepIdx<DEMO_VOIX_ETAPES;
+}
+function direEtape(txt,onDone){
+  if(!voixAutorisee()){
+    if(playing)stopPlay();
+    toast(t().demoVoix,6000);
+    return;
   }
+  speak(txt,onDone);
 }
 
 /* ---- Accueil : liste directe des parcours canoë ---- */
@@ -1069,7 +1129,7 @@ function onGpsPos(pos){
     toast(t().gpsNear+" "+CUR.steps[best].nom[lang]);
     stopPlay();stopVoice();
     showStep(best);
-    speak(CUR.steps[best].txt[lang]);
+    direEtape(CUR.steps[best].txt[lang]);
   }else{
     drawMap();  // le petit canoë suit la position GPS réelle même sans changer d'étape
   }
@@ -1089,7 +1149,7 @@ function startPlay(){
   document.getElementById('playBtn').textContent='⏸';
   document.getElementById('liveDot').classList.add('live');
   document.getElementById('liveTxt').textContent=t().running;
-  speak(CUR.steps[stepIdx].txt[lang],advanceAfterSpeech);
+  direEtape(CUR.steps[stepIdx].txt[lang],advanceAfterSpeech);
 }
 function stopPlay(){
   playing=false;updateWake();          // empêche advanceAfterSpeech de continuer
@@ -1106,7 +1166,7 @@ function advanceAfterSpeech(){
     playTimer=setTimeout(()=>{
       if(!playing)return;              // double sécurité avant d'avancer
       showStep(stepIdx+1);
-      speak(CUR.steps[stepIdx].txt[lang],advanceAfterSpeech);
+      direEtape(CUR.steps[stepIdx].txt[lang],advanceAfterSpeech);
     },1400);
   }else stopPlay();
 }
@@ -1133,7 +1193,7 @@ function setupMap(){
         stopPlay();stopVoice();
         if(gpsActive)manualStep=true;
         showStep(best);
-        speak(CUR.steps[best].txt[lang]);
+        direEtape(CUR.steps[best].txt[lang]);
       }
     };
     c.addEventListener('click',onTap);
@@ -1335,7 +1395,7 @@ function speak(txt,onDone){
         let best=stepIdx,bestD=Infinity;
         CUR.steps.forEach((s,i)=>{const d=haversine(gpsPos.lat,gpsPos.lng,s.lat,s.lng);if(d<bestD){bestD=d;best=i;}});
         manualStep=false;
-        if(best!==stepIdx){showStep(best);speak(CUR.steps[best].txt[lang]);}
+        if(best!==stepIdx){showStep(best);direEtape(CUR.steps[best].txt[lang]);}
       },2500);
     }
   };
@@ -1347,7 +1407,7 @@ function stopVoice(){
   if('speechSynthesis'in window)window.speechSynthesis.cancel();
   speaking=false;setVoiceBtn(false);
 }
-function toggleVoice(){if(speaking)stopVoice();else speak(CUR.steps[stepIdx].txt[lang]);}
+function toggleVoice(){if(speaking)stopVoice();else direEtape(CUR.steps[stepIdx].txt[lang]);}
 function setVoiceBtn(on){const b=document.getElementById('voiceBtn');b.classList.toggle('playing',on);b.innerHTML=on?t().stop:t().listen;}
 
 /* ---- Toast ---- */
@@ -1382,7 +1442,18 @@ function flushStats(){
     .catch(()=>{});
 }
 window.addEventListener('online',flushStats);
+/* QR personnalisé par base : l'URL ?b=nom-de-la-base attribue les visites
+   et installations à la base qui a distribué le QR. Mémorisé sur l'appareil. */
+try{
+  const qb=new URLSearchParams(location.search).get('b');
+  if(qb)localStorage.setItem('sentiaQrBase',qb.slice(0,40).toLowerCase());
+}catch(e){}
 track('visite');
+try{
+  const qb2=localStorage.getItem('sentiaQrBase');
+  if(qb2){track('vb:'+qb2);gcCount('visite-'+qb2);}
+}catch(e){}
+revaliderLicence();
 
 /* ---- PWA : service worker (hors connexion) ---- */
 if('serviceWorker'in navigator&&location.protocol!=='file:'){
@@ -1413,6 +1484,10 @@ if(IS_IOS&&!IS_STANDALONE){
 window.addEventListener('appinstalled',()=>{
   document.getElementById('installBtn').classList.add('hidden');
   track('installation');gcCount('installation');
+  try{
+    const qb=localStorage.getItem('sentiaQrBase');
+    if(qb){track('ib:'+qb);gcCount('install-'+qb);}
+  }catch(e){}
 });
 
 /* ---- Hors connexion : rassurer l'utilisateur ---- */
