@@ -749,7 +749,7 @@ function isRouteFree(r){return r.id===FREE_ROUTE_ID;}
 function isRouteLocked(r){return !isRouteFree(r)&&!UNLOCKED;}
 
 /* ---- État ---- */
-let lang='fr',stepIdx=0,playing=false,playTimer=null,mapCtx=null,speaking=false,currentUtterance=null,mapPositions=[],CUR=RANDO_SHORT;
+let lang='fr',stepIdx=0,mapCtx=null,speaking=false,currentUtterance=null,mapPositions=[],CUR=RANDO_SHORT;
 function t(){return UI[lang];}
 
 /* ---- Langue ---- */
@@ -851,7 +851,6 @@ function voixAutorisee(){
 }
 function direEtape(txt,onDone){
   if(!voixAutorisee()){
-    if(playing)stopPlay();
     toast(t().demoVoix,6000);
     return;
   }
@@ -914,7 +913,7 @@ function closeTop(){
   const poi=document.getElementById('poi');
   if(poi.style.display==='flex'){poi.style.display='none';document.getElementById('home').style.display='flex';return;}
   const tr=document.getElementById('trail');
-  if(tr.style.display==='flex'){stopPlay();stopVoice();stopGPS();tr.style.display='none';document.getElementById('home').style.display='flex';return;}
+  if(tr.style.display==='flex'){stopVoice();stopGPS();tr.style.display='none';document.getElementById('home').style.display='flex';return;}
 }
 function goHome(){navBack();}
 
@@ -923,7 +922,7 @@ function goHome(){navBack();}
    ou que la lecture audio est en cours. */
 let wakeLock=null;
 async function updateWake(){
-  const need=gpsActive||playing;
+  const need=gpsActive;
   if(need&&!wakeLock&&'wakeLock'in navigator){
     try{wakeLock=await navigator.wakeLock.request('screen');
       wakeLock.addEventListener('release',()=>{wakeLock=null;});}catch(e){}
@@ -1032,7 +1031,7 @@ function showStep(i){
   document.getElementById('progFill').style.width=(s.km/CUR.total*100)+'%';
   document.getElementById('progDone').textContent=s.km+" "+t().kmDone;
   document.getElementById('progLeft').textContent=(CUR.total-s.km).toFixed(1)+" "+t().kmLeft;
-  document.getElementById('liveTxt').textContent=playing?t().running:t().stopped;
+  document.getElementById('liveTxt').textContent=gpsActive?t().running:t().stopped;
   document.getElementById('voiceBtn').innerHTML=speaking?t().stop:t().listen;
   document.getElementById('photoStepBtn').innerHTML=t().photoBtn;
   document.getElementById('trailName').textContent=CUR.nom[lang];
@@ -1043,7 +1042,7 @@ function showStep(i){
   drawMap();
 }
 function goStep(i){stopVoice();if(gpsActive)manualStep=true;showStep(i);}
-function nextStep(){if(stepIdx<CUR.steps.length-1){stopVoice();if(gpsActive)manualStep=true;showStep(stepIdx+1);}else stopPlay();}
+function nextStep(){if(stepIdx<CUR.steps.length-1){stopVoice();if(gpsActive)manualStep=true;showStep(stepIdx+1);}}
 function prevStep(){if(stepIdx>0){stopVoice();if(gpsActive)manualStep=true;showStep(stepIdx-1);}}
 
 /* ---- Fenêtre photo d'un point ----
@@ -1065,6 +1064,7 @@ function closePhotoModal(){navBack();}
    à chaque étape (formule de Haversine). Sous ~60 m d'un point, l'étape
    s'affiche et se lit automatiquement, sans interrompre la navigation
    manuelle (curseur/boutons) qui reste toujours disponible. */
+const SEUIL_GPS=200;   // déclenchement vocal à ~200 m d'un point (réglé sur le terrain)
 let gpsActive=false,gpsWatchId=null,gpsPos=null,gpsAnimFrame=null;
 let mapScale=1,mapOffX=0,mapOffY=0,manualStep=false;
 function haversine(lat1,lng1,lat2,lng2){
@@ -1099,6 +1099,7 @@ function updateGpsBtn(){
   const b=document.getElementById('gpsBtn');if(!b)return;
   b.classList.toggle('active',gpsActive);
   b.textContent=gpsActive?t().gpsOn:t().gpsOff;
+  majBoutonPlay();
 }
 function nearestVillage(lat,lng){
   let best=null,bestD=Infinity;
@@ -1120,14 +1121,14 @@ function onGpsPos(pos){
   // Position trop imprécise (falaises, canopée) : on suit sur la carte
   // mais on ne déclenche pas d'étape pour éviter les faux positifs.
   if(accuracy&&accuracy>150){drawMap();return;}
-  // Seuil adaptatif : 110 m de base, élargi si le GPS est moins précis.
-  const thr=Math.max(110,(accuracy||0)*1.5);
+  // Seuil adaptatif : SEUIL_GPS de base, élargi si le GPS est moins précis.
+  const thr=Math.max(SEUIL_GPS,(accuracy||0)*1.5);
   let best=-1,bestD=Infinity;
   CUR.steps.forEach((s,i)=>{const d=haversine(latitude,longitude,s.lat,s.lng);if(d<bestD){bestD=d;best=i;}});
   if(best>=0&&bestD<thr&&best>stepIdx){
     manualStep=false;
     toast(t().gpsNear+" "+CUR.steps[best].nom[lang]);
-    stopPlay();stopVoice();
+    stopVoice();
     showStep(best);
     direEtape(CUR.steps[best].txt[lang]);
   }else{
@@ -1139,36 +1140,19 @@ function onGpsErr(err){
   toast(err.code===1?t().gpsDenied:t().gpsUnavailable);
 }
 
-/* ---- Lecture auto ----
-   playing = la séquence audio enchaîne les étapes.
-   Pause/Stop : on coupe la voix et on annule l'avance.
-   Le canoë reste figé exactement sur stepIdx (le point courant). */
-function togglePlay(){playing?stopPlay():startPlay();}
-function startPlay(){
-  playing=true;updateWake();
-  document.getElementById('playBtn').textContent='⏸';
-  document.getElementById('liveDot').classList.add('live');
-  document.getElementById('liveTxt').textContent=t().running;
-  direEtape(CUR.steps[stepIdx].txt[lang],advanceAfterSpeech);
-}
-function stopPlay(){
-  playing=false;updateWake();          // empêche advanceAfterSpeech de continuer
-  clearTimeout(playTimer);playTimer=null;
-  stopVoice();                         // coupe la voix immédiatement
-  document.getElementById('playBtn').textContent='▶';
-  document.getElementById('liveDot').classList.remove('live');
-  document.getElementById('liveTxt').textContent=t().stopped;
-  // le canoë reste sur stepIdx — aucune avance n'est déclenchée
-}
-function advanceAfterSpeech(){
-  if(!playing)return;                  // si on a mis pause pendant la lecture, on s'arrête net
-  if(stepIdx<CUR.steps.length-1){
-    playTimer=setTimeout(()=>{
-      if(!playing)return;              // double sécurité avant d'avancer
-      showStep(stepIdx+1);
-      direEtape(CUR.steps[stepIdx].txt[lang],advanceAfterSpeech);
-    },1400);
-  }else stopPlay();
+/* ---- Bouton ▶ : lancer / arrêter la descente ----
+   Demande terrain (Gonzalo, juillet 2026) : Play ne lit plus tout le
+   parcours à la suite (c'était l'ancien mode démo). Il lance le guide
+   GPS : la voix se déclenche uniquement à l'approche d'un point
+   (~SEUIL_GPS mètres), puis se tait jusqu'au point suivant. L'écoute
+   manuelle reste possible à tout moment : bouton 🔊 pour le point
+   affiché, ou toucher un point sur la carte. */
+function togglePlay(){gpsActive?stopGPS():startGPS();}
+function majBoutonPlay(){
+  const on=gpsActive;
+  const b=document.getElementById('playBtn');if(b)b.textContent=on?'⏸':'▶';
+  const d=document.getElementById('liveDot');if(d)d.classList.toggle('live',on);
+  const x=document.getElementById('liveTxt');if(x)x.textContent=on?t().running:t().stopped;
 }
 
 /* ---- Carte ---- */
@@ -1190,7 +1174,7 @@ function setupMap(){
         if(d<bestD){bestD=d;best=i;}
       });
       if(best>=0&&bestD<44){
-        stopPlay();stopVoice();
+        stopVoice();
         if(gpsActive)manualStep=true;
         showStep(best);
         direEtape(CUR.steps[best].txt[lang]);
