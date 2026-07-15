@@ -21,6 +21,10 @@
 <style>
   :root{--forest:#0d3b2e;--moss:#1c5c45;--river:#2a7a8c;--sun:#e8a838;--bark:#5c4a3a;--sand:#f2ede1;--sand-dim:#d9d0bd;--ink:#16221d;--leaf:#7fb069;--danger:#c45c4a}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+  /* Texte non sélectionnable (comme une app native) : évite que le
+     dictionnaire Android surgisse quand on touche l'écran. */
+  body{-webkit-user-select:none;user-select:none}
+  input,textarea{-webkit-user-select:text;user-select:text}
   html,body{height:100%}
   body{font-family:'Avenir Next','Segoe UI',system-ui,sans-serif;background:var(--forest);color:var(--sand);overflow:hidden;position:fixed;width:100%}
   .screen{height:100dvh;display:flex;flex-direction:column;overflow:hidden}
@@ -334,6 +338,7 @@ const UI={
     demoVoix:"🔊 La démo vocale s'arrête ici. Pour l'audioguide complet, demandez le code d'accès à votre base de location.",
     needNet:"📡 Connexion nécessaire pour activer le code. Réessayez avec du réseau.",
     baseLoin:"🛶 Vous êtes à {km} km de la base de canoës. Touchez le badge coloré en bas de la carte pour lancer l'itinéraire GPS.",
+    baseBadge:"à {km} km",
     nearVillage:"Près de",
     hikeKm:"Distance",hikeDp:"Dénivelé +",hikeDn:"Dénivelé -",hikeT:"Durée",hikeF:"Difficulté",hikeDep:"Départ",
     hikeOpen:"📍 Localiser sur Google Maps",hikeClose:"✕ Fermer",
@@ -362,6 +367,7 @@ const UI={
     demoVoix:"🔊 The voice demo stops here. For the full audioguide, ask your rental base for the access code.",
     needNet:"📡 Internet connection needed to activate the code. Try again when you have network.",
     baseLoin:"🛶 You are {km} km from the canoe base. Tap the coloured badge at the bottom of the map to start GPS directions.",
+    baseBadge:"{km} km away",
     nearVillage:"Near",
     hikeKm:"Distance",hikeDp:"Ascent",hikeDn:"Descent",hikeT:"Duration",hikeF:"Difficulty",hikeDep:"Start",
     hikeOpen:"📍 Locate on Google Maps",hikeClose:"✕ Close",
@@ -390,6 +396,7 @@ const UI={
     demoVoix:"🔊 La demo de voz termina aquí. Para la audioguía completa, pide el código de acceso a tu base de alquiler.",
     needNet:"📡 Se necesita conexión para activar el código. Inténtalo de nuevo con red.",
     baseLoin:"🛶 Estás a {km} km de la base de canoas. Toca la insignia de color abajo del mapa para iniciar la ruta GPS.",
+    baseBadge:"a {km} km",
     nearVillage:"Cerca de",
     hikeKm:"Distancia",hikeDp:"Desnivel +",hikeDn:"Desnivel -",hikeT:"Duración",hikeF:"Dificultad",hikeDep:"Salida",
     hikeOpen:"📍 Localizar en Google Maps",hikeClose:"✕ Cerrar",
@@ -418,6 +425,7 @@ const UI={
     demoVoix:"🔊 De stemdemo stopt hier. Vraag de toegangscode aan je kanoverhuurder voor de volledige audiogids.",
     needNet:"📡 Internetverbinding nodig om de code te activeren. Probeer opnieuw met netwerk.",
     baseLoin:"🛶 Je bent {km} km van de kanobasis. Tik op de gekleurde badge onderaan de kaart om de GPS-route te starten.",
+    baseBadge:"op {km} km",
     nearVillage:"Bij",
     hikeKm:"Afstand",hikeDp:"Stijging",hikeDn:"Daling",hikeT:"Duur",hikeF:"Moeilijkheid",hikeDep:"Start",
     hikeOpen:"📍 Zoek op Google Maps",hikeClose:"✕ Sluiten",
@@ -793,6 +801,138 @@ function completerLangue(o,vus){
   }
   for(const k in o)completerLangue(o[k],vus);
 }
+/* ---- Contenus néerlandais ----
+   Traduction intégrale des récits, indexée par le début du texte français
+   (stable même si les données bougent de place). Appliquée au chargement. */
+const NL_ROUTES={
+ "vitrac-castelnaud":{s:"Vallei van de 2 Kastelen · 10,4 km · ~2u30",t:["Kano","Kort","Gezinnen"]},
+ "vitrac-pech":{s:"Vallei van de 5 Kastelen · 16 km · ~3u",t:["Kano","Gezin","Kastelen"]},
+ "carsac-beynac":{s:"Carsac-Aillac → Beynac · 25 km · 4u30",t:["Kano","4u30"]},
+ "carsac-vitrac":{s:"Carsac-Aillac → Vitrac · 9 km · 1u30",t:["Kano","1u30"]},
+ "calviac-vitrac":{s:"Calviac → Vitrac · 19 km · 3u30",t:["Kano","3u30"]}
+};
+const NL_NOM={
+ "Port de Vitrac — la Maison du passeur":"Haven van Vitrac — het Veermanshuis",
+ "Pont de Vitrac":"Brug van Vitrac",
+ "La Vierge des gabariers":"De Madonna van de gabariers",
+ "La cavité d'Aliénor":"De grot van Eleonora",
+ "La Bastide de Domme":"De bastide van Domme",
+ "Pont de Cénac — église Saint-Julien":"Brug van Cénac — kerk Saint-Julien",
+ "Château de la Malartrie & sa plage":"Kasteel van La Malartrie & zijn strand",
+ "Belvédère de Marqueyssac":"Belvedère van Marqueyssac",
+ "La Bulide":"De Bulide",
+ "Embouchure du Céou":"Monding van de Céou",
+ "Pont de Castelnaud":"Brug van Castelnaud",
+ "Château de Castelnaud":"Kasteel van Castelnaud",
+ "Château de Fayrac":"Kasteel van Fayrac",
+ "Pont de chemin de fer de Vézac":"Spoorbrug van Vézac",
+ "Château de Beynac":"Kasteel van Beynac",
+ "Château des Milandes — Joséphine Baker":"Kasteel van Les Milandes — Joséphine Baker",
+ "Plage de Carsac-Aillac":"Strand van Carsac-Aillac",
+ "Falaise du Cingle de Monfort":"Klif van de Cingle de Montfort",
+ "Château de Monfort":"Kasteel van Montfort",
+ "Rocher de Caudon":"Rots van Caudon",
+ "Rocher de Caudon — la Maison du Passeur":"Rots van Caudon — het Maison du Passeur",
+ "Falaise de Vitrac":"Klif van Vitrac",
+ "Cale de Calviac":"Helling van Calviac",
+ "Château de Veyrignac":"Kasteel van Veyrignac",
+ "Pont de Groléjac":"Brug van Groléjac",
+ "Cale de Carsac":"Helling van Carsac",
+ "Falaise de Vitrac + Tour de guet":"Klif van Vitrac + wachttoren",
+ "Bastide de Domme":"Bastide van Domme",
+ "Château de la Malartrie":"Kasteel van La Malartrie",
+ "Arrivée cabane":"Aankomst bij de hut"
+};
+const NL_KIND={
+ "Départ & histoire":"Vertrek & geschiedenis",
+ "Patrimoine & batellerie":"Erfgoed & binnenvaart",
+ "Histoire & géologie":"Geschiedenis & geologie",
+ "Patrimoine & flore":"Erfgoed & flora",
+ "Repère · Pont 2 & visite":"Herkenningspunt · Brug 2 & bezoek",
+ "Architecture & microclimat":"Architectuur & microklimaat",
+ "Architecture & baignade":"Architectuur & zwemmen",
+ "Jardins & panorama":"Tuinen & panorama",
+ "Résurgence & histoire":"Karstbron & geschiedenis",
+ "Rivière & nature":"Rivier & natuur",
+ "Architecture & histoire":"Architectuur & geschiedenis",
+ "Architecture":"Architectuur",
+ "Architecture & rapaces":"Architectuur & roofvogels",
+ "Arrivée · Pont 5":"Aankomst · Brug 5",
+ "Arrivée · Pont de Castelnaud":"Aankomst · Brug van Castelnaud"
+};
+const NL_TXT={
+ "Bienvenue sur la Dordogne":"Welkom op de Dordogne, aan de haven van Vitrac. Tegenover de aanlegsteiger staat het Veermanshuis, hoog op de rots van de overkant: kijk goed, het is nauwelijks te zien, half verscholen in de begroeiing van de klif. Tijdens de Tweede Wereldoorlog kruiste de demarcatielijn die Frankrijk in tweeën deelde hier de rivier: het Veermanshuis diende om mensen in het geheim van de bezette naar de vrije zone over te zetten, dwars over het water. De haven had ook een viskaar, een bassin waarin de in de rivier gevangen zalmen levend werden bewaard voordat ze op de markt van Sarlat-la-Canéda werden verkocht. De Dordogne was toen zo visrijk dat de zalm er in grote aantallen optrok. Maak het je gemakkelijk en vind je peddelritme: de afdaling begint.",
+ "Premier repère":"Eerste herkenningspunt: ongeveer 300 meter na de kanobasis van Vitrac vaar je onder de brug van Vitrac door, de eerste van de vijf bruggen van de afdaling. Vaar onder de hoofdboog door en blijf in de stroming. Hier begint je reis stroomafwaarts pas echt: achter je de aanlegsteiger, vóór je zestien kilometer kastelen, kliffen en dorpen.",
+ "Après le premier pont":"Na de eerste brug, ongeveer een kilometer verder, kijk omhoog naar rechts: hoog in de klif waakt de Madonna van de gabariers. De gabariers waren de schippers van de Dordogne; op hun platbodems, de gabarres, voeren ze naar Bordeaux om handel te drijven, geladen met eiken- en kastanjehout. Voordat ze de stroomversnellingen en de lange reisweken trotseerden, vertrouwden ze zich aan deze Madonna toe voor een behouden thuiskomst. Het was een gevaarlijk vak: voor velen kon elk vertrek het laatste zijn.",
+ "Un peu plus loin":"Iets verderop, anderhalve kilometer na het vertrek, zie je rechts een natuurlijke holte in de kalkstenen klif. Volgens de plaatselijke overlevering liet Eleonora van Aquitanië haar inrichten als uitkijkpost: hertogin van Aquitanië en later koningin van Engeland, zou zij vanuit deze schuilplaats de bewegingen van de Engelse troepen op de rivier hebben laten volgen, in de tijd dat Aquitanië onder Engels bewind kwam. Het zachte krijtgesteente, bijna 90 miljoen jaar oud, laat zich makkelijk uithollen: de hele vallei is doorboord met schuilplaatsen en grotten die al sinds de prehistorie door mensen worden bewoond.",
+ "En descendant, vous":"Terwijl je afdaalt, zie je vóór je, hoog op de klif van de linkeroever, Domme, een van de Mooiste Dorpen van Frankrijk. Het is een echte bastide: een versterkte nieuwe stad, gesticht in 1281 door koning Filips de Stoute, met een regelmatig stratenplan, een plein met arcaden en stadsmuren. Van daarboven omvat het panorama de hele vallei. Let onderweg ook op de oeverflora: witte wilgen en elzen houden de oevers vast, de gele lis bloeit uitbundig in het voorjaar, de kattenstaart heft 's zomers zijn roze aren. Dit oeverbos herbergt reigers, ijsvogels en libellen.",
+ "Deuxième pont":"Tweede brug: de brug van Cénac, aan de voet van Domme. Ongeveer 300 meter na de brug kun je aanleggen en zo'n kilometer lopen naar de kerk Saint-Julien de Cénac, een juweel van 11e-eeuwse romaanse kunst uit de Périgord, een voormalige priorij, beroemd om haar kapitelen met dieren en bijbelse taferelen. Een vredige tussenstop, weg van de rivier, voor wie het romaanse erfgoed van de vallei wil ontdekken. Stap daarna weer in de kano richting La Roque-Gageac.",
+ "Vous longez La Roque":"Je vaart langs La Roque-Gageac, genesteld tussen de klif en het water, pal op het zuiden. De honingkleurige stenen huizen klimmen tegen de voet van de rots op, met daarboven het trogloditische fort dat op 120 meter hoogte hangt. Dankzij dit warme, beschutte microklimaat gedijt hier een exotische tuin: palmen, bananenplanten en bamboe midden in de Périgord. Dit was een van de drukste gabarier-havens van de vallei. De legende vertelt dat een schipper die stroomopwaarts tegen de kliffen schipbreuk leed, zwoer een beeld te laten plaatsen als hij het overleefde: het ex-voto staat er nog altijd.",
+ "Juste après La Roque":"Net voorbij La Roque-Gageac, op de rechteroever, rijst het kasteel van La Malartrie op aan de voet van de kliffen, pal op het zuiden in een bocht van de Dordogne. De plek is oud: in de 12e eeuw stond hier een leprozenhospitaal. Aan het einde van de 19e eeuw liet de graaf van Saint-Aulaire, Frans ambassadeur in Engeland, het huis herbouwen in de renaissancestijl die je vandaag bewondert, met zijn torens en gotische kapel. Onder het landgoed ligt het strand van La Malartrie, een natuurlijk kiezel- en zandstrand waar je kunt aanleggen om zo de rivier in te zwemmen: een verfrissende stop, een van de mooiste van de route, tegenover de kliffen en het dorp.",
+ "Quelques centaines de mètres après":"Een paar honderd meter voorbij het kasteel van La Malartrie, kijk omhoog naar rechts: het belvedère van de hangende tuinen van Marqueyssac waakt over de rivier. Deze 19e-eeuwse tuinen tellen bijna 150.000 met de hand gesnoeide buxussen, in golven en bochten, op een rotspunt hoog boven de vallei. Vanaf het belvedère, 130 meter boven het water, omvat de blik in één keer Beynac, Castelnaud, La Roque-Gageac en Domme. Vanuit de kano herken je de rotspunt en het silhouet van het belvedère tussen de bomen.",
+ "Quelques centaines de mètres avant":"Een paar honderd meter vóór de brug van Castelnaud mondt rechts de Bulide uit, een bron waarvan het water, rond de 16 graden, het hele jaar koel blijft. Het is een karstbron: het water sijpelt het kalkplateau in en komt hier helder en fris weer tevoorschijn — het levert zelfs drinkwater aan de dorpen Vézac, Castelnaud en Veyrines-de-Domme. De Bulide ontspringt zo'n 500 meter stroomopwaarts, te midden van walnotengaarden — de emblematische boom van de Périgord — en bereikt de Dordogne op de rechteroever. Men vertelt dat haar loop onder de resten van een oude Gallo-Romeinse brug doorgaat, waar de gabarres vroeger door ezels stroomopwaarts werden getrokken, op de terugweg uit Bordeaux. Iets verderop, aan je linkerhand, passeer je de monding van de Céou, vlak vóór de brug.",
+ "Juste avant le pont":"Vlak vóór de brug van Castelnaud, aan je linkerhand, zie je de monding van de Céou, een zijrivier die op dezelfde oever als Castelnaud in de Dordogne uitmondt. Haar water is helder, kristalzuiver en erg koel: de Céou ontspringt op de causse van Gramat, in de Lot, en stroomt grotendeels ondergronds door het kalkkarst voordat ze weer opduikt. Het is een wilde, goed bewaarde rivier, erkend om haar kwaliteit, waarvan het koele water nog prachtige wilde forellen herbergt, het embleem van de Céou-vallei.",
+ "Troisième pont":"Derde brug: de brug van Castelnaud, vlak vóór het kasteel. Aan de voet van het kasteel ligt terrasgewijs het dorp Castelnaud-la-Chapelle, geklasseerd bij de Mooiste Dorpen van Frankrijk: een middeleeuws dorp, gebouwd op de rotspunt, met steile steegjes en huizen van blonde steen met daken van steenplaten. Vaar onder de hoofdboog door: het kasteel rijst al vóór je op, op de linkeroever.",
+ "Sur la rive gauche se dresse":"Op de linkeroever verrijst de machtige vesting van Castelnaud-la-Chapelle, op haar rotsige voorgebergte. Tegenwoordig huisvest ze het museum van de middeleeuwse oorlogvoering, met nagebouwde belegeringswerktuigen: trebuchets, mangonels, slingerwerktuigen. Tijdens de Honderdjarige Oorlog waren Castelnaud en Beynac, zijn rivaal recht ertegenover, de twee vijandige broers van de vallei. De familie de Caumont, heren van Castelnaud, koos meestal de Engelse kant, terwijl de baronnen van Beynac eerder trouw waren aan de koning van Frankrijk — maar het kasteel wisselde zeven keer van kamp met de wisselende allianties, voordat het in 1442 door de Fransen werd heroverd. Ook het dorp is geklasseerd bij de Mooiste Dorpen van Frankrijk.",
+ "Passez sous le pont de Castelnaud":"Vaar onder de brug van Castelnaud door: de eindstop is ongeveer 200 meter verder, op de linkeroever. Je afdaling van 10,4 kilometer eindigt aan de voet van het dorp en zijn vesting. Til de kano uit het water — het middeleeuwse dorp Castelnaud-la-Chapelle, geklasseerd bij de Mooiste Dorpen van Frankrijk, klimt vlak boven je omhoog.",
+ "Un kilomètre environ":"Ongeveer een kilometer na Castelnaud, op dezelfde linkeroever, verschijnt het kasteel van Fayrac discreet in de bocht van een meander, genesteld in het groen. Met zijn ronde peperbustorens en zijn twee ophaalbruggen is het een particulier landhuis uit de 15e en 16e eeuw, met een romantisch silhouet. Tijdens de Honderdjarige Oorlog, toen Castelnaud Engels was, richtte men hier een vooruitgeschoven post in om Beynac, recht ertegenover, in de gaten te houden. Vanaf het water is het goed te zien, voordat het weer achter de bomen verdwijnt.",
+ "Quatrième pont":"Vierde brug: de spoorbrug van Vézac, ter hoogte van Fayrac, vlak vóór Beynac. Gebouwd rond 1884, toen de lijn Bordeaux-Sarlat de vallei bereikte; het was de spoorweg die de gabarres verving voor het goederenvervoer. Historisch detail: de holten onder de brug dienden in de Tweede Wereldoorlog om wapens te verbergen. Het stenen brugdek is van ver te zien: vaar onder de hoofdboog door en blijf in de stroming. Het kasteel van Beynac verschijnt al recht vooruit, op de rechteroever.",
+ "Le château de Beynac":"Het kasteel van Beynac domineert de rivier vanaf zijn klif, 150 meter boven het water. Een vesting uit de 12e eeuw en een van de vier baronieën van de Périgord; Richard Leeuwenhart en Eleonora van Aquitanië kwamen er langs, en dankzij zijn uitzonderlijke staat van bewaring is het een vaste filmlocatie. Aan het einde van het dorp splitst de rivier zich in twee armen: houd de linkerarm aan. Nog zo'n twintig minuten tot de aankomst.",
+ "Avant d'arriver au dernier":"Voordat je de laatste brug bereikt, kun je rechts, in de hoogte, het kasteel van Les Milandes zien, een emblematisch kasteel. Gebouwd in 1489 door de heren van Castelnaud, was het de woning van Joséphine Baker, de music-hall-artieste, verzetsstrijdster en burgerrechtenactiviste, die er haar 'werelddorp' en haar geadopteerde kinderen onderbracht. Tegenwoordig herbergt het domein een zestigtal roofvogels en is er elke dag een roofvogelshow in vrije vlucht — arenden, valken, buizerds en uilen — in de Franse tuinen. Een bescheiden silhouet, maar beladen met geschiedenis.",
+ "Cinquième et dernier":"Vijfde en laatste brug: de Pont de Pech, de oude spoorbrug over de Dordogne voorbij Beynac. Hier stoppen de kano's: leg aan op de linkeroever, net na de brug, links. Je afdaling van 16 kilometer zit erop. Til de kano uit het water en kijk terug op de afgelegde weg — vijf bruggen, een tiental kastelen, kliffen en dorpen. De rivier zelf stroomt verder naar Bergerac en de monding van de Gironde, zoals de gabariers van weleer.",
+ "Bienvenue à Carsac":"Welkom in Carsac-Aillac, je vertrekpunt, op slechts zeven kilometer van Sarlat-la-Canéda, de hoofdstad van de Périgord Noir. Ontstaan in 1961 uit de fusie van twee dorpen, Carsac en Aillac, is het vandaag een van de levendigste dorpen van de vallei — en een ideale uitvalsbasis: het groene pad dat erdoorheen loopt nodigt uit tot wandelen en fietsen langs de rivier, en de bastide van Domme en het middeleeuwse Sarlat liggen vlakbij. Maar het is de Dordogne die op je wacht: te water vanaf het kiezelstrand, tegenover de grote witte klif. Goede afdaling!",
+ "Entre Carsac-Aillac":"Tussen Carsac-Aillac en Vitrac tekent de Dordogne hier een van haar mooiste meanders: de Cingle de Montfort, een bijna gesloten lus, geklemd tussen steile kliffen. Binnen in de lus is de vlakte verrassend vlak — van bovenaf lijkt het een eiland, genesteld in de holte van een berg. De kalkwand is tegenwoordig een bekende klimplek. En als klimmen niets voor je is: een met de auto bereikbaar uitkijkpunt kroont de klif — het panorama over de meander, het kasteel van Montfort en het omliggende land is er uitzonderlijk.",
+ "Perché sur son piton":"Hoog op zijn rotspunt boven de meander waakt het kasteel van Montfort sinds de middeleeuwen over de rivier. Vijf keer verwoest en herbouwd in de loop van de oorlogen, dankt het zijn romantische allure aan de 19e-eeuwse restauraties. Zijn torentjes domineren het dorp en de bocht van de Dordogne: een van de mooiste vergezichten van de afdaling.",
+ "Le rocher de Caudon":"De rots van Caudon torent boven een stuk kalm water uit. Aan zijn voet schuilt het Maison du Passeur, een trogloditische site die geldt als een van de eerste gekerstende plaatsen van de Périgord, met sarcofagen en een grafnis, rechtstreeks in de rots uitgehouwen.",
+ "Au pied du rocher":"Aan de voet van de rots staat het Maison du Passeur, dat geldt als een van de eerste gekerstende plaatsen van de Périgord. De plek bewaart sporen van Gallo-Romeinse bewoning, met sarcofagen en een grafnis, rechtstreeks in de rots uitgehouwen. De middeleeuwse architectuur behield een westportaal, twee noordvensters voor het licht, en een klokkenmuur zonder klok boven op de klif.",
+ "La haute muraille calcaire de Vitrac annonce":"De hoge kalkmuur van Vitrac kondigt de basis aan: zo'n honderd meter opeengestapelde lagen, uitgehold met grotten die al sinds de prehistorie bewoond zijn. Kijk omhoog — zwaluwen en roofvogels nestelen tegenwoordig in de wand. In Vitrac begint de grote kastelenafdaling.",
+ "La haute muraille calcaire de Vitrac referme":"De hoge kalkmuur van Vitrac sluit de afdaling af: zo'n honderd meter opeengestapelde lagen, uitgehold met grotten die al sinds de prehistorie bewoond zijn. Kijk omhoog — zwaluwen en roofvogels nestelen tegenwoordig in de wand.",
+ "Vous accostez au port":"Je legt aan in de haven van Vitrac, recht tegenover het Veermanshuis, hoog op de rots van de overkant en half verscholen in de begroeiing van de klif. Tijdens de Tweede Wereldoorlog kruiste de demarcatielijn die Frankrijk in tweeën deelde hier de rivier: dit huis diende om mensen in het geheim van de bezette naar de vrije zone over te zetten. De haven had ook een viskaar waarin de gevangen zalmen levend werden bewaard voordat ze op de markt van Sarlat-la-Canéda werden verkocht. Je stapt uit direct bij het chalet van de basis.",
+ "Départ depuis la cale":"Vertrek vanaf de helling van Calviac, op de wildste oever van de Dordogne. Boven je verheft het kasteel van Fénelon zijn drievoudige ommuring: een vesting uit de 12e-17e eeuw, beschermd monument, gedekt met een opmerkelijk dak van steenplaten. Hier werd in 1651 François de Salignac de La Mothe-Fénelon geboren, schrijver en leermeester van de kleinzoon van Lodewijk XIV. Maak het je gemakkelijk — de rivier doet de rest.",
+ "Sur la falaise de la rive gauche":"Op de klif van de linkeroever verschijnt het kasteel van Veyrignac, een elegant 18e-eeuws landhuis. In 1944 in brand gestoken en daarna geduldig gerestaureerd, kreeg het zijn klassieke silhouet aan de rivier terug — een decor zo fotogeniek dat er filmopnamen plaatsvonden.",
+ "Au pont de Groléjac":"Bij de brug van Groléjac voegt de Germaine zich bij de Dordogne. Het dorp was lang een bedrijvig haventje waar vissers en gabariers elkaar kruisten; onder de bogen nodigt het kalme water uit tot een pauze, vóór het vervolg van de afdaling.",
+ "Dans les berges":"In de zachte aarden oevers nestelen oeverzwaluwen: let op de kleine gangen die ze boven het water uitgraven. Een eilandje splitst hier de rivier — volg de hoofdarm, in de stroming.",
+ "Dernière ligne droite":"Laatste rechte stuk onder de klif van Vitrac en zijn wachttoren, een Normandische uitkijkpost uit de 9e-12e eeuw, gebouwd om de rivier te bewaken en invallen van stroomafwaarts te melden. Je legt direct aan bij het chalet van de basis. Mooie afdaling — tot ziens op de Dordogne!"
+};
+const NL_POI={
+ "Guinguette du port":{n:"Guinguette aan de haven",d:"~50 m van de aanlegsteiger",x:"Terras aan het water, direct naast de aanlegsteiger: eenvoudige Périgord-keuken en grillgerechten, ideaal vóór vertrek."},
+ "Terrasses face à la falaise":{n:"Terrassen tegenover de klif",d:"~100 m van de oever",x:"Verschillende restaurants op een rij langs de kade, in de schaduw van de rots: een van de mooiste plekjes van de afdaling voor een lunchpauze."},
+ "Jardin exotique & fort troglodytique":{n:"Exotische tuin & trogloditisch fort",d:"~150 m te voet",x:"Vanaf de kade klimt een steegje naar de exotische tuin (palmen, bananenplanten) en het trogloditische fort tegen de klif."},
+ "Halte baignade":{n:"Zwemstop",d:"0 m — directe toegang tot het water",x:"Natuurlijk kiezelstrand aan de voet van het kasteel, tegenover de kliffen: de eenvoudigste zwemstop van de route."},
+ "Restaurants au pied du château":{n:"Restaurants aan de voet van het kasteel",d:"~150 m van de brug",x:"Bij de brug en de aanlegplaats enkele schaduwrijke tafels en terrassen, met zicht op de vesting."},
+ "Guinguettes du bord de Dordogne":{n:"Guinguettes aan de Dordogne-oever",d:"~120 m van de oever",x:"Aan de voet van het dorp schaduwrijke terrassen, met de voeten bijna in het water en weids zicht op het kasteel."},
+ "Ruelles médiévales du village":{n:"Middeleeuwse steegjes van het dorp",d:"~180 m te voet",x:"Vanaf de oever slingeren de geplaveide steegjes omhoog tussen de stenen huizen; de ingang van het kasteel ligt hoger."}
+};
+CANOE_ROUTES.forEach(r=>{
+  const rt=NL_ROUTES[r.id];
+  if(rt){r.sousTitre.nl=rt.s;r.tags.nl=rt.t;}
+  r.steps.forEach(s=>{
+    if(NL_NOM[s.nom.fr])s.nom.nl=NL_NOM[s.nom.fr];
+    if(NL_KIND[s.kind.fr])s.kind.nl=NL_KIND[s.kind.fr];
+    else if(s.kind.fr.indexOf('Repère')===0)s.kind.nl=s.kind.fr.replace('Repère','Herkenningspunt').replace('Pont','Brug');
+    for(const deb in NL_TXT){
+      if(s.txt.fr.lastIndexOf(deb,0)===0){s.txt.nl=NL_TXT[deb];break;}
+    }
+  });
+});
+(function(){ // arrivée du circuit 25 km : adapter la distance dans le texte NL
+  const cb=CANOE_ROUTES.find(r=>r.id==="carsac-beynac");if(!cb)return;
+  const fin=cb.steps[cb.steps.length-1];
+  if(fin&&fin.txt&&fin.txt.nl)fin.txt.nl=fin.txt.nl.replace("16 kilometer","25 kilometer");
+})();
+POI_TILE.nom.nl="Rond de afdaling";
+POI_TILE.sousTitre.nl="Restaurants & wandelingen · op minder dan 200 m van het water";
+POI_TILE.tags.nl=["Eten","Pauze","Te voet"];
+POI_TILE.items.forEach(it=>{
+  const n=NL_POI[it.nom.fr];
+  if(n){it.nom.nl=n.n;it.dist.nl=n.d;it.txt.nl=n.x;}
+  if(it.type.fr.indexOf('Restaurant')>=0)it.type.nl=it.type.fr;
+  else if(it.type.fr.indexOf('pied')>=0)it.type.nl="🚶 Wandeling";
+  else if(it.type.fr.indexOf('Pause')>=0)it.type.nl="🏖️ Pauze";
+  if(it.village.fr==="Plage de la Malartrie")it.village.nl="Strand van La Malartrie";
+});
+KIND_I18N.depart.nl="Vertrek";KIND_I18N.etape.nl="Etappe";KIND_I18N.arrivee.nl="Aankomst";
+
 [CANOE_ROUTES,POI_TILE,VILLAGES,KIND_I18N].forEach(x=>completerLangue(x));
 
 /* ---- Accès verrouillé ----
@@ -1124,15 +1264,17 @@ function closePhotoModal(){navBack();}
    s'affiche et se lit automatiquement, sans interrompre la navigation
    manuelle (curseur/boutons) qui reste toujours disponible. */
 /* ---- Version & base de rattachement ---- */
-const APP_VERSION="1.1";
+const APP_VERSION="1.2";
 const BASE_LOC={lat:44.825768,lng:1.224381};   // base Canoës Loisirs, port de Vitrac
 let baseToastFait=false;
 function majBaseBadge(lat,lng,avecToast){
   const b=document.getElementById('baseBadge');if(!b)return;
   const km=haversine(lat,lng,BASE_LOC.lat,BASE_LOC.lng)/1000;
-  b.textContent="🛶 "+(km<10?km.toFixed(1):Math.round(km))+" km";
-  b.classList.remove('hidden','b-rouge','b-orange','b-vert');
-  b.classList.add(km>10?'b-rouge':(km>3?'b-orange':'b-vert'));
+  if(km<3){b.classList.add('hidden');return;}   // arrivé : le badge disparaît
+  const kmTxt=km<10?km.toFixed(1):String(Math.round(km));
+  b.textContent="🛶 "+t().baseBadge.replace('{km}',kmTxt);
+  b.classList.remove('hidden','b-rouge','b-orange');
+  b.classList.add(km>10?'b-rouge':'b-orange');
   if(avecToast&&km>10&&!baseToastFait){
     baseToastFait=true;
     toast(t().baseLoin.replace('{km}',Math.round(km)),8000);
