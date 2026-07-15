@@ -23,7 +23,7 @@
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
   /* Texte non sélectionnable (comme une app native) : évite que le
      dictionnaire Android surgisse quand on touche l'écran. */
-  body{-webkit-user-select:none;user-select:none}
+  body{-webkit-user-select:none;user-select:none;touch-action:manipulation}
   input,textarea{-webkit-user-select:text;user-select:text}
   html,body{height:100%}
   body{font-family:'Avenir Next','Segoe UI',system-ui,sans-serif;background:var(--forest);color:var(--sand);overflow:hidden;position:fixed;width:100%}
@@ -995,9 +995,14 @@ function closeCodeModal(){navBack();}
      sans republier l'application. L'activation exige du réseau (elle se
      fait à la base de location) ; ensuite tout fonctionne hors ligne. */
 const LICENCE_ENDPOINT="https://sentia--cf208fe4791b11f19a671607ee4eb77e.web.val.run";   // sentiaAdmin dans sentia/sentiaStats
+const LICENCE_JOURS=3;   // durée de validité hors ligne d'une licence de base
 function unlockLocal(base){
   UNLOCKED=true;
-  try{localStorage.setItem('sentiaUnlocked','1');localStorage.setItem('sentiaBase',base);}catch(e){}
+  try{
+    localStorage.setItem('sentiaUnlocked','1');
+    localStorage.setItem('sentiaBase',base);
+    if(base!=='master')localStorage.setItem('sentiaValideLe',String(Date.now()));
+  }catch(e){}
   updateLockIcon();
   closeCodeModal();
   toast(t().lockOk);
@@ -1022,18 +1027,40 @@ function submitCode(){
     .catch(()=>{err.textContent=t().needNet;});
 }
 /* Revalidation silencieuse : à chaque ouverture avec réseau, on revérifie
-   le code de base mémorisé. Base désactivée (non renouvelée) → l'app se
-   reverrouille d'elle-même. Le code maître n'est jamais revalidé. */
+   le code de base mémorisé auprès du serveur. Licence glissante : sans
+   validation depuis LICENCE_JOURS jours (téléphone hors ligne, ou base
+   désactivée), l'accès complet se reverrouille — et se redéverrouille
+   tout seul à la prochaine validation réussie. Le code maître n'expire
+   jamais. Impossible de garder le produit en coupant le réseau. */
+function licenceExpiree(){
+  try{
+    if(localStorage.getItem('sentiaBase')==='master')return false;
+    if(!localStorage.getItem('sentiaCode'))return false;
+    const v=Number(localStorage.getItem('sentiaValideLe')||0);
+    return (Date.now()-v)>LICENCE_JOURS*86400000;
+  }catch(e){return false;}
+}
+if(UNLOCKED&&licenceExpiree()){
+  UNLOCKED=false;   // sentiaCode est conservé : réactivation automatique en ligne
+  try{localStorage.removeItem('sentiaUnlocked');}catch(e){}
+}
 function revaliderLicence(){
   let code=null;
   try{code=localStorage.getItem('sentiaCode');}catch(e){}
-  if(!UNLOCKED||!code||!LICENCE_ENDPOINT||!navigator.onLine)return;
+  if(!code||!LICENCE_ENDPOINT||!navigator.onLine)return;
   fetch(LICENCE_ENDPOINT+'/api/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:code})})
     .then(r=>r.json())
     .then(j=>{
       if(j&&j.ok===false){
-        try{localStorage.removeItem('sentiaUnlocked');localStorage.removeItem('sentiaCode');localStorage.removeItem('sentiaBase');}catch(e){}
+        try{localStorage.removeItem('sentiaUnlocked');localStorage.removeItem('sentiaCode');localStorage.removeItem('sentiaBase');localStorage.removeItem('sentiaValideLe');}catch(e){}
         UNLOCKED=false;updateLockIcon();renderHome();
+      }else if(j&&j.ok){
+        try{localStorage.setItem('sentiaValideLe',String(Date.now()));}catch(e){}
+        if(!UNLOCKED){
+          UNLOCKED=true;
+          try{localStorage.setItem('sentiaUnlocked','1');}catch(e){}
+          updateLockIcon();renderHome();
+        }
       }
     })
     .catch(()=>{});
@@ -1264,7 +1291,7 @@ function closePhotoModal(){navBack();}
    s'affiche et se lit automatiquement, sans interrompre la navigation
    manuelle (curseur/boutons) qui reste toujours disponible. */
 /* ---- Version & base de rattachement ---- */
-const APP_VERSION="1.2";
+const APP_VERSION="1.3";
 const BASE_LOC={lat:44.825768,lng:1.224381};   // base Canoës Loisirs, port de Vitrac
 let baseToastFait=false;
 function majBaseBadge(lat,lng,avecToast){
@@ -1706,6 +1733,13 @@ function unlockSpeech(){
 }
 document.addEventListener('touchend',unlockSpeech,{once:true});
 document.addEventListener('click',unlockSpeech,{once:true});
+
+/* Appui long : pas de menu contextuel (comportement d'app native).
+   Un appui long sur un bouton ne déclenche pas de clic sur Android —
+   les boutons répondent au tap bref. */
+window.addEventListener('contextmenu',e=>{
+  if(!e.target||e.target.tagName!=='INPUT')e.preventDefault();
+});
 
 /* ---- Init ---- */
 applyStaticUI();renderHome();updateLockIcon();
