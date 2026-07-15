@@ -66,7 +66,7 @@
   .dot{width:8px;height:8px;border-radius:50%;background:var(--sand-dim)}
   .dot.live{background:var(--leaf);box-shadow:0 0 0 0 rgba(127,176,105,.7);animation:pulse 1.8s infinite}
   @keyframes pulse{70%{box-shadow:0 0 0 9px rgba(127,176,105,0)}100%{box-shadow:0 0 0 0 rgba(127,176,105,0)}}
-  .gps-badge{position:absolute;top:12px;left:12px;z-index:5;background:rgba(8,39,30,.82);border:1px solid rgba(242,237,225,.14);color:var(--sand);padding:7px 12px;border-radius:99px;font-size:.74rem;cursor:pointer;font-family:inherit;transition:background .15s}
+  .gps-badge{position:absolute;top:12px;left:12px;z-index:5;background:rgba(8,39,30,.82);border:1px solid rgba(242,237,225,.14);color:var(--sand);padding:7px 12px;border-radius:99px;font-size:.74rem;font-family:inherit;transition:background .15s}
   .gps-badge.active{background:rgba(127,176,105,.35);border-color:var(--leaf)}
 
   .btn-photo{background:var(--river);color:var(--sand)}
@@ -223,7 +223,7 @@
   <div class="map-wrap">
     <canvas id="miniMap"></canvas>
     <div class="play-badge"><span class="dot" id="liveDot"></span><span id="liveTxt">—</span></div>
-    <button class="gps-badge" id="gpsBtn" onclick="toggleGPS()">—</button>
+    <div class="gps-badge" id="gpsBtn">—</div>
     <div class="gps-village" id="gpsVillage">—</div>
   </div>
   <div class="progress-bar" id="progressBar">
@@ -237,7 +237,6 @@
     <p class="poi-text" id="poiText">—</p>
     <div class="demo-controls" id="demoControls">
       <button onclick="prevStep()">‹‹</button>
-      <button class="play-main" id="playBtn" onclick="togglePlay()">▶</button>
       <button onclick="nextStep()">››</button>
       <input type="range" class="step-slider" id="slider" min="0" max="0" value="0" oninput="goStep(+this.value)">
     </div>
@@ -749,7 +748,7 @@ function isRouteFree(r){return r.id===FREE_ROUTE_ID;}
 function isRouteLocked(r){return !isRouteFree(r)&&!UNLOCKED;}
 
 /* ---- État ---- */
-let lang='fr',stepIdx=0,mapCtx=null,speaking=false,currentUtterance=null,mapPositions=[],CUR=RANDO_SHORT;
+let lang='fr',stepIdx=0,mapCtx=null,speaking=false,currentUtterance=null,CUR=RANDO_SHORT;
 function t(){return UI[lang];}
 
 /* ---- Langue ---- */
@@ -896,6 +895,7 @@ function startTrail(idx){
   mapScale=1;mapOffX=0;mapOffY=0;manualStep=false;
   updateGpsBtn();
   setupMap();showStep(0);
+  if(!gpsActive)startGPS();   // le GPS démarre tout seul : zéro bouton à comprendre
 }
 /* ---- Navigation & bouton retour ----
    Chaque écran/fenêtre empilé pousse une entrée dans l'historique :
@@ -1073,7 +1073,6 @@ function haversine(lat1,lng1,lat2,lng2){
   const a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLng/2)**2;
   return 2*R*Math.asin(Math.sqrt(a));
 }
-function toggleGPS(){gpsActive?stopGPS():startGPS();}
 function startGPS(){
   if(!('geolocation'in navigator)){toast(t().gpsUnavailable);return;}
   gpsActive=true;updateGpsBtn();updateWake();askMotion();ecoArm();
@@ -1098,8 +1097,31 @@ function stopGPS(){
 function updateGpsBtn(){
   const b=document.getElementById('gpsBtn');if(!b)return;
   b.classList.toggle('active',gpsActive);
-  b.textContent=gpsActive?t().gpsOn:t().gpsOff;
+  b.textContent=gpsActive?t().gpsOn:'📍 …';
   majBoutonPlay();
+}
+/* ---- Projection de la position sur le tracé ----
+   Comme un GPS de voiture qui « colle » la voiture à la route : la
+   position réelle est projetée sur le segment le plus proche du dessin
+   de la rivière. Le canoë avance ainsi le long du trait, à la hauteur
+   de la vraie position. Les distances de déclenchement vocal, elles,
+   utilisent toujours la position réelle. */
+function snapSurTrace(pos,track){
+  if(!track||track.length<2)return pos;
+  const kx=Math.cos(pos.lat*Math.PI/180);
+  let best=null,bestD=Infinity;
+  for(let i=0;i<track.length-1;i++){
+    const a=track[i],b=track[i+1];
+    const ax=a.lng*kx,ay=a.lat,bx=b.lng*kx,by=b.lat;
+    const px=pos.lng*kx,py=pos.lat;
+    const dx=bx-ax,dy=by-ay,L2=dx*dx+dy*dy;
+    let u=L2?((px-ax)*dx+(py-ay)*dy)/L2:0;
+    u=Math.max(0,Math.min(1,u));
+    const qx=ax+u*dx,qy=ay+u*dy;
+    const d=(px-qx)*(px-qx)+(py-qy)*(py-qy);
+    if(d<bestD){bestD=d;best={lat:qy,lng:qx/kx};}
+  }
+  return best||pos;
 }
 function nearestVillage(lat,lng){
   let best=null,bestD=Infinity;
@@ -1140,17 +1162,15 @@ function onGpsErr(err){
   toast(err.code===1?t().gpsDenied:t().gpsUnavailable);
 }
 
-/* ---- Bouton ▶ : lancer / arrêter la descente ----
-   Demande terrain (Gonzalo, juillet 2026) : Play ne lit plus tout le
-   parcours à la suite (c'était l'ancien mode démo). Il lance le guide
-   GPS : la voix se déclenche uniquement à l'approche d'un point
-   (~SEUIL_GPS mètres), puis se tait jusqu'au point suivant. L'écoute
-   manuelle reste possible à tout moment : bouton 🔊 pour le point
-   affiché, ou toucher un point sur la carte. */
-function togglePlay(){gpsActive?stopGPS():startGPS();}
+/* ---- Témoins de descente ----
+   Demande terrain (Gonzalo, juillet 2026) : plus aucun bouton GPS ni ▶.
+   Le GPS démarre automatiquement à l'ouverture du parcours ; la voix se
+   déclenche à l'approche d'un point (~SEUIL_GPS mètres) puis se tait.
+   L'écoute manuelle : ‹‹ ›› / la barre + bouton 🔊 (le toucher des
+   points sur la carte a été retiré : trop de sélections accidentelles
+   en zoomant). */
 function majBoutonPlay(){
   const on=gpsActive;
-  const b=document.getElementById('playBtn');if(b)b.textContent=on?'⏸':'▶';
   const d=document.getElementById('liveDot');if(d)d.classList.toggle('live',on);
   const x=document.getElementById('liveTxt');if(x)x.textContent=on?t().running:t().stopped;
 }
@@ -1160,30 +1180,9 @@ function setupMap(){
   const c=document.getElementById('miniMap');const dpr=window.devicePixelRatio||1;
   const rect=c.getBoundingClientRect();c.width=rect.width*dpr;c.height=rect.height*dpr;
   mapCtx=c.getContext('2d');mapCtx.scale(dpr,dpr);drawMap();
-  if(!c._tapBound){
-    c._tapBound=true;
-    c.style.cursor='pointer';
-    const onTap=e=>{
-      const r=c.getBoundingClientRect();
-      const pt=e.touches&&e.touches[0]?e.touches[0]:e;
-      const x=pt.clientX-r.left, y=pt.clientY-r.top;
-      // mapPositions est déjà en coordonnées écran (après zoom/pan)
-      let best=-1,bestD=Infinity;
-      mapPositions.forEach((p,i)=>{
-        const d=Math.hypot(p.x-x,p.y-y);
-        if(d<bestD){bestD=d;best=i;}
-      });
-      if(best>=0&&bestD<44){
-        stopVoice();
-        if(gpsActive)manualStep=true;
-        showStep(best);
-        direEtape(CUR.steps[best].txt[lang]);
-      }
-    };
-    c.addEventListener('click',onTap);
-    // Tap simple seulement (1 doigt), pas pendant un pinch
-    c.addEventListener('touchstart',e=>{if(e.touches.length===1)onTap(e);},{passive:true});
-  }
+  /* Le toucher des points sur la carte a été retiré (demande terrain) :
+     en zoomant, on sélectionnait des points par accident. La carte reste
+     zoomable et déplaçable ; la navigation se fait avec ‹‹ ›› et la barre. */
   if(!c._zoomBound){
     c._zoomBound=true;
     let _pA=false,_d0=0,_s0=1,_pcx=0,_pcy=0;  // état pinch
@@ -1257,8 +1256,6 @@ function drawMap(){
   const proj=p=>({x:ox+(p.lng-minLng)*kx*sc,y:H-oy-(p.lat-minLat)*sc});
   const trackPx=track.map(proj);             // tracé projeté
   const route=pts.map(proj);                 // POI projetés
-  // Positions en coordonnées écran (après transform) pour la détection de tap
-  mapPositions=route.map(p=>({x:p.x*mapScale+mapOffX,y:p.y*mapScale+mapOffY}));
   // trace une courbe douce (spline Catmull-Rom) passant par les points => effet rivière sinueuse
   const smooth=(p0,p1,p2,p3)=>{
     const cp1x=p1.x+(p2.x-p0.x)/6, cp1y=p1.y+(p2.y-p0.y)/6;
@@ -1308,7 +1305,7 @@ function drawMap(){
   });
   // Marqueur GPS (position réelle) — point bleu 📍, séparé du 🛶 de l'étape courante
   if(gpsActive&&gpsPos){
-    const gp=proj(gpsPos);
+    const gp=proj(snapSurTrace(gpsPos,track));
     const phase=(Date.now()%1600)/1600;
     // anneau pulsant bleu
     mapCtx.beginPath();mapCtx.arc(gp.x,gp.y,10+phase*18,0,7);
