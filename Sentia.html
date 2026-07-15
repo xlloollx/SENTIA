@@ -202,6 +202,7 @@
     <div class="flag on" data-lang="fr" onclick="setLang('fr')">🇫🇷</div>
     <div class="flag" data-lang="en" onclick="setLang('en')">🇬🇧</div>
     <div class="flag" data-lang="es" onclick="setLang('es')">🇪🇸</div>
+    <div class="flag" data-lang="nl" onclick="setLang('nl')">🇳🇱</div>
     <div class="flag" id="lockToggleBtn" onclick="openCodeModal()">🔒</div>
     <div class="flag hidden" id="installBtn" onclick="promptInstall()" title="Installer l'application">📲</div>
   </div>
@@ -228,6 +229,7 @@
       <div class="flag on" data-lang="fr" onclick="setLang('fr')">🇫🇷</div>
       <div class="flag" data-lang="en" onclick="setLang('en')">🇬🇧</div>
       <div class="flag" data-lang="es" onclick="setLang('es')">🇪🇸</div>
+      <div class="flag" data-lang="nl" onclick="setLang('nl')">🇳🇱</div>
     </div>
   </div>
   <div class="map-wrap">
@@ -393,10 +395,38 @@ const UI={
     hikeOpen:"📍 Localizar en Google Maps",hikeClose:"✕ Cerrar",
     circuitClose:"✕ Cerrar",circuitAdult:"Adulto",circuitChild:"Niño 5-12 años",circuitKayak:"Kayak",
     circuitSteps:"Etapas de la ruta",circuitBase:"Base y material",circuitDeparts:"Salidas",circuitModif:"Modificación",
-    circuitEquip:"Material incluido"}
+    circuitEquip:"Material incluido"},
+  nl:{tagline:"Je gids die spreekt. Kies een afdaling en laat de rivier haar verhaal vertellen.",
+    demo:"DEMO",stopped:"Gestopt",running:"Afdaling bezig…",
+    listen:"🔊 Luisteren",stop:"⏹ Stoppen",identify:"📷 Herkennen",
+    kmDone:"km afgelegd",kmLeft:"km te gaan",kmOf:"Kilometer",
+    idTitle:"Herkennen",idSub:"Fauna & flora van de Dordogne",
+    photoPh:"Tik om een foto te maken of te kiezen",takePhoto:"Foto maken",
+    noNet:"📡 Geen netwerk. Herkenning vereist een verbinding. Probeer opnieuw met 3G/4G of wifi.",
+    analyzing:"Afbeelding analyseren…",idFail:"⚠️ Herkenning mislukt. Controleer de verbinding en probeer opnieuw.",
+    needPoi:"Kom dichter bij een punt om de beschrijving te horen.",
+    photoBtn:"🖼️ Foto",photoTitle:"Foto van het punt",photoNone:"Foto volgt binnenkort voor dit punt.",photoClose:"✕ Sluiten",
+    gpsOn:"📍 GPS actief",gpsOff:"📍 GPS aanzetten",gpsUnavailable:"📡 Locatie is niet beschikbaar op dit apparaat/deze browser.",
+    gpsDenied:"📡 Locatie geweigerd. Sta locatietoegang toe om de GPS-gids te activeren.",gpsNear:"Je nadert een punt:",
+    moreSoon:"Binnenkort nieuwe routes in deze categorie.",
+    lockTitle:"Toegang tot de route",lockMsg:"Deze route is vergrendeld. Voer de toegangscode in om te ontgrendelen.",
+    lockPh:"Toegangscode",lockBtn:"Ontgrendelen",lockCancel:"Annuleren",lockWrong:"❌ Onjuiste code.",
+    lockOk:"🔓 Toegang ontgrendeld!",lockedTag:"🔒 Vergrendeld",freeTag:"Gratis",
+    offline:"📡 Offline — je routes en foto's blijven beschikbaar.",
+    iosInstall:"📲 Op iPhone: tik op Delen en dan “Zet op beginscherm”.",
+    ecoHint:"Scherm in rust om de batterij te sparen. De GPS-gids en de stem blijven werken. Tik op het scherm of schud de telefoon om te ontwaken. Zet de telefoon niet uit met de knop.",
+    demoVoix:"🔊 De stemdemo stopt hier. Vraag de toegangscode aan je kanoverhuurder voor de volledige audiogids.",
+    needNet:"📡 Internetverbinding nodig om de code te activeren. Probeer opnieuw met netwerk.",
+    baseLoin:"🛶 Je bent {km} km van de kanobasis. Tik op de gekleurde badge onderaan de kaart om de GPS-route te starten.",
+    nearVillage:"Bij",
+    hikeKm:"Afstand",hikeDp:"Stijging",hikeDn:"Daling",hikeT:"Duur",hikeF:"Moeilijkheid",hikeDep:"Start",
+    hikeOpen:"📍 Zoek op Google Maps",hikeClose:"✕ Sluiten",
+    circuitClose:"✕ Sluiten",circuitAdult:"Volwassene",circuitChild:"Kind 5-12 jaar",circuitKayak:"Kajak",
+    circuitSteps:"Etappes van de route",circuitBase:"Basis & uitrusting",circuitDeparts:"Vertrektijden",circuitModif:"Wijziging",
+    circuitEquip:"Uitrusting inbegrepen"}
 };
 
-const VOICE={fr:'fr-FR',en:'en-US',es:'es-ES'};
+const VOICE={fr:'fr-FR',en:'en-US',es:'es-ES',nl:'nl-NL'};
 
 /* ---- Parcours trilingue ---- */
 const RANDO_FULL={
@@ -750,6 +780,21 @@ const VILLAGES=[
   {nom:{fr:"Beynac-et-Cazenac",en:"Beynac-et-Cazenac",es:"Beynac-et-Cazenac"},lat:44.8389,lng:1.1447}
 ];
 
+/* ---- Néerlandais : repli automatique ----
+   L'interface est traduite en NL ; les récits des étapes sont traduits
+   progressivement. En attendant, toute donnée sans version nl reçoit
+   automatiquement l'anglais — l'app reste complète dans les 4 langues. */
+function completerLangue(o,vus){
+  vus=vus||new Set();
+  if(!o||typeof o!=='object'||vus.has(o))return;
+  vus.add(o);
+  if(o.fr!==undefined&&o.en!==undefined){
+    if(o.nl===undefined)o.nl=o.en;
+  }
+  for(const k in o)completerLangue(o[k],vus);
+}
+[CANOE_ROUTES,POI_TILE,VILLAGES,KIND_I18N].forEach(x=>completerLangue(x));
+
 /* ---- Accès verrouillé ----
    Un seul parcours (FREE_ROUTE_ID) reste accessible sans code ; tout le
    reste se débloque avec le code d'accès (stocké sous forme de hachage,
@@ -1079,7 +1124,7 @@ function closePhotoModal(){navBack();}
    s'affiche et se lit automatiquement, sans interrompre la navigation
    manuelle (curseur/boutons) qui reste toujours disponible. */
 /* ---- Version & base de rattachement ---- */
-const APP_VERSION="1.0";
+const APP_VERSION="1.1";
 const BASE_LOC={lat:44.825768,lng:1.224381};   // base Canoës Loisirs, port de Vitrac
 let baseToastFait=false;
 function majBaseBadge(lat,lng,avecToast){

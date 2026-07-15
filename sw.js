@@ -3,7 +3,7 @@
    fonctionnement 100% hors connexion sur la rivière.
    Stratégie : network-first pour Sentia.html (mises à jour), cache-first
    pour tout le reste (photos, icônes). Incrémenter VERSION à chaque publication. */
-const VERSION = 'sentia-v11';
+const VERSION = 'sentia-v12';
 
 const ASSETS = [
   './Sentia.html',
