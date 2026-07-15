@@ -123,6 +123,15 @@
   .gps-village{position:absolute;top:56px;left:12px;z-index:5;background:rgba(8,39,30,.82);border:1px solid rgba(242,237,225,.14);color:var(--sand);padding:5px 11px;border-radius:99px;font-size:.7rem;display:none}
   .gps-village.show{display:block}
 
+  /* Badge distance à la base (bas droite de la carte) : rouge >10 km,
+     orange 3-10 km, vert <3 km. Un toucher ouvre l'itinéraire GPS. */
+  .base-badge{position:absolute;bottom:12px;right:12px;z-index:5;border:none;font-family:inherit;font-weight:700;font-size:.78rem;padding:8px 13px;border-radius:99px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+  .base-badge.b-rouge{background:var(--danger);color:#fff}
+  .base-badge.b-orange{background:var(--sun);color:#3a2c10}
+  .base-badge.b-vert{background:var(--leaf);color:#0d3b2e}
+
+  .version{font-size:.6rem;color:rgba(242,237,225,.35);margin-top:8px;letter-spacing:.08em}
+
   .progress-bar{padding:12px 18px;background:rgba(8,39,30,.85)}
   .progress-track{height:7px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
   .progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--leaf),var(--sun));border-radius:99px;transition:width .5s}
@@ -205,6 +214,7 @@
     </svg>
     <h1>Sentia</h1>
     <p id="homeTagline">—</p>
+    <p class="version" id="appVersion">—</p>
   </div>
   <div class="rando-list" id="categoryList"></div>
 </div>
@@ -225,6 +235,7 @@
     <div class="play-badge"><span class="dot" id="liveDot"></span><span id="liveTxt">—</span></div>
     <div class="gps-badge" id="gpsBtn">—</div>
     <div class="gps-village" id="gpsVillage">—</div>
+    <button class="base-badge hidden" id="baseBadge" onclick="ouvrirItineraire()">—</button>
   </div>
   <div class="progress-bar" id="progressBar">
     <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
@@ -320,6 +331,7 @@ const UI={
     ecoHint:"Écran en veille pour économiser la batterie. Le guide GPS et la voix continuent. Touchez l'écran ou secouez le téléphone pour rallumer. N'éteignez pas le téléphone avec le bouton.",
     demoVoix:"🔊 La démo vocale s'arrête ici. Pour l'audioguide complet, demandez le code d'accès à votre base de location.",
     needNet:"📡 Connexion nécessaire pour activer le code. Réessayez avec du réseau.",
+    baseLoin:"🛶 Vous êtes à {km} km de la base de canoës. Touchez le badge coloré en bas de la carte pour lancer l'itinéraire GPS.",
     nearVillage:"Près de",
     hikeKm:"Distance",hikeDp:"Dénivelé +",hikeDn:"Dénivelé -",hikeT:"Durée",hikeF:"Difficulté",hikeDep:"Départ",
     hikeOpen:"📍 Localiser sur Google Maps",hikeClose:"✕ Fermer",
@@ -347,6 +359,7 @@ const UI={
     ecoHint:"Screen resting to save battery. The GPS guide and the voice keep running. Tap the screen or shake the phone to wake. Don't switch the phone off with the power button.",
     demoVoix:"🔊 The voice demo stops here. For the full audioguide, ask your rental base for the access code.",
     needNet:"📡 Internet connection needed to activate the code. Try again when you have network.",
+    baseLoin:"🛶 You are {km} km from the canoe base. Tap the coloured badge at the bottom of the map to start GPS directions.",
     nearVillage:"Near",
     hikeKm:"Distance",hikeDp:"Ascent",hikeDn:"Descent",hikeT:"Duration",hikeF:"Difficulty",hikeDep:"Start",
     hikeOpen:"📍 Locate on Google Maps",hikeClose:"✕ Close",
@@ -374,6 +387,7 @@ const UI={
     ecoHint:"Pantalla en reposo para ahorrar batería. El guía GPS y la voz siguen funcionando. Toca la pantalla o agita el teléfono para reactivar. No apagues el teléfono con el botón.",
     demoVoix:"🔊 La demo de voz termina aquí. Para la audioguía completa, pide el código de acceso a tu base de alquiler.",
     needNet:"📡 Se necesita conexión para activar el código. Inténtalo de nuevo con red.",
+    baseLoin:"🛶 Estás a {km} km de la base de canoas. Toca la insignia de color abajo del mapa para iniciar la ruta GPS.",
     nearVillage:"Cerca de",
     hikeKm:"Distancia",hikeDp:"Desnivel +",hikeDn:"Desnivel -",hikeT:"Duración",hikeF:"Dificultad",hikeDep:"Salida",
     hikeOpen:"📍 Localizar en Google Maps",hikeClose:"✕ Cerrar",
@@ -1064,6 +1078,25 @@ function closePhotoModal(){navBack();}
    à chaque étape (formule de Haversine). Sous ~60 m d'un point, l'étape
    s'affiche et se lit automatiquement, sans interrompre la navigation
    manuelle (curseur/boutons) qui reste toujours disponible. */
+/* ---- Version & base de rattachement ---- */
+const APP_VERSION="1.0";
+const BASE_LOC={lat:44.825768,lng:1.224381};   // base Canoës Loisirs, port de Vitrac
+let baseToastFait=false;
+function majBaseBadge(lat,lng,avecToast){
+  const b=document.getElementById('baseBadge');if(!b)return;
+  const km=haversine(lat,lng,BASE_LOC.lat,BASE_LOC.lng)/1000;
+  b.textContent="🛶 "+(km<10?km.toFixed(1):Math.round(km))+" km";
+  b.classList.remove('hidden','b-rouge','b-orange','b-vert');
+  b.classList.add(km>10?'b-rouge':(km>3?'b-orange':'b-vert'));
+  if(avecToast&&km>10&&!baseToastFait){
+    baseToastFait=true;
+    toast(t().baseLoin.replace('{km}',Math.round(km)),8000);
+  }
+}
+function ouvrirItineraire(){
+  window.open('https://www.google.com/maps/dir/?api=1&destination='+BASE_LOC.lat+','+BASE_LOC.lng+'&travelmode=driving','_blank');
+}
+
 const SEUIL_GPS=200;   // déclenchement vocal à ~200 m d'un point (réglé sur le terrain)
 let gpsActive=false,gpsWatchId=null,gpsPos=null,gpsAnimFrame=null;
 let mapScale=1,mapOffX=0,mapOffY=0,manualStep=false;
@@ -1140,6 +1173,7 @@ function onGpsPos(pos){
   const{latitude,longitude,accuracy}=pos.coords;
   gpsPos={lat:latitude,lng:longitude};
   updateGpsVillage();
+  majBaseBadge(latitude,longitude,true);
   // Position trop imprécise (falaises, canopée) : on suit sur la carte
   // mais on ne déclenche pas d'étape pour éviter les faux positifs.
   if(accuracy&&accuracy>150){drawMap();return;}
@@ -1488,6 +1522,18 @@ document.addEventListener('click',unlockSpeech,{once:true});
 
 /* ---- Init ---- */
 applyStaticUI();renderHome();updateLockIcon();
+document.getElementById('appVersion').textContent='Sentia v'+APP_VERSION;
+/* Au lancement : si la localisation est déjà autorisée, on prévient
+   discrètement le client s'il est loin de la base (toast + badge). */
+if(navigator.permissions&&navigator.permissions.query&&'geolocation'in navigator){
+  navigator.permissions.query({name:'geolocation'}).then(p=>{
+    if(p.state==='granted'){
+      navigator.geolocation.getCurrentPosition(
+        pos=>majBaseBadge(pos.coords.latitude,pos.coords.longitude,true),
+        ()=>{},{maximumAge:120000,timeout:8000});
+    }
+  }).catch(()=>{});
+}
 if('speechSynthesis'in window){window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();window.speechSynthesis.getVoices();}
 </script>
 </body>
