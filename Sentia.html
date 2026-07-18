@@ -66,11 +66,13 @@
 
   .map-wrap{position:relative;flex:1;overflow:hidden;background:#0a3024}
   #miniMap{width:100%;height:100%;display:block}
-  .play-badge{position:absolute;top:12px;right:12px;z-index:5;background:rgba(8,39,30,.82);border:1px solid rgba(242,237,225,.14);padding:7px 12px;border-radius:99px;font-size:.74rem;display:flex;align-items:center;gap:7px}
+  /* Badges informatifs de la carte : pointer-events:none pour que le
+     zoom/déplacement de la carte fonctionne aussi sous ces zones. */
+  .play-badge{position:absolute;top:12px;right:12px;z-index:5;background:rgba(8,39,30,.82);border:1px solid rgba(242,237,225,.14);padding:7px 12px;border-radius:99px;font-size:.74rem;display:flex;align-items:center;gap:7px;pointer-events:none}
   .dot{width:8px;height:8px;border-radius:50%;background:var(--sand-dim)}
   .dot.live{background:var(--leaf);box-shadow:0 0 0 0 rgba(127,176,105,.7);animation:pulse 1.8s infinite}
   @keyframes pulse{70%{box-shadow:0 0 0 9px rgba(127,176,105,0)}100%{box-shadow:0 0 0 0 rgba(127,176,105,0)}}
-  .gps-badge{position:absolute;top:12px;left:12px;z-index:5;background:rgba(8,39,30,.82);border:1px solid rgba(242,237,225,.14);color:var(--sand);padding:7px 12px;border-radius:99px;font-size:.74rem;font-family:inherit;transition:background .15s}
+  .gps-badge{position:absolute;top:12px;left:12px;z-index:5;background:rgba(8,39,30,.82);border:1px solid rgba(242,237,225,.14);color:var(--sand);padding:7px 12px;border-radius:99px;font-size:.74rem;font-family:inherit;transition:background .15s;pointer-events:none}
   .gps-badge.active{background:rgba(127,176,105,.35);border-color:var(--leaf)}
 
   .btn-photo{background:var(--river);color:var(--sand)}
@@ -124,7 +126,7 @@
   .lock-tag.free{background:rgba(127,176,105,.92);color:#0d3b2e}
   .rando-card{position:relative}
 
-  .gps-village{position:absolute;top:56px;left:12px;z-index:5;background:rgba(8,39,30,.82);border:1px solid rgba(242,237,225,.14);color:var(--sand);padding:5px 11px;border-radius:99px;font-size:.7rem;display:none}
+  .gps-village{position:absolute;top:56px;left:12px;z-index:5;background:rgba(8,39,30,.82);border:1px solid rgba(242,237,225,.14);color:var(--sand);padding:5px 11px;border-radius:99px;font-size:.7rem;display:none;pointer-events:none}
   .gps-village.show{display:block}
 
   /* Badge distance à la base (bas droite de la carte) : rouge >10 km,
@@ -193,7 +195,9 @@
   .btn-eco{flex:0 0 58px;background:#16221d;color:var(--sand)}
 
   .hidden{display:none!important}
-  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--sand);padding:12px 20px;border-radius:99px;font-size:.85rem;z-index:99;opacity:0;transition:opacity .3s;border:1px solid rgba(242,237,225,.2);max-width:88vw;text-align:center}
+  /* pointer-events:none — CRUCIAL : sans lui, le toast invisible (opacity 0)
+     reste au-dessus des boutons 🔊 🖼️ 🌙 et avale leurs touchers. */
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--sand);padding:12px 20px;border-radius:99px;font-size:.85rem;z-index:99;opacity:0;transition:opacity .3s;border:1px solid rgba(242,237,225,.2);max-width:88vw;text-align:center;pointer-events:none}
   .toast.show{opacity:1}
   ::-webkit-scrollbar{width:0}
 </style>
@@ -648,7 +652,7 @@ const CIRCUITS_CANOE=[
       fr:"Le rocher de Caudon surplombe un passage d'eaux calmes de son promontoire calcaire. À son pied se cache la Maison du Passeur, site troglodytique considéré comme l'un des premiers lieux christianisés du Périgord, avec ses sarcophages et son enfeu taillés dans la roche.",
       en:"The Caudon rock overhangs a stretch of calm water from its limestone promontory. At its foot hides the Maison du Passeur, a troglodyte site considered one of the first Christianised places in Périgord, with sarcophagi and a burial niche carved into the rock.",
       es:"La roca de Caudon domina un tramo de aguas tranquilas desde su promontorio calcáreo. A sus pies se esconde la Maison du Passeur, un sitio troglodita considerado uno de los primeros lugares cristianizados del Périgord, con sarcófagos y un nicho funerario tallados en la roca."}},
-     {km:7.5,lieu:"Falaise de Vitrac",note:{
+     {km:7.5,lieu:"Falaise de Vitrac",photo:"Vitrac%20port.JPG",note:{
       fr:"La haute muraille calcaire de Vitrac annonce la base : une centaine de mètres de strates empilées, creusées de cavités occupées dès la préhistoire. Levez les yeux — hirondelles et rapaces nichent aujourd'hui dans la paroi. À Vitrac, la grande descente des châteaux commence.",
       en:"The high limestone wall of Vitrac announces the base: a hundred metres of stacked strata, hollowed with cavities occupied since prehistory. Look up — swallows and birds of prey now nest in the rock face. At Vitrac, the great castle descent begins.",
       es:"La alta muralla calcárea de Vitrac anuncia la base: un centenar de metros de estratos apilados, horadados por cavidades ocupadas desde la prehistoria. Alza la vista — golondrinas y rapaces anidan hoy en la pared. En Vitrac empieza el gran descenso de los castillos."}}
@@ -673,7 +677,7 @@ const CIRCUITS_CANOE=[
       fr:"Au pied du rocher se dresse la Maison du Passeur, considérée comme l'un des premiers sites christianisés du Périgord. Le lieu garde des traces d'occupation gallo-romaine, avec des sarcophages et un enfeu taillés directement dans la roche. Son architecture médiévale a conservé un portail ouest, deux baies nord pour l'éclairage, et un clocher-mur sans cloche au sommet de la falaise.",
       en:"At the foot of the rock stands the Maison du Passeur, considered one of the first Christianised sites in Périgord. The place keeps traces of Gallo-Roman occupation, with sarcophagi and a burial niche carved directly into the rock. Its medieval architecture has preserved a west portal, two north windows for light, and a bell-gable without its bell at the top of the cliff.",
       es:"Al pie de la roca se alza la Maison du Passeur, considerada uno de los primeros lugares cristianizados del Périgord. El lugar conserva huellas de ocupación galorromana, con sarcófagos y un nicho funerario tallados directamente en la roca. Su arquitectura medieval conserva un portal oeste, dos vanos al norte para la iluminación y una espadaña sin campana en lo alto del acantilado."}},
-     {km:7.5,lieu:"Falaise de Vitrac",note:{
+     {km:7.5,lieu:"Falaise de Vitrac",photo:"Vitrac%20port.JPG",note:{
       fr:"La haute muraille calcaire de Vitrac referme la descente : une centaine de mètres de strates empilées, creusées de cavités occupées dès la préhistoire. Levez les yeux — hirondelles et rapaces nichent aujourd'hui dans la paroi.",
       en:"The high limestone wall of Vitrac closes the descent: a hundred metres of stacked strata, hollowed with cavities occupied since prehistory. Look up — swallows and birds of prey now nest in the rock face.",
       es:"La alta muralla calcárea de Vitrac cierra el descenso: un centenar de metros de estratos apilados, horadados por cavidades ocupadas desde la prehistoria. Alza la vista — golondrinas y rapaces anidan hoy en la pared."}},
@@ -686,7 +690,7 @@ const CIRCUITS_CANOE=[
    navette:"Vitrac→Calviac / arrivée directe à la base",
    resume:"Itinéraire sauvage et historique depuis la cale de Calviac. On glisse au pied de demeures seigneuriales, d'un tablier de pont disgracieux et de berges habitées par les hirondelles, avant d'atteindre la tour de guet médiévale de Vitrac.",
    etapes:[
-     {km:0,lieu:"Cale de Calviac",photo:"Chateau%20de%20Fenelon.jpg",note:{
+     {km:0,lieu:"Cale de Calviac",photo:"depart_calviac_web.jpg",note:{
       fr:"Départ depuis la cale de Calviac, sur la rive la plus sauvage de la Dordogne. Au-dessus de vous, le château de Fénelon dresse sa triple enceinte : forteresse des XIIe-XVIIe siècles classée monument historique, coiffée d'une remarquable toiture de lauzes. C'est ici que naquit en 1651 François de Salignac de La Mothe-Fénelon, écrivain et précepteur du petit-fils de Louis XIV. Installez-vous, la rivière fait le reste.",
       en:"You set off from the Calviac slipway, on the wildest bank of the Dordogne. Above you rises the triple wall of Fénelon castle: a 12th–17th-century fortress, a listed monument crowned with a remarkable stone-slab roof. François de Salignac de La Mothe-Fénelon, writer and tutor to Louis XIV's grandson, was born here in 1651. Settle in — the river does the rest.",
       es:"Salida desde la rampa de Calviac, en la orilla más salvaje del Dordoña. Sobre ti se alza el triple recinto del castillo de Fénelon: fortaleza de los siglos XII-XVII, monumento histórico coronado por una notable techumbre de lajas. Aquí nació en 1651 François de Salignac de La Mothe-Fénelon, escritor y preceptor del nieto de Luis XIV. Acomódate — el río hace el resto."}},
@@ -698,7 +702,7 @@ const CIRCUITS_CANOE=[
       fr:"Au pont de Groléjac, la Germaine vient rejoindre la Dordogne. Le village fut longtemps un port actif où pêcheurs et gabariers se croisaient ; sous les arches, l'eau calme invite à une pause avant la suite de la descente.",
       en:"At Groléjac bridge, the Germaine stream joins the Dordogne. The village was long a busy little port where fishermen and bargemen crossed paths; beneath the arches, the calm water invites a pause before the rest of the descent.",
       es:"En el puente de Groléjac, el arroyo Germaine se une al Dordoña. El pueblo fue durante mucho tiempo un pequeño puerto activo donde se cruzaban pescadores y gabarreros; bajo los arcos, el agua tranquila invita a una pausa antes de seguir el descenso."}},
-     {km:8.5,lieu:"Cale de Carsac",note:{
+     {km:8.5,lieu:"Cale de Carsac",photo:"Depart%20de%20Carsac.jpg",note:{
       fr:"Dans les berges de terre meuble nichent les hirondelles de rivage : observez les petites galeries qu'elles creusent au-dessus de l'eau. Un îlot partage ici la rivière — suivez le bras principal, dans le courant.",
       en:"Sand martins nest in the soft earth banks here: look for the little tunnels they dig above the water. A small island splits the river — follow the main channel, staying in the current.",
       es:"En las orillas de tierra blanda anidan los aviones zapadores: observa las pequeñas galerías que excavan sobre el agua. Un islote divide aquí el río — sigue el brazo principal, en la corriente."}},
@@ -714,7 +718,7 @@ const CIRCUITS_CANOE=[
       fr:"Le rocher de Caudon surplombe un passage d'eaux calmes de son chaos de blocs calcaires. À son pied se cache la Maison du Passeur, site troglodytique considéré comme l'un des premiers lieux christianisés du Périgord, avec ses sarcophages et son enfeu taillés dans la roche.",
       en:"The Caudon rock overhangs a stretch of calm water with its chaos of limestone blocks. At its foot hides the Maison du Passeur, a troglodyte site considered one of the first Christianised places in Périgord, with sarcophagi and a burial niche carved into the rock.",
       es:"La roca de Caudon domina un tramo de aguas tranquilas con su caos de bloques calcáreos. A sus pies se esconde la Maison du Passeur, un sitio troglodita considerado uno de los primeros lugares cristianizados del Périgord, con sarcófagos y un nicho funerario tallados en la roca."}},
-     {km:19,lieu:"Falaise de Vitrac + Tour de guet",note:{
+     {km:19,lieu:"Falaise de Vitrac + Tour de guet",photo:"Vitrac%20port.JPG",note:{
       fr:"Dernière ligne droite sous la falaise de Vitrac et sa tour de guet, vigie normande élevée entre les IXe et XIIe siècles pour surveiller la rivière et prévenir les invasions venues de l'aval. Vous accostez directement au chalet de la base. Belle descente — à bientôt sur la Dordogne !",
       en:"Final stretch beneath the Vitrac cliff and its watchtower, a Norman lookout built between the 9th and 12th centuries to watch the river and warn of invasions from downstream. You land directly at the base's hut. Well paddled — see you again on the Dordogne!",
       es:"Última recta bajo el acantilado de Vitrac y su atalaya, vigía normanda levantada entre los siglos IX y XII para vigilar el río y prevenir invasiones llegadas de aguas abajo. Desembarcas directamente en el chalet de la base. ¡Buen descenso — hasta pronto en el Dordoña!"}}
@@ -1280,6 +1284,10 @@ function openPhotoModal(){
   document.getElementById('photoModalClose').textContent=t().photoClose;
   const zone=document.getElementById('photoModalZone');
   zone.innerHTML=s.photo?`<img src="${s.photo}" alt="">`:`<div class="ph"><span>🖼️</span><span>${t().photoNone}</span></div>`;
+  // Image indisponible (précache interrompu + hors ligne) : message clair
+  // au lieu d'un écran noir muet.
+  const im=zone.querySelector('img');
+  if(im)im.addEventListener('error',()=>{zone.innerHTML=`<div class="ph"><span>🖼️</span><span>${t().photoNone}</span></div>`;},{once:true});
   const m=document.getElementById('photoModal');
   if(!m.classList.contains('show')){navPush();m.classList.add('show');}
 }
@@ -1291,7 +1299,7 @@ function closePhotoModal(){navBack();}
    s'affiche et se lit automatiquement, sans interrompre la navigation
    manuelle (curseur/boutons) qui reste toujours disponible. */
 /* ---- Version & base de rattachement ---- */
-const APP_VERSION="1.3";
+const APP_VERSION="1.4";
 const BASE_LOC={lat:44.825768,lng:1.224381};   // base Canoës Loisirs, port de Vitrac
 let baseToastFait=false;
 function majBaseBadge(lat,lng,avecToast){

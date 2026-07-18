@@ -3,7 +3,7 @@
    fonctionnement 100% hors connexion sur la rivière.
    Stratégie : network-first pour Sentia.html (mises à jour), cache-first
    pour tout le reste (photos, icônes). Incrémenter VERSION à chaque publication. */
-const VERSION = 'sentia-v14';
+const VERSION = 'sentia-v15';
 
 const ASSETS = [
   './Sentia.html',
@@ -32,6 +32,7 @@ const ASSETS = [
   './Monfort.jpg',
   './Chateau%20de%20Fenelon.jpg',
   './Embarcadere%20Grolegeac.jpg',
+  './depart_calviac_web.jpg',
   "./La%20cavit%C3%A9%20d'Ali%C3%A9nor.jpg",
   './bastide%20domme.jpg',
   './Pont%20de%20Cenac.jpg'
