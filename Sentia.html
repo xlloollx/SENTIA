@@ -194,6 +194,9 @@
   #blackout .bo-hint{color:#242424;font-size:.72rem;line-height:1.5}
   .btn-eco{flex:0 0 58px;background:#16221d;color:var(--sand)}
 
+  /* Bouton flottant de remontée de bug (visible en mode testeur) */
+  #bugBtn{position:fixed;left:10px;bottom:10px;z-index:150;background:rgba(196,92,74,.95);color:#fff;border:none;border-radius:99px;padding:8px 13px;font-size:.8rem;font-weight:700;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.4);cursor:pointer}
+  #bugBtn:active{transform:scale(.95)}
   .hidden{display:none!important}
   /* pointer-events:none — CRUCIAL : sans lui, le toast invisible (opacity 0)
      reste au-dessus des boutons 🔊 🖼️ 🌙 et avale leurs touchers. */
@@ -285,7 +288,8 @@
   <div class="dialog-card">
     <h3 id="codeTitle">—</h3>
     <p id="codeMsg" class="dialog-msg">—</p>
-    <input type="text" id="codeInput" class="dialog-input" autocomplete="off" autocapitalize="off" spellcheck="false" onkeydown="if(event.key==='Enter')submitCode()">
+    <input type="text" id="codeInput" class="dialog-input" autocomplete="off" autocapitalize="off" spellcheck="false" onkeydown="if(event.key==='Enter')document.getElementById('codePass').focus()">
+    <input type="password" id="codePass" class="dialog-input" style="margin-top:9px" autocomplete="off" autocapitalize="off" spellcheck="false" onkeydown="if(event.key==='Enter')submitCode()">
     <p id="codeError" class="dialog-error"></p>
     <div class="dialog-actions">
       <button class="btn" id="codeCancelBtn" onclick="closeCodeModal()">—</button>
@@ -304,6 +308,9 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- Bouton flottant « remonter un bug » (mode testeur) -->
+<button id="bugBtn" onclick="signalerBug()" title="Signaler un bug">🐞 Bug</button>
 
 <!-- MODE VEILLE (écran noir, guide actif) -->
 <div id="blackout" onclick="ecoHide()">
@@ -333,9 +340,10 @@ const UI={
     gpsOn:"📍 GPS activé",gpsOff:"📍 Activer le GPS",gpsUnavailable:"📡 La localisation n'est pas disponible sur cet appareil/navigateur.",
     gpsDenied:"📡 Localisation refusée. Autorisez l'accès à la position pour activer le guide GPS.",gpsNear:"Vous approchez d'un point :",
     moreSoon:"De nouveaux parcours arrivent bientôt dans cette catégorie.",
-    lockTitle:"Accès parcours",lockMsg:"Ce parcours est réservé. Entrez le code d'accès pour le débloquer.",
-    lockPh:"Code d'accès",lockBtn:"Déverrouiller",lockCancel:"Annuler",lockWrong:"❌ Code incorrect.",
-    lockOk:"🔓 Accès débloqué !",lockedTag:"🔒 Réservé",freeTag:"Gratuit",
+    lockTitle:"Connexion",lockMsg:"Entrez l'identifiant et le mot de passe fournis par votre base de location.",
+    lockPhLogin:"Identifiant",lockPhPass:"Mot de passe",lockBtn:"Se connecter",lockCancel:"Annuler",lockWrong:"❌ Identifiant ou mot de passe incorrect.",
+    lockOk:"🔓 Connecté !",lockedTag:"🔒 Réservé",freeTag:"Gratuit",
+    bugBtn:"🐞 Signaler un bug",bugPrompt:"Décrivez le problème (ce qui s'est passé, où, quand) :",bugMerci:"Merci ! Votre retour a bien été envoyé. 🙏",testeur:"Mode testeur",
     offline:"📡 Hors connexion — vos parcours et photos restent disponibles.",
     iosInstall:"📲 Sur iPhone : bouton Partager, puis « Sur l'écran d'accueil ».",
     ecoHint:"Écran en veille pour économiser la batterie. Le guide GPS et la voix continuent. Touchez l'écran ou secouez le téléphone pour rallumer. N'éteignez pas le téléphone avec le bouton.",
@@ -362,9 +370,10 @@ const UI={
     gpsOn:"📍 GPS on",gpsOff:"📍 Turn on GPS",gpsUnavailable:"📡 Location isn't available on this device/browser.",
     gpsDenied:"📡 Location denied. Allow location access to enable the GPS guide.",gpsNear:"You're approaching a point:",
     moreSoon:"New routes are coming soon in this category.",
-    lockTitle:"Route access",lockMsg:"This route is locked. Enter the access code to unlock it.",
-    lockPh:"Access code",lockBtn:"Unlock",lockCancel:"Cancel",lockWrong:"❌ Wrong code.",
-    lockOk:"🔓 Access unlocked!",lockedTag:"🔒 Locked",freeTag:"Free",
+    lockTitle:"Sign in",lockMsg:"Enter the username and password given by your rental base.",
+    lockPhLogin:"Username",lockPhPass:"Password",lockBtn:"Sign in",lockCancel:"Cancel",lockWrong:"❌ Wrong username or password.",
+    lockOk:"🔓 Signed in!",lockedTag:"🔒 Locked",freeTag:"Free",
+    bugBtn:"🐞 Report a bug",bugPrompt:"Describe the problem (what happened, where, when):",bugMerci:"Thanks! Your feedback has been sent. 🙏",testeur:"Tester mode",
     offline:"📡 Offline — your routes and photos are still available.",
     iosInstall:"📲 On iPhone: tap Share, then “Add to Home Screen”.",
     ecoHint:"Screen resting to save battery. The GPS guide and the voice keep running. Tap the screen or shake the phone to wake. Don't switch the phone off with the power button.",
@@ -391,9 +400,10 @@ const UI={
     gpsOn:"📍 GPS activado",gpsOff:"📍 Activar GPS",gpsUnavailable:"📡 La localización no está disponible en este dispositivo/navegador.",
     gpsDenied:"📡 Localización denegada. Permite el acceso a la ubicación para activar la guía GPS.",gpsNear:"Te acercas a un punto:",
     moreSoon:"Próximamente nuevas rutas en esta categoría.",
-    lockTitle:"Acceso a la ruta",lockMsg:"Esta ruta está bloqueada. Introduce el código de acceso para desbloquearla.",
-    lockPh:"Código de acceso",lockBtn:"Desbloquear",lockCancel:"Cancelar",lockWrong:"❌ Código incorrecto.",
-    lockOk:"🔓 ¡Acceso desbloqueado!",lockedTag:"🔒 Bloqueado",freeTag:"Gratis",
+    lockTitle:"Conexión",lockMsg:"Introduce el usuario y la contraseña que te dio tu base de alquiler.",
+    lockPhLogin:"Usuario",lockPhPass:"Contraseña",lockBtn:"Entrar",lockCancel:"Cancelar",lockWrong:"❌ Usuario o contraseña incorrectos.",
+    lockOk:"🔓 ¡Conectado!",lockedTag:"🔒 Bloqueado",freeTag:"Gratis",
+    bugBtn:"🐞 Reportar un fallo",bugPrompt:"Describe el problema (qué pasó, dónde, cuándo):",bugMerci:"¡Gracias! Tu comentario se ha enviado. 🙏",testeur:"Modo prueba",
     offline:"📡 Sin conexión — tus rutas y fotos siguen disponibles.",
     iosInstall:"📲 En iPhone: botón Compartir y luego «Añadir a pantalla de inicio».",
     ecoHint:"Pantalla en reposo para ahorrar batería. El guía GPS y la voz siguen funcionando. Toca la pantalla o agita el teléfono para reactivar. No apagues el teléfono con el botón.",
@@ -420,9 +430,10 @@ const UI={
     gpsOn:"📍 GPS actief",gpsOff:"📍 GPS aanzetten",gpsUnavailable:"📡 Locatie is niet beschikbaar op dit apparaat/deze browser.",
     gpsDenied:"📡 Locatie geweigerd. Sta locatietoegang toe om de GPS-gids te activeren.",gpsNear:"Je nadert een punt:",
     moreSoon:"Binnenkort nieuwe routes in deze categorie.",
-    lockTitle:"Toegang tot de route",lockMsg:"Deze route is vergrendeld. Voer de toegangscode in om te ontgrendelen.",
-    lockPh:"Toegangscode",lockBtn:"Ontgrendelen",lockCancel:"Annuleren",lockWrong:"❌ Onjuiste code.",
-    lockOk:"🔓 Toegang ontgrendeld!",lockedTag:"🔒 Vergrendeld",freeTag:"Gratis",
+    lockTitle:"Inloggen",lockMsg:"Voer de gebruikersnaam en het wachtwoord in van je kanoverhuurder.",
+    lockPhLogin:"Gebruikersnaam",lockPhPass:"Wachtwoord",lockBtn:"Inloggen",lockCancel:"Annuleren",lockWrong:"❌ Onjuiste gebruikersnaam of wachtwoord.",
+    lockOk:"🔓 Ingelogd!",lockedTag:"🔒 Vergrendeld",freeTag:"Gratis",
+    bugBtn:"🐞 Bug melden",bugPrompt:"Beschrijf het probleem (wat, waar, wanneer):",bugMerci:"Bedankt! Je melding is verzonden. 🙏",testeur:"Testmodus",
     offline:"📡 Offline — je routes en foto's blijven beschikbaar.",
     iosInstall:"📲 Op iPhone: tik op Delen en dan “Zet op beginscherm”.",
     ecoHint:"Scherm in rust om de batterij te sparen. De GPS-gids en de stem blijven werken. Tik op het scherm of schud de telefoon om te ontwaken. Zet de telefoon niet uit met de knop.",
@@ -948,7 +959,7 @@ const ADMIN_HASH="1ebk4s";
 const FREE_ROUTE_ID="vitrac-castelnaud";
 let UNLOCKED=(function(){try{return localStorage.getItem('sentiaUnlocked')==='1';}catch(e){return false;}})();
 function isRouteFree(r){return r.id===FREE_ROUTE_ID;}
-function isRouteLocked(r){return !isRouteFree(r)&&!UNLOCKED;}
+function isRouteLocked(r){if(typeof MODE_TESTEUR!=='undefined'&&MODE_TESTEUR)return false;return !isRouteFree(r)&&!UNLOCKED;}
 
 /* ---- État ---- */
 let lang='fr',stepIdx=0,mapCtx=null,speaking=false,currentUtterance=null,CUR=RANDO_SHORT;
@@ -979,7 +990,8 @@ function updateLockIcon(){
 function applyCodeUI(){
   document.getElementById('codeTitle').textContent=t().lockTitle;
   document.getElementById('codeMsg').textContent=t().lockMsg;
-  document.getElementById('codeInput').placeholder=t().lockPh;
+  document.getElementById('codeInput').placeholder=t().lockPhLogin;
+  document.getElementById('codePass').placeholder=t().lockPhPass;
   document.getElementById('codeCancelBtn').textContent=t().lockCancel;
   document.getElementById('codeSubmitBtn').textContent=t().lockBtn;
 }
@@ -988,6 +1000,7 @@ function openCodeModal(){
   applyCodeUI();
   document.getElementById('codeError').textContent='';
   document.getElementById('codeInput').value='';
+  document.getElementById('codePass').value='';
   document.getElementById('codeModal').classList.add('show');
   setTimeout(()=>document.getElementById('codeInput').focus(),50);
 }
@@ -998,8 +1011,14 @@ function closeCodeModal(){navBack();}
      licences (LICENCE_ENDPOINT), qui permet d'ajouter/désactiver une base
      sans republier l'application. L'activation exige du réseau (elle se
      fait à la base de location) ; ensuite tout fonctionne hors ligne. */
-const LICENCE_ENDPOINT="https://sentia--cf208fe4791b11f19a671607ee4eb77e.web.val.run";   // sentiaAdmin dans sentia/sentiaStats
+const API_BASE="https://sentia.petrocores.workers.dev";   // Worker Cloudflare (compteur + licences + bugs)
+const LICENCE_ENDPOINT=API_BASE;                          // connexion : API_BASE + /api/login
 const LICENCE_JOURS=3;   // durée de validité hors ligne d'une licence de base
+/* Mode testeur : pendant les tests terrain, TOUS les parcours sont ouverts
+   et la voix est complète, quel que soit le login. La connexion reste
+   fonctionnelle (pour tester) mais ne bloque aucun parcours. Passer à
+   false pour réactiver le verrouillage commercial par base. */
+const MODE_TESTEUR=true;
 function unlockLocal(base){
   UNLOCKED=true;
   try{
@@ -1013,17 +1032,19 @@ function unlockLocal(base){
   renderHome();
 }
 function submitCode(){
-  const val=document.getElementById('codeInput').value.trim().toLowerCase();
+  const login=document.getElementById('codeInput').value.trim().toLowerCase();
+  const pass=document.getElementById('codePass').value;
   const err=document.getElementById('codeError');
-  if(codeHash(val)===ADMIN_HASH){unlockLocal('master');return;}
-  if(!LICENCE_ENDPOINT){err.textContent=t().lockWrong;return;}
+  // Passe-partout maître : mot de passe seul (haché en local), marche hors ligne.
+  if(codeHash(pass.trim().toLowerCase())===ADMIN_HASH){unlockLocal('master');return;}
+  if(!login||!pass){err.textContent=t().lockWrong;return;}
   if(!navigator.onLine){err.textContent=t().needNet;return;}
   err.textContent='…';
-  fetch(LICENCE_ENDPOINT+'/api/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:val})})
+  fetch(API_BASE+'/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({login:login,pass:pass})})
     .then(r=>r.json())
     .then(j=>{
       if(j&&j.ok){
-        try{localStorage.setItem('sentiaCode',val);}catch(e){}
+        try{localStorage.setItem('sentiaLogin',login);localStorage.setItem('sentiaPass',pass);}catch(e){}
         unlockLocal(j.base||'base');
         track('activation:'+(j.base||'inconnue'));gcCount('activation-'+(j.base||'inconnue'));
       }else err.textContent=t().lockWrong;
@@ -1039,7 +1060,7 @@ function submitCode(){
 function licenceExpiree(){
   try{
     if(localStorage.getItem('sentiaBase')==='master')return false;
-    if(!localStorage.getItem('sentiaCode'))return false;
+    if(!localStorage.getItem('sentiaPass'))return false;
     const v=Number(localStorage.getItem('sentiaValideLe')||0);
     return (Date.now()-v)>LICENCE_JOURS*86400000;
   }catch(e){return false;}
@@ -1049,14 +1070,14 @@ if(UNLOCKED&&licenceExpiree()){
   try{localStorage.removeItem('sentiaUnlocked');}catch(e){}
 }
 function revaliderLicence(){
-  let code=null;
-  try{code=localStorage.getItem('sentiaCode');}catch(e){}
-  if(!code||!LICENCE_ENDPOINT||!navigator.onLine)return;
-  fetch(LICENCE_ENDPOINT+'/api/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:code})})
+  let login=null,pass=null;
+  try{login=localStorage.getItem('sentiaLogin');pass=localStorage.getItem('sentiaPass');}catch(e){}
+  if(!login||!pass||!navigator.onLine)return;
+  fetch(API_BASE+'/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({login:login,pass:pass})})
     .then(r=>r.json())
     .then(j=>{
       if(j&&j.ok===false){
-        try{localStorage.removeItem('sentiaUnlocked');localStorage.removeItem('sentiaCode');localStorage.removeItem('sentiaBase');localStorage.removeItem('sentiaValideLe');}catch(e){}
+        try{localStorage.removeItem('sentiaUnlocked');localStorage.removeItem('sentiaLogin');localStorage.removeItem('sentiaPass');localStorage.removeItem('sentiaBase');localStorage.removeItem('sentiaValideLe');}catch(e){}
         UNLOCKED=false;updateLockIcon();renderHome();
       }else if(j&&j.ok){
         try{localStorage.setItem('sentiaValideLe',String(Date.now()));}catch(e){}
@@ -1076,6 +1097,7 @@ function revaliderLicence(){
    produit complet se demande à la base de location. */
 const DEMO_VOIX_ETAPES=3;
 function voixAutorisee(){
+  if(typeof MODE_TESTEUR!=='undefined'&&MODE_TESTEUR)return true;
   return UNLOCKED||CUR.id!==FREE_ROUTE_ID||stepIdx<DEMO_VOIX_ETAPES;
 }
 function direEtape(txt,onDone){
@@ -1299,7 +1321,7 @@ function closePhotoModal(){navBack();}
    s'affiche et se lit automatiquement, sans interrompre la navigation
    manuelle (curseur/boutons) qui reste toujours disponible. */
 /* ---- Version & base de rattachement ---- */
-const APP_VERSION="1.4";
+const APP_VERSION="1.5";
 const BASE_LOC={lat:44.825768,lng:1.224381};   // base Canoës Loisirs, port de Vitrac
 let baseToastFait=false;
 function majBaseBadge(lat,lng,avecToast){
@@ -1651,6 +1673,18 @@ function setVoiceBtn(on){const b=document.getElementById('voiceBtn');b.classList
 let toastT;
 function toast(m,d){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),d||3200);}
 
+/* ---- Remontée de bug terrain ----
+   Un bouton flottant 🐞 : l'utilisateur décrit le souci, c'est envoyé au
+   Worker Cloudflare (/api/bug) et visible dans la page d'administration. */
+function signalerBug(){
+  const txt=prompt(t().bugPrompt);
+  if(!txt||!txt.trim())return;
+  let base='';try{base=localStorage.getItem('sentiaQrBase')||'';}catch(e){}
+  const info=(CUR&&CUR.id?('['+CUR.id+'] '):'')+txt.trim();
+  try{fetch(API_BASE+'/api/bug',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({texte:info,base:base,lang:lang})});}catch(e){}
+  toast(t().bugMerci,5000);
+}
+
 /* ---- Statistiques anonymes ----
    Aucune donnée personnelle : on compte des événements (visite, installation,
    parcours lancé) avec leur heure. Deux canaux :
@@ -1658,7 +1692,7 @@ function toast(m,d){const el=document.getElementById('toast');el.textContent=m;e
    2) STATS_ENDPOINT : le compteur Val Town qui envoie l'email du soir.
       Les événements sont mis en file locale et expédiés au retour du réseau,
       pour compter aussi les usages hors connexion sur la rivière. */
-const STATS_ENDPOINT="https://sentia--ded251e4769f11f180bc1607ee4eb77e.web.val.run";   // compteur Val Town
+const STATS_ENDPOINT=API_BASE+"/api/collect";   // compteur Cloudflare (Worker sentia)
 function gcCount(path){
   try{if(window.goatcounter&&window.goatcounter.count)window.goatcounter.count({path:path,event:true});}catch(e){}
 }
@@ -1674,7 +1708,8 @@ function flushStats(){
   if(!STATS_ENDPOINT||!navigator.onLine)return;
   let q;try{q=JSON.parse(localStorage.getItem('sentiaStats')||'[]');}catch(e){return;}
   if(!q.length)return;
-  fetch(STATS_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({events:q})})
+  let qbase='';try{qbase=localStorage.getItem('sentiaQrBase')||'';}catch(e){}
+  fetch(STATS_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({events:q,base:qbase})})
     .then(r=>{if(r.ok){try{localStorage.setItem('sentiaStats','[]');}catch(e){}}})
     .catch(()=>{});
 }
@@ -1751,7 +1786,7 @@ window.addEventListener('contextmenu',e=>{
 
 /* ---- Init ---- */
 applyStaticUI();renderHome();updateLockIcon();
-document.getElementById('appVersion').textContent='Sentia v'+APP_VERSION;
+document.getElementById('appVersion').textContent='Sentia v'+APP_VERSION+(MODE_TESTEUR?' · '+t().testeur:'');
 /* Au lancement : si la localisation est déjà autorisée, on prévient
    discrètement le client s'il est loin de la base (toast + badge). */
 if(navigator.permissions&&navigator.permissions.query&&'geolocation'in navigator){
